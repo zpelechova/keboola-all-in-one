@@ -1,26 +1,25 @@
-const Apify = require('apify')
-const { gotScraping } = require('got-scraping')
+import Apify from 'apify';
+import fs from 'fs';
+import { config } from 'dotenv';
+import * as lib from './lib.js';
+config();
+  
+const shopName = 'ccc';
+const transformationId = "346265961"
 
 
 Apify.main(async () => {
-    const url =
-        'https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations/328335000/tasks'
-    const method = 'PUT'
-    const formData = {
-        name: 'apitest3'
-    }
-    const headers = {
-        'content-type': 'application/json',
-        'x-storageapi-token': 'process.env.KEBOOLA_TOKEN'
-    }
+    console.log(process.env.KEBOOLA_TOKEN);
 
-    const { body } = await gotScraping({
-        useHeaderGenerator: false,
-        url,
-        method,
-        headers,
-        form: formData
-    })
+    const orchestrationInfo = await lib.getOrCreateOrchestration(shopName);
 
-    console.dir(JSON.parse(body))
+    const orchestrationId = orchestrationInfo.id;
+    const orchestrationTokenId = orchestrationInfo.token.id;
+
+    await lib.updateOrchestrationTasks(orchestrationId, transformationId);
+
+    await lib.updateOrchestrationNotifications(orchestrationId);
+
+    await lib.updateOrchestrationTriggers(orchestrationId, orchestrationTokenId);
+
 })
