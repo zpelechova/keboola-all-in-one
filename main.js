@@ -1,25 +1,46 @@
-import Apify from 'apify';
-import fs from 'fs';
-import { config } from 'dotenv';
-import * as lib from './lib.js';
-config();
-  
-const shopName = 'ccc';
-const transformationId = "346265961"
+import Apify from 'apify'
+import fs from 'fs'
+import { config } from 'dotenv'
+import * as stor from './src/storage.js'
+import * as trans from './src/transformation.js'
+import * as orch from './src/orchestration.js'
+config()
 
+const shopName = 'ccc'
+const transformationId = '346265961'
+
+let runStorage = true;
+let runTransformation = false;
+let runWriter = false;
+let runOrchestration = false;
 
 Apify.main(async () => {
-    console.log(process.env.KEBOOLA_TOKEN);
+    console.log(process.env.KEBOOLA_TOKEN)
+    if (runStorage) {
+        console.log(`Starting Orchestration management program`);
+        await stor.getOrCreateTable(shopName)
+    }
 
-    const orchestrationInfo = await lib.getOrCreateOrchestration(shopName);
+    if (runTransformation) {
+        console.log(`Starting Transformation management program`)
+    }
 
-    const orchestrationId = orchestrationInfo.id;
-    const orchestrationTokenId = orchestrationInfo.token.id;
+    if (runWriter) {
+        console.log(`Starting Writer management program`)
+    }
 
-    await lib.updateOrchestrationTasks(orchestrationId, transformationId);
+    if (runOrchestration) {
 
-    await lib.updateOrchestrationNotifications(orchestrationId);
+        console.log(`Starting Orchestration management program`)
+        const orchestrationInfo = await orch.getOrCreateOrchestration(shopName)
 
-    await lib.updateOrchestrationTriggers(orchestrationId, orchestrationTokenId);
+        const orchestrationId = orchestrationInfo.id
+        const orchestrationTokenId = orchestrationInfo.token.id
 
+        await orch.updateOrchestrationTasks(shopName, orchestrationId, transformationId)
+
+        await orch.updateOrchestrationNotifications(shopName, orchestrationId)
+
+        await orch.updateOrchestrationTriggers(shopName, orchestrationId, orchestrationTokenId)
+    }
 })
