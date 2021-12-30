@@ -60,7 +60,7 @@ export async function getOrCreateOrchestration (shopName) {
 export async function updateOrchestrationTasks (
     shopName,
     orchestrationId,
-    transformationId
+    transformationIds
 ) {
     console.log(`I am going to update tasks in ${shopName} orchestration.`)
 
@@ -69,10 +69,26 @@ export async function updateOrchestrationTasks (
     const headers = {
         'content-type': 'application/json',
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
-    };
-    //TODO here I can add more tasks as well
-    const requestBody = JSON.stringify([
+    }
+    //TODO add  tasksfor writers as well
+    //Filled in with Sleep tranformation already
+    const transformationTasks = [
         {
+            component: 'keboola.snowflake-transformation',
+            action: 'run',
+            actionParameters: {
+                config: 331156399
+            },
+            timeoutMinutes: null,
+            active: true,
+            continueOnFailure: false,
+            phase: 'Sleep'
+        }
+    ];
+
+    for (const transformationId of transformationIds) {
+        const index = transformationIds.indexOf(transformationId);
+        const transformationTask = {
             component: 'keboola.snowflake-transformation',
             action: 'run',
             actionParameters: {
@@ -81,10 +97,18 @@ export async function updateOrchestrationTasks (
             timeoutMinutes: null,
             active: true,
             continueOnFailure: false,
-            phase: 'New phase'
+            phase: `Transformation Phase ${index + 1}`
         }
-    ]);
+        transformationTasks.push(transformationTask)
+    }
 
+    const writerTasks = [];
+
+    //TODO add writer tasks here
+
+    const tasks = transformationTasks.concat(writerTasks); 
+
+    const requestBody = JSON.stringify(tasks)
 
     const { body } = await gotScraping({
         useHeaderGenerator: false,
@@ -98,35 +122,40 @@ export async function updateOrchestrationTasks (
     console.dir(body)
 }
 
-export async function updateOrchestrationNotifications(shopName, orchestrationId) {
+export async function updateOrchestrationNotifications (
+    shopName,
+    orchestrationId,
+    email
+) {
+    console.log(
+        `I am going to update notifications in ${shopName} orchestration.`
+    )
 
-    console.log(`I am going to update notifications in ${shopName} orchestration.`)
-
-    const url = `https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations/${orchestrationId}/notifications`;
-    const method = 'PUT';
+    const url = `https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations/${orchestrationId}/notifications`
+    const method = 'PUT'
     const headers = {
         'content-type': 'application/json',
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
-    };
+    }
     const requestBody = JSON.stringify([
         {
-            email: 'zuzka@apify.com',
+            email: email,
             channel: 'error',
             parameters: {}
         },
         {
-            email: 'zuzka@apify.com',
+            email: email,
             channel: 'warning',
             parameters: {}
         },
         {
-            email: 'zuzka@apify.com',
+            email: email,
             channel: 'processing',
             parameters: {
                 tolerance: 20
             }
         }
-    ]);
+    ])
 
     const { body } = await gotScraping({
         useHeaderGenerator: false,
@@ -136,11 +165,17 @@ export async function updateOrchestrationNotifications(shopName, orchestrationId
         body: requestBody
     })
 
-    console.log(`I have updated the notifications in ${shopName} orchestration: `)
+    console.log(
+        `I have updated the notifications in ${shopName} orchestration: `
+    )
     console.dir(body)
 }
 
-export async function updateOrchestrationTriggers (shopName, orchestrationId, orchestrationTokenId) {
+export async function updateOrchestrationTriggers (
+    shopName,
+    orchestrationId,
+    orchestrationTokenId
+) {
     console.log(`I am going to update triggers in ${shopName} orchestration.`)
 
     const url = `https://connection.eu-central-1.keboola.com/v2/storage/triggers/`
@@ -154,8 +189,8 @@ export async function updateOrchestrationTriggers (shopName, orchestrationId, or
         runWithTokenId: orchestrationTokenId,
         component: 'orchestrator',
         configurationId: orchestrationId,
-        coolDownPeriodMinutes: 78,
-        'tableIds[0]': 'in.c-Example-new-shops.aaaauto_clean'
+        coolDownPeriodMinutes: 60,
+        'tableIds[0]': `in.c-black-friday.${shopName}`
     }
 
     const { body } = await gotScraping({

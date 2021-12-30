@@ -1,96 +1,140 @@
-import { gotScraping } from 'got-scraping';
+import { gotScraping } from 'got-scraping'
 
-export async function getOrCreateTransformation(shopName, suffix) {
-    const transformationName = `${shopName}${suffix}`;
+export async function getOrCreateTransformation (shopName, suffix) {
+    const transformationName = `${shopName}_${suffix}`
+
+    console.log(
+        `Checking if transformation ${transformationName} already exists.`
+    )
 
     // Check if exists, if so, return id
-    const getUrl = 'https://connection.eu-central-1.keboola.com/v2/'
-        + 'storage/'
-        + 'components'
-        + '?componentType=transformation'
-        + '&include=configuration';
+    const getUrl =
+        'https://connection.eu-central-1.keboola.com/v2/' +
+        'storage/' +
+        'components' +
+        '?componentType=transformation' +
+        '&include=configuration'
 
-    const getMethod = 'GET';
+    const getMethod = 'GET'
 
-    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
+    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN }
 
     const { body: getBody } = await gotScraping({
         useHeaderGenerator: false,
         url: getUrl,
         method: getMethod,
-        headers: getHeaders,
-    });
+        headers: getHeaders
+    })
 
-    console.log(getBody);
+    const transformationAllData = JSON.parse(getBody);
 
-    const transformationData = JSON.parse(getBody)[0].configurations.find((i) => i.name === shopName + suffix);
-    if (transformationData) return transformationData.id;
+    let transformationData = {};
+    
+    for (const t of transformationAllData) {
+        if (t.id = "keboola.snowflake-transformation") {
+            transformationData = t.configurations.find(
+                i => i.name === transformationName
+            );
+        }
+    }
+
+    if (transformationData) {
+        console.log(
+            `The transformation ${transformationName} already exists, returning its information.`
+        )
+        return transformationData.id
+    }
 
     // Otherwise, create
-    const description = 'This is description';
 
-    const postUrl = 'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.snowflake-transformation/configs';
-    const postMethod = 'POST';
+    console.log(
+        `The transformation ${transformationName} doesn't exists, I am going to create it now.`
+    )
+    const description = 'This is description'
+
+    const postUrl =
+        'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.snowflake-transformation/configs'
+    const postMethod = 'POST'
     const postFormData = {
         name: `${transformationName}`,
-        description,
-    };
+        description
+    }
     const postHeaders = {
         'content-type': 'application/x-www-form-urlencoded',
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN,
-    };
+        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+    }
 
     const { body: postBody } = await gotScraping({
         useHeaderGenerator: false,
         url: postUrl,
         method: postMethod,
         headers: postHeaders,
-        form: postFormData,
-    });
+        form: postFormData
+    })
 
-    console.dir(JSON.parse(postBody));
+    console.log(
+        `The transfromation ${transformationName} has been created, returning its information.`
+    )
 
-    return JSON.parse(postBody).id;
+    return JSON.parse(postBody).id
 }
 
-export async function updateTransformation(shopId, trsfDescription, inputSource, inputName, outputName, outputDestination, prim_keys, blockName, codeName, code) {
-    // TODO: nicer format of long line
-    const url = `https://connection.eu-central-1.keboola.com/v2/`
-    + `storage/`
-    + `components/`
-    + `keboola.snowflake-transformation/`
-    + `configs/`
-    + `${shopId}`;
+export async function updateTransformation (
+    transformationId,
+    transformationDescription,
+    inputSources,
+    inputNames,
+    outputNames,
+    outputDestinations,
+    primaryKeys,
+    blockName,
+    codeName,
+    code
+) {
+    console.log(
+        `I am going to update tasks in ${transformationId} transformation.`
+    )
 
-    const inTables = [];
-    if (inputSource.length === inputName.length) {
-        for (const i in inputSource) {
+    const url =
+        `https://connection.eu-central-1.keboola.com/v2/` +
+        `storage/` +
+        `components/` +
+        `keboola.snowflake-transformation/` +
+        `configs/` +
+        `${transformationId}`
+
+    const inTables = []
+    if (inputSources.length === inputNames.length) {
+        for (const inputSource of inputSources) {
+            const index = inputSources.indexOf(inputSource);
             const inTable = {
-                source: inputSource[i],
-                destination: inputName[i],            };
-            inTables.push(inTable);
+                source: inputSource,
+                destination: inputNames[index]
+            }
+            inTables.push(inTable)
         }
     } else {
-        console.log("The input tables are not defined properly.")
+        console.log('The input tables are not defined properly - there is different number of sources and names in their respective arrays.')
+        return 'READ THE ERROR MESSAGE'
+    }
+
+    const outTables = [];
+    if (outputDestinations.length === outputNames.length) {
+        for (const outputDestination of outputDestinations) {
+            const index = outputDestinations.indexOf(outputDestination);
+            const outTable = {
+                destination: outputDestination,
+                source: outputNames[index],
+                primary_key: primaryKeys[index],
+            };
+            outTables.push(outTable);
+        }
+    } else {
+        console.log("The output tables are not defined properly - there is different number of destinations and names/primary keys in their respective arrays.")
         return "READ THE ERROR MESSAGE"
     }
 
-    // const outTables = [];
-    // if (outputDestination.length === outputName.length) {
-    //     for (const i in outputDestination) {
-    //         const outTable = {
-    //             destination: outputDestination[i],
-    //             source: outputName[i],
-    //             primary_key: prim_key[i],
-    //         };
-    //         outTables.push(outTable);
-    //     }
-    // } else {
-    //     console.log("The output tables are not defined properly.")
-    //     return "READ THE ERROR MESSAGE"
-    // }
-
-    const method = 'PUT';
+    const method = 'PUT'
     const formData = {
         configuration: JSON.stringify({
             parameters: {
@@ -100,43 +144,37 @@ export async function updateTransformation(shopId, trsfDescription, inputSource,
                         codes: [
                             {
                                 name: codeName,
-                                script: [code],
-                            },
-                        ],
-                    },
-                ],
+                                script: [code]
+                            }
+                        ]
+                    }
+                ]
             },
             storage: {
                 input: {
-                    tables: inTables,
+                    tables: inTables
                 },
                 output: {
-                  tables: [
-                      {
-                        source: outputName,
-                        destination: outputDestination,
-                        primary_key: prim_keys,
-                      },
-                  ],
-                },
-            },
+                    tables: outTables
+                }
+            }
         }),
-        description: trsfDescription,
-        changeDescription: 'Playing with API',
-    };
+        description: transformationDescription,
+        changeDescription: 'Changing the transformation via API'
+    }
     const headers = {
         'content-type': 'application/x-www-form-urlencoded',
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN,
-    };
+        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+    }
 
     const { body } = await gotScraping({
         useHeaderGenerator: false,
         url,
         method,
         headers,
-        form: formData,
-    });
+        form: formData
+    })
 
-    console.dir(JSON.parse(body));
+    console.log(`I have updated the ${transformationId} transformation. `)
+    console.dir(JSON.parse(body))
 }
-
