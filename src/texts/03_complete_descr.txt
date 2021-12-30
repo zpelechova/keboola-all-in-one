@@ -1,0 +1,1 @@
+**Counts newSale** as the percentage difference between currentPrice and originalPriceHS (= minPrice, if n/a then commonPrice). 

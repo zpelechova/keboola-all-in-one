@@ -1,2 +1,14 @@
 {
+    "title": "Input schema for the Keboola API actor.",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "test": {
+            "title": "Shop name",
+            "type": "array",
+            "description": "With countr suffix.",
+            "editor": "stringList"
+        }
+    },
+    "required": ["title"]
 }

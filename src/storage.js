@@ -47,7 +47,7 @@ export async function getOrCreateTable(shopName) {
         form: postFormData
     })
 
-    const postStorageData = JSON.parse(postBody).find((i) => i.id === `in.c-black-friday.${shopName}`);
+    const postStorageData = JSON.parse(postBody);
     if (postStorageData) {
         console.log(`The table ${shopName} has been created, returning its information.`);
         return postStorageData;

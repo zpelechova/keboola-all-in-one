@@ -1,0 +1,15 @@
+**What it does:**
+
+Gets raw data from Apify scraper and prepares them for use in Hlidac shopu extension and web, ie:
+
+: gets rid of extra information that we scrape (eg. breadcrumbs)
+
+: gets rid of duplicates, so that there is only one price for one date and item (with current price we use minimum price for the day, with original price we use maximum price for the day)
+
+: creates md5 hash - p_key is unique for item and consists of shop and itemId
+
+: creates an temporary output table
+
+**Shop specific notes:** 
+
+**Still needs to be done:** 

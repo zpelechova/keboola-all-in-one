@@ -53,23 +53,42 @@ export async function getOrCreateTransformation(shopName, suffix) {
     return JSON.parse(postBody).id;
 }
 
-export async function updateTransformation(shopId, blockName, codeName, code, inputSource, inputName, outputDestination, outputName) {
+export async function updateTransformation(shopId, trsfDescription, inputSource, inputName, outputName, outputDestination, prim_keys, blockName, codeName, code) {
     // TODO: nicer format of long line
-    const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.snowflake-transformation/configs/${shopId}`;
+    const url = `https://connection.eu-central-1.keboola.com/v2/`
+    + `storage/`
+    + `components/`
+    + `keboola.snowflake-transformation/`
+    + `configs/`
+    + `${shopId}`;
 
-    const tables = [];
+    const inTables = [];
     if (inputSource.length === inputName.length) {
         for (const i in inputSource) {
-            const table = {
+            const inTable = {
                 source: inputSource[i],
-                destination: inputName[i],
-            };
-            tables.push(table);
+                destination: inputName[i],            };
+            inTables.push(inTable);
         }
     } else {
-        console.log("The input tables are not blbblblb")
+        console.log("The input tables are not defined properly.")
         return "READ THE ERROR MESSAGE"
     }
+
+    // const outTables = [];
+    // if (outputDestination.length === outputName.length) {
+    //     for (const i in outputDestination) {
+    //         const outTable = {
+    //             destination: outputDestination[i],
+    //             source: outputName[i],
+    //             primary_key: prim_key[i],
+    //         };
+    //         outTables.push(outTable);
+    //     }
+    // } else {
+    //     console.log("The output tables are not defined properly.")
+    //     return "READ THE ERROR MESSAGE"
+    // }
 
     const method = 'PUT';
     const formData = {
@@ -89,19 +108,20 @@ export async function updateTransformation(shopId, blockName, codeName, code, in
             },
             storage: {
                 input: {
-                    tables: tables,
+                    tables: inTables,
                 },
                 output: {
-                    tables: [
-                        {
-                            destination: outputDestination,
-                            source: outputName,
-                            primary_key: ['p_key'],
-                        },
-                    ],
+                  tables: [
+                      {
+                        source: outputName,
+                        destination: outputDestination,
+                        primary_key: prim_keys,
+                      },
+                  ],
                 },
             },
         }),
+        description: trsfDescription,
         changeDescription: 'Playing with API',
     };
     const headers = {

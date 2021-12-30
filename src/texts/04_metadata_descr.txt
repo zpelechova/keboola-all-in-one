@@ -1,0 +1,3 @@
+Creates **table for pairing url with item id on the web** - it parses the url so that it only has the piece which is both unique for the product and universal for any url access (if there is www at the beginning or not, if there is affilliation link etc.) - metadata table
+
+Also provides info about **common price and min price.**
