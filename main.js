@@ -8,30 +8,31 @@ config()
 
 Apify.main(async () => {
     console.log(process.env.KEBOOLA_TOKEN)
-    const input = await Apify.getInput();
-    console.log(input);
+    const input = await Apify.getInput()
+    console.log(input)
 
-    const shopNames = input.shopNames;
-    const email = input.email;
-    const runStorage = input.runStorage;
-    const runTransformation = input.runTransformation;
-    const runWriter = input.runWriter;
-    const runOrchestration = input.runOrchestration;
-    const testOrchestration = input.testOrchestration;
-    
+    const shopNames = input.shopNames
+    const email = input.email
+    const runStorage = input.runStorage
+    const runTransformation = input.runTransformation
+    const runWriter = input.runWriter
+    const runOrchestration = input.runOrchestration
+    const testOrchestration = input.testOrchestration
+    const notifyByMail = input.notifyByMail
+    const notifyBySlack = input.notifyBySlack
+
     for (const shopName of shopNames) {
-
-        const transformationIds = [];
-        const writerIds = [];
+        const transformationIds = []
+        const writerIds = []
 
         if (runStorage) {
             //It checks if the in table already exists and if not, creates it. it also returns the data about the table, but we dont need it for anything at the moment I think
-            console.log(`Starting Storage management program`);
-            await stor.getOrCreateTable(shopName);
-        };
+            console.log(`Starting Storage management program`)
+            await stor.getOrCreateTable(shopName)
+        }
 
         if (runTransformation) {
-            console.log(`Starting Transformation management program`);
+            console.log(`Starting Transformation management program`)
 
             const transformations = [
                 '01_unification',
@@ -45,13 +46,16 @@ Apify.main(async () => {
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
                     transformation
-                );
+                )
                 //I am creating an array of transformation Ids to be used in orchestrations later on
-                transformationIds.push(transformationId);
+                transformationIds.push(transformationId)
 
                 await trans.updateTransformation(
                     transformationId,
-                    fs.readFileSync(`./src/texts/${transformation}_descr.txt`, 'utf-8'),
+                    fs.readFileSync(
+                        `./src/texts/${transformation}_descr.txt`,
+                        'utf-8'
+                    ),
                     [`in.c-black-friday.${shopName}`],
                     ['shop_raw'],
                     [`shop_${transformation}`],
@@ -59,7 +63,10 @@ Apify.main(async () => {
                     [['itemId', 'date']],
                     `Codeblock - ${transformation}`,
                     `Shop ${transformation}`,
-                    fs.readFileSync(`./src/texts/${transformation}.sql`, 'utf-8')
+                    fs.readFileSync(
+                        `./src/texts/${transformation}.sql`,
+                        'utf-8'
+                    )
                 )
             }
         }
@@ -96,34 +103,45 @@ Apify.main(async () => {
             )
         }
 
-        if(testOrchestration) {
+        if (testOrchestration) {
             console.log(`Starting Orchestration test program`)
             const orchestrationInfo = await orch.getOrCreateOrchestration(
                 shopName
             )
 
-            const today = new Date().toISOString();
-    
-            const orchestrationLastTimeStart = orchestrationInfo.lastExecutedJob.startTime;
-            const orchestrationLastTimeEnd = orchestrationInfo.lastExecutedJob.endTime;
-            const orchestrationLastStatus = orchestrationInfo.lastExecutedJob.status;
+            const today = new Date().toISOString()
 
-            if (orchestrationLastTimeStart.substring(0,10) === today.substring(0,10)) {
-                console.log(`The run for ${shopName} has run today.`);
+            const orchestrationLastTimeStart =
+                orchestrationInfo.lastExecutedJob.startTime
+            const orchestrationLastTimeEnd =
+                orchestrationInfo.lastExecutedJob.endTime
+            const orchestrationLastStatus =
+                orchestrationInfo.lastExecutedJob.status
+
+            if (
+                orchestrationLastTimeStart.substring(0, 10) ===
+                today.substring(0, 10)
+            ) {
+                console.log(`The run for ${shopName} has run today.`)
             } else {
-                console.log(`Sending notification to Slack...`);
-                await Apify.call('katerinahronik/slack-message', {
-                    text: "Hello from Apify actor!",
-                    channel: "#monitoring-blackfriday",
-                    token: process.env.SLACK_TOKEN
-                });
-                console.log(`Sending email to ${email}...`);
-                await Apify.call('apify/send-mail', {
-                    to: user.email,
-                    subject: 'Random Word',
-                    html: `<h1>Random Word</h1>${shopName}`,
-                });
-                console.log('Email sent. Good luck!');
+                if (notifyBySlack) {
+                    console.log(`Sending notification to Slack...`)
+                    await Apify.call('katerinahronik/slack-message', {
+                        text: 'This orchestration has not run today',
+                        channel: '#monitoring-blackfriday',
+                        token: process.env.SLACK_TOKEN
+                    })
+                    console.log('Email sent. Good luck!')
+                }
+                if (notifyByMail) {
+                    console.log(`Sending email to ${email}...`)
+                    await Apify.call('apify/send-mail', {
+                        to: email,
+                        subject: `The orchestration for ${shopName} has not run yet, check what is wrong!`,
+                        html: `<h1>Check it please </h1>`
+                    })
+                    console.log('Email sent. Good luck!')
+                }
             }
         }
     }
