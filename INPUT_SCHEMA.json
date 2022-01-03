@@ -19,31 +19,36 @@
             "title": "runStorage",
             "type": "boolean",
             "default": false,
-            "editor": "checkbox"
+            "editor": "checkbox",
+            "description": "Do you want to run Storage?"
         },
         "runTransformation": {
             "title": "runTransformation",
             "type": "boolean",
             "default": false,
-            "editor": "checkbox"
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation?"
         },
         "runWriter": {
             "title": "runWriter",
             "type": "boolean",
             "default": false,
-            "editor": "checkbox"
+            "editor": "checkbox",
+            "description": "Do you want to run Writer?"
         },
         "runOrchestration": {
             "title": "runOrchestration",
             "type": "boolean",
             "default": false,
-            "editor": "checkbox"
+            "editor": "checkbox",
+            "description": "Do you want to run Orchestration?"
         },
         "testOrchestration": {
             "title": "testOrchestration",
             "type": "boolean",
             "default": false,
-            "editor": "checkbox"
+            "editor": "checkbox",
+            "description": "Do you want to test Orchestration?"
         }
     },
     "required": ["shopNames"]
