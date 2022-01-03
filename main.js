@@ -6,18 +6,19 @@ import * as trans from './src/transformation.js'
 import * as orch from './src/orchestration.js'
 config()
 
-const shopNames = ['Mall_sk'];
-const email = "zuzka@apify.com"
-
-let runStorage = false;
-let runTransformation = false;
-let runWriter = false;
-let runOrchestration = false;
-let testOrchestration = true;
-
 Apify.main(async () => {
     console.log(process.env.KEBOOLA_TOKEN)
+    const input = await Apify.getInput();
+    console.log(input);
 
+    const shopNames = input.shopNames;
+    const email = input.email;
+    const runStorage = input.runStorage;
+    const runTransformation = input.runTransformation;
+    const runWriter = input.runWriter;
+    const runOrchestration = input.runOrchestration;
+    const testOrchestration = input.testOrchestration;
+    
     for (const shopName of shopNames) {
 
         const transformationIds = [];

@@ -3,12 +3,42 @@
     "type": "object",
     "schemaVersion": 1,
     "properties": {
-        "test": {
-            "title": "Shop name",
+        "shopNames": {
+            "title": "Shop names",
             "type": "array",
-            "description": "With countr suffix.",
+            "description": "With country suffixes.",
             "editor": "stringList"
+        },
+        "email": {
+            "title": "Shop names",
+            "type": "string",
+            "description": "Where you want to send notifications"
+        },
+        "runStorage": {
+            "title": "runStorage",
+            "type": "boolean",
+            "default": false 
+        },
+        "runTransformation": {
+            "title": "runTransformation",
+            "type": "boolean",
+            "default": false 
+        },
+        "runWriter": {
+            "title": "runWriter",
+            "type": "boolean",
+            "default": false 
+        },
+        "runOrchestration": {
+            "title": "runOrchestration",
+            "type": "boolean",
+            "default": false 
+        },
+        "testOrchestration": {
+            "title": "testOrchestration",
+            "type": "boolean",
+            "default": false 
         }
     },
-    "required": ["title"]
+    "required": ["shopNames"]
 }
