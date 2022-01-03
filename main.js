@@ -18,6 +18,7 @@ Apify.main(async () => {
     const runWriter = input.runWriter
     const runOrchestration = input.runOrchestration
     const testOrchestration = input.testOrchestration
+    const testStorage = input.testStorage
     const notifyByMail = input.notifyByMail
     const notifyBySlack = input.notifyBySlack
 
@@ -142,6 +143,39 @@ Apify.main(async () => {
                     })
                     console.log('Email sent. Good luck!')
                 }
+            }
+        }
+
+        if (testStorage) {
+            console.log(`Starting Storage checking program`)
+            const tablesData = await stor.checkTable()
+
+            //Makes a dataset from given shops
+            //TODO Save to named KVS store and compare to yesterdays event
+            // for (const shop of shopNames) {
+            //     for (const table of tablesData) {
+            //         const tableData = {};
+            //         if (shop.toLowerCase() === table.name) {
+            //             tableData.name = table.name;
+            //             tableData.displayName = table.displayName;
+            //             tableData.rowsCount = table.rowsCount;
+            //             tableData.bucket = table.bucket.id;
+            //             tableData.id = table.id;
+            //             await Apify.pushData(tableData);
+            //         }
+            //     }
+            // }
+
+            //makes dataset from all shops
+            for (const table of tablesData) {
+                const tableData = {
+                    "name": table.name,
+                    "displayName": table.displayName,
+                    "rowsCount": table.rowsCount,
+                    "bucket": table.bucket.id,
+                    "id": table.id
+                }
+                await Apify.pushData(tableData)
             }
         }
     }

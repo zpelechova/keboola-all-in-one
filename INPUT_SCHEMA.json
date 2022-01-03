@@ -50,6 +50,13 @@
             "editor": "checkbox",
             "description": "Do you want to test Orchestration?"
         },
+        "testStorage": {
+            "title": "testStorage",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to test Storage?"
+        },
         "notifyByMail": {
             "title": "notifyByMail",
             "type": "boolean",
