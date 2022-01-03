@@ -12,32 +12,38 @@
         "email": {
             "title": "Shop names",
             "type": "string",
-            "description": "Where you want to send notifications"
+            "description": "Where you want to send notifications",
+            "editor": "textField"
         },
         "runStorage": {
             "title": "runStorage",
             "type": "boolean",
-            "default": false 
+            "default": false,
+            "editor": "checkbox"
         },
         "runTransformation": {
             "title": "runTransformation",
             "type": "boolean",
-            "default": false 
+            "default": false,
+            "editor": "checkbox"
         },
         "runWriter": {
             "title": "runWriter",
             "type": "boolean",
-            "default": false 
+            "default": false,
+            "editor": "checkbox"
         },
         "runOrchestration": {
             "title": "runOrchestration",
             "type": "boolean",
-            "default": false 
+            "default": false,
+            "editor": "checkbox"
         },
         "testOrchestration": {
             "title": "testOrchestration",
             "type": "boolean",
-            "default": false 
+            "default": false,
+            "editor": "checkbox"
         }
     },
     "required": ["shopNames"]
