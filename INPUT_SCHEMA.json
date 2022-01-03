@@ -13,7 +13,7 @@
             "title": "Shop names",
             "type": "string",
             "description": "Where you want to send notifications",
-            "editor": "textField"
+            "editor": "textfield"
         },
         "runStorage": {
             "title": "runStorage",
