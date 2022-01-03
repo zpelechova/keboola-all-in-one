@@ -6,13 +6,14 @@ import * as trans from './src/transformation.js'
 import * as orch from './src/orchestration.js'
 config()
 
-const shopNames = ['aaaaa']
-const email = "martina@apify.com, zuzka@apify.com"
+const shopNames = ['Mall_sk'];
+const email = "zuzka@apify.com"
 
-let runStorage = true;
-let runTransformation = true;
+let runStorage = false;
+let runTransformation = false;
 let runWriter = false;
-let runOrchestration = true;
+let runOrchestration = false;
+let testOrchestration = true;
 
 Apify.main(async () => {
     console.log(process.env.KEBOOLA_TOKEN)
@@ -92,6 +93,31 @@ Apify.main(async () => {
                 orchestrationId,
                 orchestrationTokenId
             )
+        }
+
+        if(testOrchestration) {
+            console.log(`Starting Orchestration test program`)
+            const orchestrationInfo = await orch.getOrCreateOrchestration(
+                shopName
+            )
+
+            const today = new Date().toISOString();
+    
+            const orchestrationLastTimeStart = orchestrationInfo.lastExecutedJob.startTime;
+            const orchestrationLastTimeEnd = orchestrationInfo.lastExecutedJob.endTime;
+            const orchestrationLastStatus = orchestrationInfo.lastExecutedJob.status;
+
+            if (orchestrationLastTimeStart.substring(0,10) === today.substring(0,10)) {
+                console.log(`The run for ${shopName} has run today.`);
+            } else {
+                console.log(`Sending email to ${email}...`);
+                await Apify.call('apify/send-mail', {
+                    to: email,
+                    subject: 'Random Word',
+                    html: `<h1>Random Word</h1>${shopName}`,
+                });
+                console.log('Email sent. Good luck!');
+            }
         }
     }
 })
