@@ -110,9 +110,15 @@ Apify.main(async () => {
             if (orchestrationLastTimeStart.substring(0,10) === today.substring(0,10)) {
                 console.log(`The run for ${shopName} has run today.`);
             } else {
+                console.log(`Sending notification to Slack...`);
+                await Apify.call('katerinahronik/slack-message', {
+                    text: "Hello from Apify actor!",
+                    channel: "#monitoring-blackfriday",
+                    token: process.env.SLACK_TOKEN
+                });
                 console.log(`Sending email to ${email}...`);
                 await Apify.call('apify/send-mail', {
-                    to: email,
+                    to: user.email,
                     subject: 'Random Word',
                     html: `<h1>Random Word</h1>${shopName}`,
                 });
