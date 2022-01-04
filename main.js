@@ -196,7 +196,9 @@ Apify.main(async () => {
                             today,
                             diff
                         }
-                        differences.push(dailyChange)
+                        if (!differences.includes(dailyChange)) {
+                            differences.push(dailyChange)
+                        }
                         if (dailyChange.diff < 1000) {
                             //TODO set the difference correctly for each shop and set notifications
                             console.log(
