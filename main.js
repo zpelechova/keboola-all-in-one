@@ -192,7 +192,8 @@ Apify.main(async () => {
                         const today = table.rowsCount
                         const diff = yesterday - today
                         const dailyChange = {
-                            table: table.name,
+                            tableName: table.name,
+                            tableId: table.id,
                             yesterday,
                             today,
                             diff
