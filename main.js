@@ -149,6 +149,7 @@ Apify.main(async () => {
             }
         }
 
+        //TODO It nows saves only the last shop to KVS, I think I have to move it outside the forcycle and assign it a forcycle of its own
         if (testStorage) {
             console.log(`Starting Storage checking program`)
             const tablesRawData = await stor.getTables()
@@ -160,7 +161,7 @@ Apify.main(async () => {
             const tablesData = []
             for (const table of tablesRawData) {
                 if (
-                    shopName.toLowerCase() === table.name &&
+                    `${shopName.toLowerCase()}_clean` === table.name &&
                     table.id.startsWith('out.c-0')
                 ) {
                     const tableData = {}
@@ -192,6 +193,7 @@ Apify.main(async () => {
                         const yesterday = latest.rowsCount
                         const today = table.rowsCount
                         const diff = yesterday - today
+                        //TODO add last change date - if the date from Keboola is not todays date, send 1 notification, then compare dates latest/actual and if the are the same, do nothing, if they are different compare rowsCount
                         const dailyChange = {
                             tableName: table.name,
                             tableId: table.id,
@@ -231,7 +233,8 @@ Apify.main(async () => {
                 displayName: table.displayName,
                 rowsCount: table.rowsCount,
                 bucket: table.bucket.id,
-                id: table.id
+                id: table.id,
+                lastChange: table.lastChangeDate
             }
             await Apify.pushData(tableData)
         }
