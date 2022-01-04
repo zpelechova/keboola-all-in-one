@@ -13,7 +13,7 @@ Apify.main(async () => {
     const input = await Apify.getInput()
     console.log(input)
 
-    const shopNames = input.shopNames
+    const shopNames = input.shopNames.map(name => name.toLowerCase());
     const email = input.email
     const runStorage = input.runStorage
     const runTransformation = input.runTransformation
@@ -24,10 +24,190 @@ Apify.main(async () => {
     const getStorage = input.getStorage
     const notifyByMail = input.notifyByMail
     const notifyBySlack = input.notifyBySlack
+    const migrateTables = input.migrateTables
 
     for (const shopName of shopNames) {
         const transformationIds = []
         const writerIds = []
+
+
+        if (migrateTables) {
+            const code = ['alter table "shop_w" drop column "_timestamp";','create table "shop_unified" as\nselect *\nfrom "shop_w"\nlimit 100;'];
+            
+            await trans.updateTransformation(
+                367214386,
+                'This transformation migrates data from old to new Keboola',
+                [`out.c-0-${shopName}.${shopName}_w`],
+                ['shop_w'],
+                [`shop_unified`],
+                [`out.c-${shopName}.${shopName}_unified`],
+                [['itemId', 'date']],
+                `Codeblock - MIGRATION`,
+                `MIGRATION`,
+                code
+            )
+
+            await trans.migrate();
+
+            const configuration = {
+                output: [
+                    {
+                        destination: 'out.c-dm_cz.dm_cz_unified',
+                        source: 'shop_unified',
+                        incremental: true,
+                        deleteWhereColumn: '',
+                        deleteWhereOperator: 'eq',
+                        deleteWhereValues: [],
+                        primaryKey: ['itemId', 'date']
+                    },
+                    {
+                        destination: 'out.c-dm_cz.dm_cz_refprices',
+                        source: 'shop_refprices',
+                        incremental: true,
+                        deleteWhereColumn: '',
+                        deleteWhereOperator: 'eq',
+                        deleteWhereValues: [],
+                        primaryKey: ['itemId', 'date']
+                    }
+                ],
+                queries: [
+                    '--alter table "shop_w" rename column "parsedUrl" to "slug";\ncreate table "shop_unified" as\nselect *\nfrom "shop_w"\n;',
+                    'create table "shop_refprices" as\nselect *\nfrom "shop_new"\n;'
+                ],
+                input: [
+                    {
+                        source: 'out.c-0-dm_cz.dm_cz_new',
+                        destination: 'shop_new',
+                        datatypes: {
+                            itemId: {
+                                type: 'VARCHAR',
+                                column: 'itemId',
+                                length: '16777216',
+                                convertEmptyValuesToNull: false
+                            },
+                            commonPrice: {
+                                type: 'NUMBER',
+                                column: 'commonPrice',
+                                length: '12,2',
+                                convertEmptyValuesToNull: true
+                            },
+                            minPrice: {
+                                type: 'NUMBER',
+                                column: 'minPrice',
+                                length: '12,2',
+                                convertEmptyValuesToNull: true
+                            },
+                            date: {
+                                type: 'DATE',
+                                column: 'date',
+                                length: '',
+                                convertEmptyValuesToNull: false
+                            }
+                        },
+                        columns: [],
+                        whereColumn: '',
+                        whereValues: [],
+                        whereOperator: 'eq'
+                    },
+                    {
+                        source: 'out.c-0-dm.dm_cz_w',
+                        destination: 'shop_w',
+                        datatypes: {
+                            itemImage: {
+                                type: 'VARCHAR',
+                                column: 'itemImage',
+                                length: '16777216',
+                                convertEmptyValuesToNull: true
+                            },
+                            itemId: {
+                                type: 'VARCHAR',
+                                column: 'itemId',
+                                length: '16777216',
+                                convertEmptyValuesToNull: false
+                            },
+                            date: {
+                                type: 'DATE',
+                                column: 'date',
+                                length: '',
+                                convertEmptyValuesToNull: false
+                            },
+                            p_key: {
+                                type: 'VARCHAR',
+                                column: 'p_key',
+                                length: '32',
+                                convertEmptyValuesToNull: true
+                            },
+                            currentPrice: {
+                                type: 'NUMBER',
+                                column: 'currentPrice',
+                                length: '16,2',
+                                convertEmptyValuesToNull: true
+                            },
+                            inStock: {
+                                type: 'VARCHAR',
+                                column: 'inStock',
+                                length: '16777216',
+                                convertEmptyValuesToNull: true
+                            },
+                            officialSale: {
+                                type: 'NUMBER',
+                                column: 'officialSale',
+                                length: '38,2',
+                                convertEmptyValuesToNull: true
+                            },
+                            shop: {
+                                type: 'VARCHAR',
+                                column: 'shop',
+                                length: '5',
+                                convertEmptyValuesToNull: true
+                            },
+                            shop_itemId: {
+                                type: 'VARCHAR',
+                                column: 'shop_itemId',
+                                length: '16777216',
+                                convertEmptyValuesToNull: true
+                            },
+                            originalPrice: {
+                                type: 'NUMBER',
+                                column: 'originalPrice',
+                                length: '16,2',
+                                convertEmptyValuesToNull: true
+                            },
+                            itemUrl: {
+                                type: 'VARCHAR',
+                                column: 'itemUrl',
+                                length: '16777216',
+                                convertEmptyValuesToNull: true
+                            },
+                            itemName: {
+                                type: 'VARCHAR',
+                                column: 'itemName',
+                                length: '16777216',
+                                convertEmptyValuesToNull: true
+                            },
+                            parsedUrl: {
+                                type: 'VARCHAR',
+                                column: 'parsedUrl',
+                                length: '16777216',
+                                convertEmptyValuesToNull: true
+                            }
+                        },
+                        columns: [],
+                        whereColumn: '',
+                        whereValues: [],
+                        whereOperator: 'eq'
+                    }
+                ],
+                name: 'Tables migration for new trsfs',
+                packages: [],
+                requires: [],
+                backend: 'snowflake',
+                type: 'simple',
+                id: '331164179',
+                phase: 1,
+                disabled: false
+            }
+        }
 
         if (runStorage) {
             //It checks if the in table already exists and if not, creates it. it also returns the data about the table, but we dont need it for anything at the moment I think
@@ -222,6 +402,7 @@ Apify.main(async () => {
             console.log('Done.')
         }
     }
+
     if (getStorage) {
         console.log(`Starting Storage downloading program`)
         const tablesData = await stor.getTables()

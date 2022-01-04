@@ -39,6 +39,13 @@
             "editor": "checkbox",
             "description": "Do you want to run Transformation?"
         },
+        "migrateTables": {
+            "title": "migrateTables",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run migrate Tables?"
+        },
         "runWriter": {
             "title": "runWriter",
             "type": "boolean",

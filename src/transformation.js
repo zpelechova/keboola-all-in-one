@@ -144,7 +144,7 @@ export async function updateTransformation (
                         codes: [
                             {
                                 name: codeName,
-                                script: [code]
+                                script: code
                             }
                         ]
                     }
@@ -176,5 +176,32 @@ export async function updateTransformation (
     })
 
     console.log(`I have updated the ${transformationId} transformation. `)
+    console.dir(JSON.parse(body))
+}
+
+export async function migrate () {
+    console.log(
+        `I am going to run migration transformation.`
+    )
+
+    const url = "https://syrup.eu-central-1.keboola.com/docker/keboola.snowflake-transformation/run"
+    const method = 'POST'
+    const requestBody = JSON.stringify({"config":"367214386"});
+    const headers = {
+        'content-type': 'application/json',
+        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+    }
+
+    const { body } = await gotScraping({
+        useHeaderGenerator: false,
+        url,
+        method,
+        headers,
+        body: requestBody
+    })
+
+    console.log(`I have started running the transformation. `)
+    console.dir(JSON.parse(body))
+    
     console.dir(JSON.parse(body))
 }
