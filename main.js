@@ -198,6 +198,7 @@ Apify.main(async () => {
                         }
                         differences.push(dailyChange)
                         if (dailyChange.diff < 1000) {
+                            //TODO set the difference correctly for each shop and set notifications
                             console.log(
                                 `Hey, there is some problem with ${shopName}, got really very few clean items today.`
                             )
