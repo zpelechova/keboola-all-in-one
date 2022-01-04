@@ -170,7 +170,9 @@ Apify.main(async () => {
                         tableData.rowsCount = table.rowsCount
                         tableData.bucket = table.bucket.id
                         tableData.id = table.id
-                        tablesData.push(tableData)
+                        if (!tablesData.includes(tableData)) {
+                            tablesData.push(tableData)
+                        }
                     }
                 }
             }
@@ -201,6 +203,7 @@ Apify.main(async () => {
                         if (!differences.includes(dailyChange)) {
                             differences.push(dailyChange)
                         }
+                        //TODO put it elswhere (now it writes manytimes for each shop - and have it really just once for all shops, so maybe a new for cycle reading from differences)
                         if (dailyChange.diff < 1000) {
                             //TODO set the difference correctly for each shop and set notifications
                             console.log(
