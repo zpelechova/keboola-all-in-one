@@ -160,7 +160,7 @@ Apify.main(async () => {
             const tablesData = []
             for (const table of tablesRawData) {
                 if (
-                    shop.toLowerCase() === table.name &&
+                    shopName.toLowerCase() === table.name &&
                     table.id.startsWith('out.c-0')
                 ) {
                     const tableData = {}
