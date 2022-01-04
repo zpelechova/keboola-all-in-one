@@ -158,24 +158,23 @@ Apify.main(async () => {
             // Makes a dataset from given shops
             // TODO Save to named KVS store and compare to yesterdays event
             const tablesData = []
-            for (const shop of shopNames) {
-                for (const table of tablesRawData) {
-                    if (
-                        shop.toLowerCase() === table.name &&
-                        table.id.startsWith('out.c-0')
-                    ) {
-                        const tableData = {}
-                        tableData.name = table.name
-                        tableData.displayName = table.displayName
-                        tableData.rowsCount = table.rowsCount
-                        tableData.bucket = table.bucket.id
-                        tableData.id = table.id
-                        if (!tablesData.includes(tableData)) {
-                            tablesData.push(tableData)
-                        }
+            for (const table of tablesRawData) {
+                if (
+                    shop.toLowerCase() === table.name &&
+                    table.id.startsWith('out.c-0')
+                ) {
+                    const tableData = {}
+                    tableData.name = table.name
+                    tableData.displayName = table.displayName
+                    tableData.rowsCount = table.rowsCount
+                    tableData.bucket = table.bucket.id
+                    tableData.id = table.id
+                    if (!tablesData.includes(tableData)) {
+                        tablesData.push(tableData)
                     }
                 }
             }
+
             await Apify.pushData(tablesData)
 
             let latestData = await kvStore.getValue(LATEST)
