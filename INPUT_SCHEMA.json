@@ -9,18 +9,28 @@
             "description": "With country suffixes.",
             "editor": "stringList"
         },
-        "email": {
-            "title": "Email",
-            "type": "string",
-            "description": "Where you want to send notifications",
-            "editor": "textfield"
+        "testOrchestration": {
+            "title": "testOrchestration",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to test Orchestration?",
+            "sectionCaption": "Run tests"
+        },
+        "testStorage": {
+            "title": "testStorage",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to test Storage?"
         },
         "runStorage": {
             "title": "runStorage",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Storage?"
+            "description": "Do you want to run Storage?",
+            "sectionCaption": "Run updates"
         },
         "runTransformation": {
             "title": "runTransformation",
@@ -43,33 +53,27 @@
             "editor": "checkbox",
             "description": "Do you want to run Orchestration?"
         },
-        "testOrchestration": {
-            "title": "testOrchestration",
-            "type": "boolean",
-            "default": false,
-            "editor": "checkbox",
-            "description": "Do you want to test Orchestration?"
-        },
-        "testStorage": {
-            "title": "testStorage",
-            "type": "boolean",
-            "default": false,
-            "editor": "checkbox",
-            "description": "Do you want to test Storage?"
-        },
         "getStorage": {
             "title": "getStorage",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to get Storage?"
+            "description": "Do you want to get Storage?",
+            "sectionCaption": "Get data"
         },
         "notifyByMail": {
             "title": "notifyByMail",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to be notified by Mail?"
+            "description": "Do you want to be notified by Mail?",
+            "sectionCaption": "Set notifications"
+        },
+        "email": {
+            "title": "Email",
+            "type": "string",
+            "description": "Where you want to send notifications",
+            "editor": "textfield"
         },
         "notifyBySlack": {
             "title": "notifyBySlack",
