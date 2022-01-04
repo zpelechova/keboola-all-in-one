@@ -19,6 +19,7 @@ Apify.main(async () => {
     const runOrchestration = input.runOrchestration
     const testOrchestration = input.testOrchestration
     const testStorage = input.testStorage
+    const getStorage = input.getStorage
     const notifyByMail = input.notifyByMail
     const notifyBySlack = input.notifyBySlack
 
@@ -178,5 +179,24 @@ Apify.main(async () => {
                 await Apify.pushData(tableData)
             }
         }
+    }
+    if (getStorage) {
+        console.log(`Starting Storage downloading program`)
+        const tablesData = await stor.getTables()
+
+        //makes dataset from all shops
+        for (const table of tablesData) {
+            const tableData = {
+                "name": table.name,
+                "displayName": table.displayName,
+                "rowsCount": table.rowsCount,
+                "bucket": table.bucket.id,
+                "id": table.id
+            }
+            await Apify.pushData(tableData)
+        }
+        console.log(`All data has been saved to dataset, saving to KVS now.`)
+        await Apify.setValue('AllTables', tablesData);
+        console.log(`Storage downloading program has finished.`)
     }
 })

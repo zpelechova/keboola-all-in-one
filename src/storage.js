@@ -65,7 +65,7 @@ export async function getOrCreateTable (shopName) {
     }
 }
 
-export async function checkTable () {
+export async function getTables () {
     console.log(`Getting information about all tables`)
 
     const getUrl =

@@ -57,6 +57,13 @@
             "editor": "checkbox",
             "description": "Do you want to test Storage?"
         },
+        "getStorage": {
+            "title": "getStorage",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to get Storage?"
+        },
         "notifyByMail": {
             "title": "notifyByMail",
             "type": "boolean",
