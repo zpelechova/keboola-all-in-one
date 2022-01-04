@@ -6,6 +6,8 @@ import * as trans from './src/transformation.js'
 import * as orch from './src/orchestration.js'
 config()
 
+const LATEST = 'LATEST'
+
 Apify.main(async () => {
     console.log(process.env.KEBOOLA_TOKEN)
     const input = await Apify.getInput()
@@ -149,35 +151,66 @@ Apify.main(async () => {
 
         if (testStorage) {
             console.log(`Starting Storage checking program`)
-            const tablesData = await stor.checkTable()
+            const tablesRawData = await stor.getTables()
 
-            //Makes a dataset from given shops
-            //TODO Save to named KVS store and compare to yesterdays event
-            // for (const shop of shopNames) {
-            //     for (const table of tablesData) {
-            //         const tableData = {};
-            //         if (shop.toLowerCase() === table.name) {
-            //             tableData.name = table.name;
-            //             tableData.displayName = table.displayName;
-            //             tableData.rowsCount = table.rowsCount;
-            //             tableData.bucket = table.bucket.id;
-            //             tableData.id = table.id;
-            //             await Apify.pushData(tableData);
-            //         }
-            //     }
-            // }
+            const kvStore = await Apify.openKeyValueStore('outputTables')
 
-            //makes dataset from all shops
-            for (const table of tablesData) {
-                const tableData = {
-                    "name": table.name,
-                    "displayName": table.displayName,
-                    "rowsCount": table.rowsCount,
-                    "bucket": table.bucket.id,
-                    "id": table.id
+            // Makes a dataset from given shops
+            // TODO Save to named KVS store and compare to yesterdays event
+            const tablesData = []
+            for (const shop of shopNames) {
+                for (const table of tablesRawData) {
+                    if (
+                        shop.toLowerCase() === table.name &&
+                        table.id.startsWith('out')
+                    ) {
+                        const tableData = {}
+                        tableData.name = table.name
+                        tableData.displayName = table.displayName
+                        tableData.rowsCount = table.rowsCount
+                        tableData.bucket = table.bucket.id
+                        tableData.id = table.id
+                        tablesData.push(tableData)
+                    }
                 }
-                await Apify.pushData(tableData)
             }
+            await Apify.pushData(tablesData)
+
+            let latestData = await kvStore.getValue(LATEST)
+            if (!latestData) {
+                await kvStore.setValue('LATEST', tablesData)
+                latestData = tablesData
+            }
+            const actual = Object.assign({}, tablesData)
+
+            const differences = []
+
+            for (const table of tablesData) {
+                for (const latest of latestData) {
+                    if (table.name === latest.name && table.id === latest.id) {
+                        const yesterday = latest.rowsCount
+                        const today = table.rowsCount
+                        const diff = yesterday - today
+                        const dailyChange = {
+                            yesterday,
+                            today,
+                            diff
+                        }
+                        differences.push(dailyChange)
+                        if (dailyChange.diff < 1000) {
+                            console.log(
+                                `Hey, there is some problem with ${shopName}, got really very few clean items today.`
+                            )
+                        }
+                    }
+                }
+            }
+
+            await kvStore.setValue('LATEST', tablesData)
+            await Apify.setValue('DIFFERENCES', differences)
+            await Apify.setValue('TABLES', tablesData)
+
+            console.log('Done.')
         }
     }
     if (getStorage) {
@@ -187,16 +220,16 @@ Apify.main(async () => {
         //makes dataset from all shops
         for (const table of tablesData) {
             const tableData = {
-                "name": table.name,
-                "displayName": table.displayName,
-                "rowsCount": table.rowsCount,
-                "bucket": table.bucket.id,
-                "id": table.id
+                name: table.name,
+                displayName: table.displayName,
+                rowsCount: table.rowsCount,
+                bucket: table.bucket.id,
+                id: table.id
             }
             await Apify.pushData(tableData)
         }
         console.log(`All data has been saved to dataset, saving to KVS now.`)
-        await Apify.setValue('AllTables', tablesData);
+        await Apify.setValue('AllTables', tablesData)
         console.log(`Storage downloading program has finished.`)
     }
 })

@@ -82,6 +82,6 @@ export async function getTables () {
         headers: getHeaders
     })
 
-    const tablesData = JSON.parse(getBody)
-    return tablesData
+    const tablesRawData = JSON.parse(getBody)
+    return tablesRawData
 }
