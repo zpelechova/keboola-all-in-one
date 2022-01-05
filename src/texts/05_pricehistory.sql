@@ -1,3 +1,4 @@
+[`
 /*
     - shopy a produkty mohou mít duplicitní informace o denních cenách
     - v takovém případě mám vzít tu nejnižší
@@ -31,8 +32,9 @@ SELECT
                     "shop_complete"
         ) "t0"
     WHERE
-        "t0"."row_number" = 1;
-
+        "t0"."row_number" = 1
+;
+`,`
 /*
     - tohle vyrobí tabulku kde je důležitý sloupec "type"
     - slouží pro "emulaci" stavového stroje
@@ -92,7 +94,7 @@ SELECT
                 GROUP BY
                     "p_key") "dd" ON "dd"."p_key" = "a"."p_key"
 ;
-
+`,`
 /*
     - tohle mi generuje sekvenci datumů
     - základní účel je gap filling prázdných datumů
@@ -113,8 +115,9 @@ SELECT
                                 FROM "produkty") AND
          "t1"."DateSeq" <= (SELECT
                                 MAX("d")
-                                FROM "produkty"));
-
+                                FROM "produkty"))
+;
+`,`
 /*
     tady mám tabulku všech datumů a všech p_key a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
@@ -207,3 +210,4 @@ SELECT
     GROUP BY
         "p_key"
 ;
+`]

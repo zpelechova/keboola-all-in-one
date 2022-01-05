@@ -1,10 +1,11 @@
+[`
 --takes only records from last 2 days from both input tables - the number of days can be easily modified or omitted altogether
 CREATE TABLE "shop" as
 SELECT *
 	FROM "shop_raw"
 	WHERE LEFT("date", 10) >= to_char(DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE), 'yyyy-mm-dd')
 ;
-
+`,`
 --takes main table, sets minimum number for current price and maximum for original price, converts date to date format, leaves out rows with no itemId or price or date, leaves out extra information
 --creates two md5 hashes - p_key is unique for item and consists of shop and itemId, pk is unique for item a date and is made from p_key, - , date
 CREATE TABLE "shop_unified"
@@ -34,3 +35,4 @@ WHERE "currentPrice" <> ''
 AND "date" <> ''
 AND "itemId" <> ''
 ;
+`]
