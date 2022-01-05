@@ -49,164 +49,6 @@ Apify.main(async () => {
 
             await trans.migrate();
 
-            const configuration = {
-                output: [
-                    {
-                        destination: 'out.c-dm_cz.dm_cz_unified',
-                        source: 'shop_unified',
-                        incremental: true,
-                        deleteWhereColumn: '',
-                        deleteWhereOperator: 'eq',
-                        deleteWhereValues: [],
-                        primaryKey: ['itemId', 'date']
-                    },
-                    {
-                        destination: 'out.c-dm_cz.dm_cz_refprices',
-                        source: 'shop_refprices',
-                        incremental: true,
-                        deleteWhereColumn: '',
-                        deleteWhereOperator: 'eq',
-                        deleteWhereValues: [],
-                        primaryKey: ['itemId', 'date']
-                    }
-                ],
-                queries: [
-                    '--alter table "shop_w" rename column "parsedUrl" to "slug";\ncreate table "shop_unified" as\nselect *\nfrom "shop_w"\n;',
-                    'create table "shop_refprices" as\nselect *\nfrom "shop_new"\n;'
-                ],
-                input: [
-                    {
-                        source: 'out.c-0-dm_cz.dm_cz_new',
-                        destination: 'shop_new',
-                        datatypes: {
-                            itemId: {
-                                type: 'VARCHAR',
-                                column: 'itemId',
-                                length: '16777216',
-                                convertEmptyValuesToNull: false
-                            },
-                            commonPrice: {
-                                type: 'NUMBER',
-                                column: 'commonPrice',
-                                length: '12,2',
-                                convertEmptyValuesToNull: true
-                            },
-                            minPrice: {
-                                type: 'NUMBER',
-                                column: 'minPrice',
-                                length: '12,2',
-                                convertEmptyValuesToNull: true
-                            },
-                            date: {
-                                type: 'DATE',
-                                column: 'date',
-                                length: '',
-                                convertEmptyValuesToNull: false
-                            }
-                        },
-                        columns: [],
-                        whereColumn: '',
-                        whereValues: [],
-                        whereOperator: 'eq'
-                    },
-                    {
-                        source: 'out.c-0-dm.dm_cz_w',
-                        destination: 'shop_w',
-                        datatypes: {
-                            itemImage: {
-                                type: 'VARCHAR',
-                                column: 'itemImage',
-                                length: '16777216',
-                                convertEmptyValuesToNull: true
-                            },
-                            itemId: {
-                                type: 'VARCHAR',
-                                column: 'itemId',
-                                length: '16777216',
-                                convertEmptyValuesToNull: false
-                            },
-                            date: {
-                                type: 'DATE',
-                                column: 'date',
-                                length: '',
-                                convertEmptyValuesToNull: false
-                            },
-                            p_key: {
-                                type: 'VARCHAR',
-                                column: 'p_key',
-                                length: '32',
-                                convertEmptyValuesToNull: true
-                            },
-                            currentPrice: {
-                                type: 'NUMBER',
-                                column: 'currentPrice',
-                                length: '16,2',
-                                convertEmptyValuesToNull: true
-                            },
-                            inStock: {
-                                type: 'VARCHAR',
-                                column: 'inStock',
-                                length: '16777216',
-                                convertEmptyValuesToNull: true
-                            },
-                            officialSale: {
-                                type: 'NUMBER',
-                                column: 'officialSale',
-                                length: '38,2',
-                                convertEmptyValuesToNull: true
-                            },
-                            shop: {
-                                type: 'VARCHAR',
-                                column: 'shop',
-                                length: '5',
-                                convertEmptyValuesToNull: true
-                            },
-                            shop_itemId: {
-                                type: 'VARCHAR',
-                                column: 'shop_itemId',
-                                length: '16777216',
-                                convertEmptyValuesToNull: true
-                            },
-                            originalPrice: {
-                                type: 'NUMBER',
-                                column: 'originalPrice',
-                                length: '16,2',
-                                convertEmptyValuesToNull: true
-                            },
-                            itemUrl: {
-                                type: 'VARCHAR',
-                                column: 'itemUrl',
-                                length: '16777216',
-                                convertEmptyValuesToNull: true
-                            },
-                            itemName: {
-                                type: 'VARCHAR',
-                                column: 'itemName',
-                                length: '16777216',
-                                convertEmptyValuesToNull: true
-                            },
-                            parsedUrl: {
-                                type: 'VARCHAR',
-                                column: 'parsedUrl',
-                                length: '16777216',
-                                convertEmptyValuesToNull: true
-                            }
-                        },
-                        columns: [],
-                        whereColumn: '',
-                        whereValues: [],
-                        whereOperator: 'eq'
-                    }
-                ],
-                name: 'Tables migration for new trsfs',
-                packages: [],
-                requires: [],
-                backend: 'snowflake',
-                type: 'simple',
-                id: '331164179',
-                phase: 1,
-                disabled: false
-            }
         }
 
         if (runStorage) {
@@ -226,7 +68,13 @@ Apify.main(async () => {
                 '05_pricehistory'
             ]
 
+            const inputTables = [
+                [`in.c-black-friday.${shopName}`],
+                [`out.c-${shopName}.${shopName}`],
+                [`in.c-black-friday.${shopName}`,`out.c-${shopName}.${shopName}`],            ]
+
             for (const transformation of transformations) {
+                const index = transformations.indexOf(transformation);
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
                     transformation
@@ -240,7 +88,7 @@ Apify.main(async () => {
                         `./src/texts/${transformation}_descr.txt`,
                         'utf-8'
                     ),
-                    [`in.c-black-friday.${shopName}`],
+                    inputTables[index],
                     ['shop_raw'],
                     [`shop_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
