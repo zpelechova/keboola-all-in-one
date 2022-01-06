@@ -32,15 +32,16 @@ Apify.main(async () => {
 
 
         if (migrateTables) {
-            const code = ['alter table "shop_w" drop column "_timestamp";','create table "shop_unified" as\nselect *\nfrom "shop_w"\nlimit 100;'];
+            //TODO adding clean table?
+            const code = [`alter table "shop_w" drop column "_timestamp";`,`create table "shop_unified" as select * from "shop_w" limit 100;`,`create table "shop_refprices" as select * from "shop_new";`];
             
             await trans.updateTransformation(
                 367214386,
                 'This transformation migrates data from old to new Keboola',
-                [`out.c-0-${shopName}.${shopName}_w`],
-                ['shop_w'],
-                [`shop_unified`],
-                [`out.c-${shopName}.${shopName}_unified`],
+                [`out.c-0-${shopName}.${shopName}_w`, `out.c-0-${shopName}.${shopName}_new`],
+                ['shop_w', 'shop_neww'],
+                [`shop_unified`, 'shop_refprices'],
+                [`out.c-${shopName}.${shopName}_unified`, `out.c-${shopName}.${shopName}_refprices`],
                 [['itemId', 'date']],
                 `Codeblock - MIGRATION`,
                 `MIGRATION`,
