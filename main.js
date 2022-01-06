@@ -169,7 +169,7 @@ Apify.main(async () => {
                 if (notifyBySlack) {
                     console.log(`Sending notification to Slack...`)
                     await Apify.call('katerinahronik/slack-message', {
-                        text: 'This orchestration has not run today',
+                        text: `The orchestration for ${shopName} has not run yet, check what is wrong!`,
                         channel: slackChannel,
                         token: process.env.SLACK_TOKEN
                     })

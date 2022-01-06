@@ -20,7 +20,7 @@ export async function getOrCreateOrchestration (shopName) {
     })
 
     const orchestrationGetData = JSON.parse(getBody).find(
-        i => i.name === shopName
+        i => i.name.toLowerCase() === shopName
     )
     if (orchestrationGetData) {
         console.log(
