@@ -9,30 +9,31 @@ config()
 const LATEST = 'LATEST'
 
 Apify.main(async () => {
-    console.log(process.env.KEBOOLA_TOKEN)
-    const input = await Apify.getInput()
-    console.log(input)
+    console.log(process.env.KEBOOLA_TOKEN);
+    console.log(process.env.SLACK_TOKEN);
+    const input = await Apify.getInput();
+    console.log(input);
 
-    const date = new Date()
-    const todaysDate = date.toISOString().substring(0, 10)
+    const date = new Date();
+    const todaysDate = date.toISOString().substring(0, 10);
 
-    const shopNames = input.shopNames.map(name => name.toLowerCase())
-    const email = input.email
-    const runStorage = input.runStorage
-    const runTransformation = input.runTransformation
-    const runWriter = input.runWriter
-    const runOrchestration = input.runOrchestration
-    const testOrchestration = input.testOrchestration
-    const testStorage = input.testStorage
-    const getStorage = input.getStorage
-    const notifyByMail = input.notifyByMail
-    const notifyBySlack = input.notifyBySlack
-    const migrateTables = input.migrateTables
-    const slackChannel = input.slackChannel
+    const shopNames = input.shopNames.map(name => name.toLowerCase());
+    const email = input.email;
+    const runStorage = input.runStorage;
+    const runTransformation = input.runTransformation;
+    const runWriter = input.runWriter;
+    const runOrchestration = input.runOrchestration;
+    const testOrchestration = input.testOrchestration;
+    const testStorage = input.testStorage;
+    const getStorage = input.getStorage;
+    const notifyByMail = input.notifyByMail;
+    const notifyBySlack = input.notifyBySlack;
+    const migrateTables = input.migrateTables;
+    const slackChannel = input.slackChannel;
 
     for (const shopName of shopNames) {
-        const transformationIds = []
-        const writerIds = []
+        const transformationIds = [];
+        const writerIds = [];
 
         if (migrateTables) {
             //TODO adding clean table?
@@ -157,22 +158,14 @@ Apify.main(async () => {
             const orchestrationInfo = await orch.getOrCreateOrchestration(
                 shopName
             )
-
-            const today = new Date().toISOString()
-
+//TODO The folloowing line errors when an incorrect name is provided - also case sensitive still
             const orchestrationLastTimeStart =
                 orchestrationInfo.lastExecutedJob.startTime
-            const orchestrationLastTimeEnd =
-                orchestrationInfo.lastExecutedJob.endTime
-            const orchestrationLastStatus =
-                orchestrationInfo.lastExecutedJob.status
 
-            if (
-                orchestrationLastTimeStart.substring(0, 10) ===
-                today.substring(0, 10)
-            ) {
+            if (orchestrationLastTimeStart.substring(0, 10) === todaysDate) {
                 console.log(`The run for ${shopName} has run today.`)
             } else {
+                //TODO notifications at the very end of the actor run, so that we dont have hunders of them
                 if (notifyBySlack) {
                     console.log(`Sending notification to Slack...`)
                     await Apify.call('katerinahronik/slack-message', {
@@ -195,7 +188,6 @@ Apify.main(async () => {
         }
     }
 
-    //TODO It nows saves only the last shop to KVS, I think I have to move it outside the forcycle and assign it a forcycle of its own
     if (testStorage) {
         console.log(`Starting Storage checking program`)
         const tablesRawData = await stor.getTables()
@@ -307,4 +299,7 @@ Apify.main(async () => {
         await Apify.setValue('AllTables', tablesData)
         console.log(`Storage downloading program has finished.`)
     }
+
+    console.log("All required tasks have been finished.")
+    //here will go all the notifications
 })
