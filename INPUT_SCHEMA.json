@@ -88,8 +88,13 @@
             "default": false,
             "editor": "checkbox",
             "description": "Do you want to be notified by Slack?"
+        },
+        "slackChannel": {
+            "title": "Slack channel",
+            "type": "string",
+            "description": "What channel you want to send notifications",
+            "editor": "textfield"
         }
-    
     },
     "required": ["shopNames"]
 }

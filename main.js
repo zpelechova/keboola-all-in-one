@@ -13,7 +13,10 @@ Apify.main(async () => {
     const input = await Apify.getInput()
     console.log(input)
 
-    const shopNames = input.shopNames.map(name => name.toLowerCase());
+    const date = new Date()
+    const todaysDate = date.toISOString().substring(0, 10)
+
+    const shopNames = input.shopNames.map(name => name.toLowerCase())
     const email = input.email
     const runStorage = input.runStorage
     const runTransformation = input.runTransformation
@@ -25,31 +28,40 @@ Apify.main(async () => {
     const notifyByMail = input.notifyByMail
     const notifyBySlack = input.notifyBySlack
     const migrateTables = input.migrateTables
+    const slackChannel = input.slackChannel
 
     for (const shopName of shopNames) {
         const transformationIds = []
         const writerIds = []
 
-
         if (migrateTables) {
             //TODO adding clean table?
-            const code = [`alter table "shop_w" drop column "_timestamp";`,`create table "shop_unified" as select * from "shop_w" limit 100;`,`create table "shop_refprices" as select * from "shop_new";`];
-            
+            const code = [
+                `alter table "shop_w" drop column "_timestamp";`,
+                `create table "shop_unified" as select * from "shop_w" limit 100;`,
+                `create table "shop_refprices" as select * from "shop_new";`
+            ]
+
             await trans.updateTransformation(
                 367214386,
                 'This transformation migrates data from old to new Keboola',
-                [`out.c-0-${shopName}.${shopName}_w`, `out.c-0-${shopName}.${shopName}_new`],
+                [
+                    `out.c-0-${shopName}.${shopName}_w`,
+                    `out.c-0-${shopName}.${shopName}_new`
+                ],
                 ['shop_w', 'shop_neww'],
                 [`shop_unified`, 'shop_refprices'],
-                [`out.c-${shopName}.${shopName}_unified`, `out.c-${shopName}.${shopName}_refprices`],
+                [
+                    `out.c-${shopName}.${shopName}_unified`,
+                    `out.c-${shopName}.${shopName}_refprices`
+                ],
                 [['itemId', 'date']],
                 `Codeblock - MIGRATION`,
                 `MIGRATION`,
                 code
             )
 
-            await trans.migrate();
-
+            await trans.migrate()
         }
 
         if (runStorage) {
@@ -72,10 +84,14 @@ Apify.main(async () => {
             const inputTables = [
                 [`in.c-black-friday.${shopName}`],
                 [`out.c-${shopName}.${shopName}`],
-                [`in.c-black-friday.${shopName}`,`out.c-${shopName}.${shopName}`],            ]
+                [
+                    `in.c-black-friday.${shopName}`,
+                    `out.c-${shopName}.${shopName}`
+                ]
+            ]
 
             for (const transformation of transformations) {
-                const index = transformations.indexOf(transformation);
+                const index = transformations.indexOf(transformation)
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
                     transformation
@@ -161,7 +177,7 @@ Apify.main(async () => {
                     console.log(`Sending notification to Slack...`)
                     await Apify.call('katerinahronik/slack-message', {
                         text: 'This orchestration has not run today',
-                        channel: '#monitoring-blackfriday',
+                        channel: slackChannel,
                         token: process.env.SLACK_TOKEN
                     })
                     console.log('Email sent. Good luck!')
@@ -177,17 +193,19 @@ Apify.main(async () => {
                 }
             }
         }
+    }
 
-        //TODO It nows saves only the last shop to KVS, I think I have to move it outside the forcycle and assign it a forcycle of its own
-        if (testStorage) {
-            console.log(`Starting Storage checking program`)
-            const tablesRawData = await stor.getTables()
+    //TODO It nows saves only the last shop to KVS, I think I have to move it outside the forcycle and assign it a forcycle of its own
+    if (testStorage) {
+        console.log(`Starting Storage checking program`)
+        const tablesRawData = await stor.getTables()
 
-            const kvStore = await Apify.openKeyValueStore('outputTables')
+        const kvStore = await Apify.openKeyValueStore('outputTables')
 
-            // Makes a dataset from given shops
-            // TODO Save to named KVS store and compare to yesterdays event
-            const tablesData = []
+        // Makes a dataset from given shops
+        // TODO Save to named KVS store and compare to yesterdays event
+        const tablesData = []
+        for (const shopName of shopNames) {
             for (const table of tablesRawData) {
                 if (
                     `${shopName.toLowerCase()}_clean` === table.name &&
@@ -199,29 +217,39 @@ Apify.main(async () => {
                     tableData.rowsCount = table.rowsCount
                     tableData.bucket = table.bucket.id
                     tableData.id = table.id
+                    tableData.lastChange = table.lastChangeDate.substring(0, 10)
                     if (!tablesData.includes(tableData)) {
                         tablesData.push(tableData)
                     }
                 }
             }
+        }
 
-            await Apify.pushData(tablesData)
+        await Apify.pushData(tablesData)
 
-            let latestData = await kvStore.getValue(LATEST)
-            if (!latestData) {
-                await kvStore.setValue('LATEST', tablesData)
-                latestData = tablesData
-            }
-            const actual = Object.assign({}, tablesData)
+        let latestData = await kvStore.getValue(LATEST)
+        if (!latestData) {
+            await kvStore.setValue('LATEST', tablesData)
+            latestData = tablesData
+        }
 
-            const differences = []
+        const differences = []
 
-            for (const table of tablesData) {
-                for (const latest of latestData) {
-                    if (table.name === latest.name && table.id === latest.id) {
+        for (const table of tablesData) {
+            let shopInLatest = false
+            for (const latest of latestData) {
+                if (table.name === latest.name && table.id === latest.id) {
+                    shopInLatest = true
+
+                    if (table.lastChange != todaysDate) {
+                        console.log(
+                            `We are missing todays data for ${table.name}!`
+                        )
+                    } else if (latest.lastChange != table.lastChange) {
                         const yesterday = latest.rowsCount
                         const today = table.rowsCount
                         const diff = yesterday - today
+
                         //TODO add last change date - if the date from Keboola is not todays date, send 1 notification, then compare dates latest/actual and if the are the same, do nothing, if they are different compare rowsCount
                         const dailyChange = {
                             tableName: table.name,
@@ -233,23 +261,30 @@ Apify.main(async () => {
                         if (!differences.includes(dailyChange)) {
                             differences.push(dailyChange)
                         }
-                        //TODO put it elswhere (now it writes manytimes for each shop - and have it really just once for all shops, so maybe a new for cycle reading from differences)
+
                         if (dailyChange.diff < 1000) {
                             //TODO set the difference correctly for each shop and set notifications
                             console.log(
-                                `Hey, there is some problem with ${shopName}, got really very few clean items today.`
+                                `Hey, there is some problem with ${dailyChange.tableName}, got really very few clean items today.`
                             )
                         }
+                    } else {
+                        console.log(
+                            `It seems ${table.name} has already been checked today, skipping it.`
+                        )
                     }
                 }
             }
-
-            await kvStore.setValue('LATEST', tablesData)
-            await Apify.setValue('DIFFERENCES', differences)
-            await Apify.setValue('TABLES', tablesData)
-
-            console.log('Done.')
+            if (!shopInLatest) {
+                console.log(`You are missing yesterday data for ${table.name}`)
+            }
         }
+
+        await kvStore.setValue('LATEST', tablesData)
+        await Apify.setValue('DIFFERENCES', differences)
+        await Apify.setValue('TABLES', tablesData)
+
+        console.log('Done.')
     }
 
     if (getStorage) {
