@@ -8,7 +8,7 @@
 CREATE OR REPLACE TABLE "allItemIds" AS
 SELECT DISTINCT
        "itemId"
-FROM "shop_unified"
+FROM "shop_01_unification"
 WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 `,`
@@ -136,7 +136,7 @@ WHERE "t0"."price_trend" = 'down'
 GROUP BY 1, 2, 3, 4
 ;
 `,`
-CREATE TABLE "shop_refprices" AS
+CREATE TABLE "shop_02_refprices" AS
 SELECT "c"."itemId",
        "commonPrice",
        "min_currentPrice" as "minPrice",

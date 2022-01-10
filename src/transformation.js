@@ -87,6 +87,7 @@ export async function updateTransformation (
     outputNames,
     outputDestinations,
     primaryKeys,
+    incremental,
     blockName,
     codeName,
     code
@@ -126,6 +127,7 @@ export async function updateTransformation (
                 destination: outputDestination,
                 source: outputNames[index],
                 primary_key: primaryKeys[index],
+                incremental: incremental[index],
             };
             outTables.push(outTable);
         }

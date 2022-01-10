@@ -29,7 +29,7 @@ SELECT
                 row_number()
                 OVER (PARTITION BY "p_key", "date"::DATE ORDER BY try_to_number("currentPrice", 20, 2) ASC) AS "row_number"
                 FROM
-                    "shop_complete"
+                    "shop_03_complete"
         ) "t0"
     WHERE
         "t0"."row_number" = 1
@@ -122,7 +122,7 @@ SELECT
     tady mám tabulku všech datumů a všech p_key a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
 */
-CREATE TABLE "shop_pricehistory" AS
+CREATE TABLE "shop_05_pricehistory" AS
 /*
  - tohle už je jen očištění a filtrace
  - asi by to mohlo být všechno dohromady v jedné query, ale líp se mi to v DataGripu čte

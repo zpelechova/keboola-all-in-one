@@ -1,7 +1,7 @@
 [`
 --MAIN TABLE  
 --it uses the last record for given item (and only goes back to history for the same period of time as inc at the very beginning does. 
-CREATE TABLE "shop_metadata" AS
+CREATE TABLE "shop_04_extension" AS
 
 SELECT "shop" AS "shop"
 	, "slug" AS "itemUrl"
@@ -36,7 +36,7 @@ FROM
 			, "itemImage" AS "itemImage"
 			, "commonPrice"
 			, "minPrice"
-		FROM "shop_complete"
+		FROM "shop_03_complete"
 		WHERE "itemId" <> ''
 			OR "slug" <> ''
 		-- here I set a time period for which it checks backwards so that I dont run all of it again. Could 		easily be only for one day.

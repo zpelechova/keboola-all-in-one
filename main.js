@@ -79,16 +79,40 @@ Apify.main(async () => {
                 '02_refprices',
                 '03_complete',
                 '04_extension',
-                '05_pricehistory'
+                '05_pricehistory',
+                '00_preparation' // only for shops with feed and/or unitPrice items
             ]
 
-            const inputTables = [
+            const inputTablesSource = [
                 [`in.c-black-friday.${shopName}`],
-                [`out.c-${shopName}.${shopName}`],
-                [
-                    `in.c-black-friday.${shopName}`,
-                    `out.c-${shopName}.${shopName}`
-                ]
+                [`out.c-${shopName}.${shopName}_01_unification`],
+                [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
+                [`out.c-${shopName}.${shopName}_03_complete`],
+                [`out.c-${shopName}.${shopName}_03_complete`]
+            ]
+
+            const inputTablesName = [
+              ['shop_raw'],
+              ['shop_01_unification'],
+              ['shop_01_unification', 'shop_02_refprices'],
+              ['shop_03_complete'],
+              ['shop_03_complete']
+            ] 
+
+            const outputTablesKeys = [
+              ['itemId', 'date'],
+              ['itemId', 'date'],
+              ['itemId', 'date'],
+              ['pkey'],
+              ['p_key']
+            ]
+
+            const outputIncremental = [
+              true,
+              true,
+              true,
+              false,
+              false
             ]
 
             for (const transformation of transformations) {
@@ -106,11 +130,12 @@ Apify.main(async () => {
                         `./src/texts/${transformation}_descr.txt`,
                         'utf-8'
                     ),
-                    inputTables[index],
-                    ['shop_raw'],
-                    [`shop_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [['itemId', 'date']],
+                    inputTablesSource[index], //in-table source
+                    inputTablesName[index], //in-table alias
+                    [`shop_${transformation}`], //out-table alias
+                    [`out.c-${shopName}.${shopName}_${transformation}`], //out-table source
+                    outputTablesKeys[index], //out-table primary keys
+                    outputIncremental[index], //out-table incremental?
                     `Codeblock - ${transformation}`,
                     `Shop ${transformation}`,
                     fs.readFileSync(
