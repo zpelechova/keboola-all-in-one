@@ -50,13 +50,14 @@ Apify.main(async () => {
                     `out.c-0-${shopName}.${shopName}_w`,
                     `out.c-0-${shopName}.${shopName}_new`
                 ],
-                ['shop_w', 'shop_neww'],
+                ['shop_w', 'shop_new'],
                 [`shop_unified`, 'shop_refprices'],
                 [
                     `out.c-${shopName}.${shopName}_unified`,
                     `out.c-${shopName}.${shopName}_refprices`
                 ],
                 [['itemId', 'date']],
+                [true, true]
                 `Codeblock - MIGRATION`,
                 `MIGRATION`,
                 code
@@ -80,7 +81,9 @@ Apify.main(async () => {
                 '03_complete',
                 '04_extension',
                 '05_pricehistory',
-                '00_preparation' // only for shops with feed and/or unitPrice items
+                '06_s3format'
+                //doplnit 07_dashboard
+                //'00_preparation' // only for shops with feed and/or unitPrice items
             ]
 
             const inputTablesSource = [
@@ -88,7 +91,8 @@ Apify.main(async () => {
                 [`out.c-${shopName}.${shopName}_01_unification`],
                 [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
                 [`out.c-${shopName}.${shopName}_03_complete`],
-                [`out.c-${shopName}.${shopName}_03_complete`]
+                [`out.c-${shopName}.${shopName}_03_complete`],
+                [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_pricehistory`]
             ]
 
             const inputTablesName = [
@@ -96,23 +100,44 @@ Apify.main(async () => {
               ['shop_01_unification'],
               ['shop_01_unification', 'shop_02_refprices'],
               ['shop_03_complete'],
-              ['shop_03_complete']
+              ['shop_03_complete'],
+              ['shop_04_extension', 'shop_05_pricehistory']
             ] 
+
+            const outputTablesName = [
+              [`shop_${transformation}`],
+              [`shop_${transformation}`],
+              [`shop_${transformation}`],
+              [`shop_${transformation}`],
+              [`shop_${transformation}`],
+              [`shop_s3_metadata`, `shop_s3_pricehistory`]
+            ]
+
+            const outputTablesSource = [
+              [`out.c-${shopName}.${shopName}_${transformation}`],
+              [`out.c-${shopName}.${shopName}_${transformation}`],
+              [`out.c-${shopName}.${shopName}_${transformation}`],
+              [`out.c-${shopName}.${shopName}_${transformation}`],
+              [`out.c-${shopName}.${shopName}_${transformation}`],
+              [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
+            ]
 
             const outputTablesKeys = [
               ['itemId', 'date'],
               ['itemId', 'date'],
               ['itemId', 'date'],
               ['pkey'],
-              ['p_key']
+              ['p_key'],
+              [['slug'], ['slug']]
             ]
 
             const outputIncremental = [
-              true,
-              true,
-              true,
-              false,
-              false
+              [true],
+              [true],
+              [true],
+              [false],
+              [false],
+              [false, false]
             ]
 
             for (const transformation of transformations) {
@@ -132,8 +157,8 @@ Apify.main(async () => {
                     ),
                     inputTablesSource[index], //in-table source
                     inputTablesName[index], //in-table alias
-                    [`shop_${transformation}`], //out-table alias
-                    [`out.c-${shopName}.${shopName}_${transformation}`], //out-table source
+                    outputTablesName[index], //out-table alias
+                    outputTablesSource[index], //out-table source
                     outputTablesKeys[index], //out-table primary keys
                     outputIncremental[index], //out-table incremental?
                     `Codeblock - ${transformation}`,

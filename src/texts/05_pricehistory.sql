@@ -122,7 +122,7 @@ SELECT
     tady mám tabulku všech datumů a všech p_key a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
 */
-CREATE TABLE "shop_05_pricehistory" AS
+CREATE TABLE "final" AS
 /*
  - tohle už je jen očištění a filtrace
  - asi by to mohlo být všechno dohromady v jedné query, ale líp se mi to v DataGripu čte
