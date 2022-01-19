@@ -177,6 +177,7 @@ Apify.main(async () => {
             console.log(`Starting Writer management program`);
 
             const writers = [
+                "04_metadata",
                 "05_pricehistory"
             ]
 
