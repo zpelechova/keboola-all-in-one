@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 import * as stor from './src/storage.js'
 import * as trans from './src/transformation.js'
 import * as orch from './src/orchestration.js'
+import * as wr from './src/writer.js'
 config()
 
 const LATEST = 'LATEST'
@@ -11,6 +12,7 @@ const LATEST = 'LATEST'
 Apify.main(async () => {
     console.log(process.env.KEBOOLA_TOKEN);
     console.log(process.env.SLACK_TOKEN);
+    console.log(process.env.AWS_TOKEN);
     const input = await Apify.getInput();
     console.log(input);
 
@@ -172,7 +174,18 @@ Apify.main(async () => {
         }
 
         if (runWriter) {
-            console.log(`Starting Writer management program`)
+            console.log(`Starting Writer management program`);
+
+            const writers = [
+                "05_pricehistory"
+            ]
+
+            for (const writer of writers) {
+                const writerId = await wr.getOrCreateWriter(shopName, writer);
+                writerIds.push(writerId);
+                console.log('Writer ID is ' + writerId);
+                await wr.updateWriter(shopName, writer, writerId);
+            }
         }
 
         if (runOrchestration) {
