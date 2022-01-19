@@ -150,9 +150,17 @@ Apify.main(async () => {
 
         if (runWriter) {
             console.log(`Starting Writer management program`);
-            const writerId = await wr.getOrCreateWriter(shopName);
-            writerIds.push(writerId);
-            console.log('Writer ID is ' + writerId);
+
+            const writers = [
+                "05_pricehistory"
+            ]
+
+            for (const writer of writers) {
+                const writerId = await wr.getOrCreateWriter(shopName, writer);
+                writerIds.push(writerId);
+                console.log('Writer ID is ' + writerId);
+                await wr.updateWriter(shopName, writer, writerId);
+            }
         }
 
         if (runOrchestration) {
