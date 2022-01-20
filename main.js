@@ -177,8 +177,8 @@ Apify.main(async () => {
             console.log(`Starting Writer management program`);
 
             const writers = [
-                "04_metadata",
-                "05_pricehistory"
+                "S3_metadata",
+                "S3_pricehistory"
             ]
 
             for (const writer of writers) {

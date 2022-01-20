@@ -44,7 +44,7 @@ export async function getOrCreateWriter(shopName, suffix) {
 export async function updateWriter (shopName, suffix, writerId) {
     const shortSuffix = suffix.substring(3);
     console.log(
-        `I am going to update writer ${shopName}_${shortSuffix} with writer ID: ${writerId}.`
+        `I am going to update writer ${shopName}_${suffix} (writer ID: ${writerId}).`
     )
 
     const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}`
@@ -64,7 +64,7 @@ export async function updateWriter (shopName, suffix, writerId) {
                 "input": {
                     "tables": [
                         {
-                            "source": `out.c-0-${shopName}.${shopName}_${shortSuffix}`,
+                            "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
                             "destination": `shop_${shortSuffix}.csv`
                         }
                     ]
@@ -98,5 +98,5 @@ export async function updateWriter (shopName, suffix, writerId) {
         form: formData
     })
 
-    console.log(`I have updated the writer ${shopName}_${shortSuffix} with writer ID: ${writerId}`)
+    console.log(`I have updated the writer ${shopName}_${suffix} with writer ID: ${writerId}`)
 }
