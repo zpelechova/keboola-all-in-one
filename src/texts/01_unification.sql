@@ -29,7 +29,6 @@ SELECT DISTINCT "shop" AS "shop"
 	,"img" AS "itemImage"
 	,to_date("date") AS "date"
   ,"inStock"
-  , 0 as "blackFriday"
 FROM "shop"
 WHERE "currentPrice" <> ''
 AND "date" <> ''

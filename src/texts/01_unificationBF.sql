@@ -30,7 +30,6 @@ SELECT DISTINCT "itemId" AS "itemId"
 	, "img" AS "itemImage"
   , "inStock"
 	, to_date("date") AS "date"
-  , 1 as "blackFriday"
 FROM "shop_bf"
 WHERE "currentPrice" <> ''
 	AND "date" <> ''
@@ -54,7 +53,6 @@ SELECT DISTINCT "itemId" AS "itemId"
 	, "img" AS "itemImage"
   , "inStock"
 	, to_date("date") AS "date"
-    , 0 as "blackFriday"
 FROM "shop_all"
 WHERE "currentPrice" <> ''
 	AND "date" <> ''
@@ -85,7 +83,6 @@ SELECT DISTINCT "shop" AS "shop"
 	, COALESCE("s"."itemImage", "bf"."itemImage") AS "itemImage"
  	, COALESCE("s"."date", "bf"."date") AS "date"
   , COALESCE("s"."inStock", "bf"."inStock") AS "inStock"
-  , COALESCE("bf"."blackFriday", "s"."blackFriday") AS "blackFriday"
 FROM "tmp.shop_clean" "s"
 FULL JOIN "tmp.shop_bf" "bf" ON to_date("s"."date") = to_date("bf"."date")
 	AND "bf"."itemId" = "s"."itemId";
