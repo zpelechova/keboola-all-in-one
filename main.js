@@ -201,7 +201,8 @@ Apify.main(async () => {
             await orch.updateOrchestrationTasks(
                 shopName,
                 orchestrationId,
-                transformationIds
+                transformationIds,
+                writerIds
             )
 
             await orch.updateOrchestrationNotifications(

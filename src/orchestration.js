@@ -60,7 +60,8 @@ export async function getOrCreateOrchestration (shopName) {
 export async function updateOrchestrationTasks (
     shopName,
     orchestrationId,
-    transformationIds
+    transformationIds,
+    writerIds
 ) {
     console.log(`I am going to update tasks in ${shopName} orchestration.`)
 
@@ -80,7 +81,7 @@ export async function updateOrchestrationTasks (
                 config: 331156399
             },
             timeoutMinutes: null,
-            active: true,
+            active: false,
             continueOnFailure: false,
             phase: 'Sleep'
         }
