@@ -71,9 +71,8 @@ export async function updateOrchestrationTasks (
         'content-type': 'application/json',
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
     }
-    //TODO add  tasksfor writers as well
     //Filled in with Sleep tranformation already
-    const transformationTasks = [
+    const tasks = [
         {
             component: 'keboola.snowflake-transformation',
             action: 'run',
@@ -87,6 +86,7 @@ export async function updateOrchestrationTasks (
         }
     ];
 
+    //add transformation tasks based on IDs
     for (const transformationId of transformationIds) {
         const index = transformationIds.indexOf(transformationId);
         const transformationTask = {
@@ -100,14 +100,25 @@ export async function updateOrchestrationTasks (
             continueOnFailure: false,
             phase: `Transformation Phase ${index + 1}`
         }
-        transformationTasks.push(transformationTask)
+        tasks.push(transformationTask)
     }
 
-    const writerTasks = [];
-
-    //TODO add writer tasks here
-
-    const tasks = transformationTasks.concat(writerTasks); 
+    //add writer tasks
+    for (const writerId of writerIds) {
+        const index = writerIds.indexOf(writerId);
+        const writerTask = {
+            component: 'keboola.wr-aws-s3',
+            action: 'run',
+            actionParameters: {
+                config: writerId
+            },
+            timeoutMinutes: null,
+            active: true,
+            continueOnFailure: false,
+            phase: `Writer Phase ${index + 1}`
+        }
+        tasks.push(writerTask)
+    }
 
     const requestBody = JSON.stringify(tasks)
 
