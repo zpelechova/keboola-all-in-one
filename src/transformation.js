@@ -179,6 +179,7 @@ export async function updateTransformation (
 
     console.log(`I have updated the ${transformationId} transformation. `)
     console.dir(JSON.parse(body))
+    console.dir(body)
 }
 
 export async function migrate () {

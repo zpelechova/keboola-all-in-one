@@ -128,11 +128,11 @@ Apify.main(async () => {
           ]
 
           const outputTablesKeys = [
-            ['itemId', 'date'],
-            ['itemId', 'date'],
-            ['itemId', 'date'],
-            ['pkey'],
-            ['p_key'],
+            [['itemId', 'date']],
+            [['itemId', 'date']],
+            [['itemId', 'date']],
+            [['pkey']],
+            [['p_key']],
             [['slug'], ['slug']]
           ]
 

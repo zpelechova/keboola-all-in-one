@@ -3,6 +3,8 @@ import { gotScraping } from 'got-scraping';
 // wip
 
 export async function getOrCreateWriter(shopName, suffix) {
+    
+    console.log(`Checking if writer ${shopName}_${suffix} exists`);
     const getUrl =  "https://connection.eu-central-1.keboola.com/v2/storage/components?include=configuration"
 
     const getMethod = 'GET';
@@ -17,9 +19,12 @@ export async function getOrCreateWriter(shopName, suffix) {
 
     const writerDataAll = JSON.parse(getBody).find((i) => i.id === 'keboola.wr-aws-s3').configurations;
     const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`); 
-    if (writerData) return writerData.id;
-
+    if (writerData) {
+        console.log(`Writer ${shopName}_${suffix} exists, returning its ID.`);
+        return writerData.id;
+    }
     // Otherwise, create
+    console.log(`Writer ${shopName}_${suffix} doesn't exist, I am going to create it.`);
     const postUrl =
         'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs'
     const postMethod = 'POST'
@@ -36,7 +41,7 @@ export async function getOrCreateWriter(shopName, suffix) {
         headers: postHeaders,
         form: formData
     })
-
+    console.log(`Writer ${shopName}_${suffix} has been created.`);
     const writerId = JSON.parse(postBody).id; 
     return writerId;
 }
