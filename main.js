@@ -10,32 +10,32 @@ config()
 const LATEST = 'LATEST'
 
 Apify.main(async () => {
-    console.log(process.env.KEBOOLA_TOKEN);
-    console.log(process.env.SLACK_TOKEN);
-    console.log(process.env.AWS_TOKEN);
-    const input = await Apify.getInput();
-    console.log(input);
+    console.log(process.env.KEBOOLA_TOKEN)
+    console.log(process.env.SLACK_TOKEN)
+    console.log(process.env.AWS_TOKEN)
+    const input = await Apify.getInput()
+    console.log(input)
 
-    const date = new Date();
-    const todaysDate = date.toISOString().substring(0, 10);
+    const date = new Date()
+    const todaysDate = date.toISOString().substring(0, 10)
 
-    const shopNames = input.shopNames.map(name => name.toLowerCase());
-    const email = input.email;
-    const runStorage = input.runStorage;
-    const runTransformation = input.runTransformation;
-    const runWriter = input.runWriter;
-    const runOrchestration = input.runOrchestration;
-    const testOrchestration = input.testOrchestration;
-    const testStorage = input.testStorage;
-    const getStorage = input.getStorage;
-    const notifyByMail = input.notifyByMail;
-    const notifyBySlack = input.notifyBySlack;
-    const migrateTables = input.migrateTables;
-    const slackChannel = input.slackChannel;
+    const shopNames = input.shopNames.map(name => name.toLowerCase())
+    const email = input.email
+    const runStorage = input.runStorage
+    const runTransformation = input.runTransformation
+    const runWriter = input.runWriter
+    const runOrchestration = input.runOrchestration
+    const testOrchestration = input.testOrchestration
+    const testStorage = input.testStorage
+    const getStorage = input.getStorage
+    const notifyByMail = input.notifyByMail
+    const notifyBySlack = input.notifyBySlack
+    const migrateTables = input.migrateTables
+    const slackChannel = input.slackChannel
 
     for (const shopName of shopNames) {
-        const transformationIds = [];
-        const writerIds = [];
+        const transformationIds = []
+        const writerIds = []
 
         if (migrateTables) {
             //TODO adding clean table?
@@ -59,8 +59,7 @@ Apify.main(async () => {
                     `out.c-${shopName}.${shopName}_refprices`
                 ],
                 [['itemId', 'date']],
-                [true, true]
-                `Codeblock - MIGRATION`,
+                [true, true]`Codeblock - MIGRATION`,
                 `MIGRATION`,
                 code
             )
@@ -90,66 +89,88 @@ Apify.main(async () => {
 
             for (const transformation of transformations) {
                 const index = transformations.indexOf(transformation)
-                
-            const inputTablesSource = [
-              [`in.c-black-friday.${shopName}`],
-              [`out.c-${shopName}.${shopName}_01_unification`],
-              [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
-              [`out.c-${shopName}.${shopName}_03_complete`],
-              [`out.c-${shopName}.${shopName}_03_complete`],
-              [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_pricehistory`]
-          ]
 
-          const inputTablesName = [
-            ['shop_raw'],
-            ['shop_01_unification'],
-            ['shop_01_unification', 'shop_02_refprices'],
-            ['shop_03_complete'],
-            ['shop_03_complete'],
-            ['shop_04_extension', 'shop_05_pricehistory']
-          ] 
+                const inputTablesSource = [
+                    [`in.c-black-friday.${shopName}`],
+                    [`out.c-${shopName}.${shopName}_01_unification`],
+                    [
+                        `out.c-${shopName}.${shopName}_01_unification`,
+                        `out.c-${shopName}.${shopName}_02_refprices`
+                    ],
+                    [`out.c-${shopName}.${shopName}_03_complete`],
+                    [`out.c-${shopName}.${shopName}_03_complete`],
+                    [
+                        `out.c-${shopName}.${shopName}_04_extension`,
+                        `out.c-${shopName}.${shopName}_05_pricehistory`
+                    ]
+                ]
 
-          const outputTablesName = [
-            [`shop_${transformation}`],
-            [`shop_${transformation}`],
-            [`shop_${transformation}`],
-            [`shop_${transformation}`],
-            [`shop_${transformation}`],
-            [`shop_s3_metadata`, `shop_s3_pricehistory`]
-          ]
+                const inputTablesName = [
+                    ['shop_raw'],
+                    ['shop_01_unification'],
+                    ['shop_01_unification', 'shop_02_refprices'],
+                    ['shop_03_complete'],
+                    ['shop_03_complete'],
+                    ['shop_04_extension', 'shop_05_pricehistory']
+                ]
 
-          const outputTablesSource = [
-            [`out.c-${shopName}.${shopName}_${transformation}`],
-            [`out.c-${shopName}.${shopName}_${transformation}`],
-            [`out.c-${shopName}.${shopName}_${transformation}`],
-            [`out.c-${shopName}.${shopName}_${transformation}`],
-            [`out.c-${shopName}.${shopName}_${transformation}`],
-            [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
-          ]
+                const outputTablesName = [
+                    [`shop_${transformation}`],
+                    [`shop_${transformation}`],
+                    [`shop_${transformation}`],
+                    [`shop_${transformation}`],
+                    [`shop_${transformation}`],
+                    [`shop_s3_metadata`, `shop_s3_pricehistory`]
+                ]
 
-          const outputTablesKeys = [
-            [['itemId', 'date']],
-            [['itemId', 'date']],
-            [['itemId', 'date']],
-            [['pkey']],
-            [['p_key']],
-            [['slug'], ['slug']]
-          ]
+                const outputTablesSource = [
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [
+                        `out.c-${shopName}.${shopName}_s3_metadata`,
+                        `out.c-${shopName}.${shopName}_s3_pricehistory`
+                    ]
+                ]
 
-          const outputIncremental = [
-            [true],
-            [true],
-            [true],
-            [false],
-            [false],
-            [false, false]
-          ]
+                const outputTablesKeys = [
+                    [['itemId', 'date']],
+                    [['itemId', 'date']],
+                    [['itemId', 'date']],
+                    [['pkey']],
+                    [['p_key']],
+                    [['slug'], ['slug']]
+                ]
+
+                const outputIncremental = [
+                    [true],
+                    [true],
+                    [true],
+                    [false],
+                    [false],
+                    [false, false]
+                ]
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
                     transformation
                 )
                 //I am creating an array of transformation Ids to be used in orchestrations later on
                 transformationIds.push(transformationId)
+
+                //I am transforming sql code to array
+                const sqlCode = [];
+                const sqls = fs
+                    .readFileSync(`./src/texts/${transformation}.sql`,'utf-8')
+                    .toString()
+                    .split('--;')
+                for (let sql of sqls) {
+                    if (sql != '') {
+                        sql = sql.trim()
+                        sqlCode.push(sql);
+                    }
+                }
 
                 await trans.updateTransformation(
                     transformationId,
@@ -165,27 +186,21 @@ Apify.main(async () => {
                     outputIncremental[index], //out-table incremental?
                     `Codeblock - ${transformation}`,
                     `Shop ${transformation}`,
-                    fs.readFileSync(
-                        `./src/texts/${transformation}.sql`,
-                        'utf-8'
-                    )
+                    sqlCode
                 )
             }
         }
 
         if (runWriter) {
-            console.log(`Starting Writer management program`);
+            console.log(`Starting Writer management program`)
 
-            const writers = [
-                "s3_metadata",
-                "s3_pricehistory"
-            ]
+            const writers = ['s3_metadata', 's3_pricehistory']
 
             for (const writer of writers) {
-                const writerId = await wr.getOrCreateWriter(shopName, writer);
-                writerIds.push(writerId);
-                console.log('Writer ID is ' + writerId);
-                await wr.updateWriter(shopName, writer, writerId);
+                const writerId = await wr.getOrCreateWriter(shopName, writer)
+                writerIds.push(writerId)
+                console.log('Writer ID is ' + writerId)
+                await wr.updateWriter(shopName, writer, writerId)
             }
         }
 
@@ -223,7 +238,7 @@ Apify.main(async () => {
             const orchestrationInfo = await orch.getOrCreateOrchestration(
                 shopName
             )
-//TODO The folloowing line errors when an incorrect name is provided - also case sensitive still
+            //TODO The folloowing line errors when an incorrect name is provided - also case sensitive still
             const orchestrationLastTimeStart =
                 orchestrationInfo.lastExecutedJob.startTime
 
@@ -365,6 +380,6 @@ Apify.main(async () => {
         console.log(`Storage downloading program has finished.`)
     }
 
-    console.log("All required tasks have been finished.")
+    console.log('All required tasks have been finished.')
     //here will go all the notifications
 })
