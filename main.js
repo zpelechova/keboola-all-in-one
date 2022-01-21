@@ -88,62 +88,62 @@ Apify.main(async () => {
                 //'00_preparation' // only for shops with feed and/or unitPrice items
             ]
 
-            const inputTablesSource = [
-                [`in.c-black-friday.${shopName}`],
-                [`out.c-${shopName}.${shopName}_01_unification`],
-                [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
-                [`out.c-${shopName}.${shopName}_03_complete`],
-                [`out.c-${shopName}.${shopName}_03_complete`],
-                [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_pricehistory`]
-            ]
-
-            const inputTablesName = [
-              ['shop_raw'],
-              ['shop_01_unification'],
-              ['shop_01_unification', 'shop_02_refprices'],
-              ['shop_03_complete'],
-              ['shop_03_complete'],
-              ['shop_04_extension', 'shop_05_pricehistory']
-            ] 
-
-            const outputTablesName = [
-              [`shop_${transformation}`],
-              [`shop_${transformation}`],
-              [`shop_${transformation}`],
-              [`shop_${transformation}`],
-              [`shop_${transformation}`],
-              [`shop_s3_metadata`, `shop_s3_pricehistory`]
-            ]
-
-            const outputTablesSource = [
-              [`out.c-${shopName}.${shopName}_${transformation}`],
-              [`out.c-${shopName}.${shopName}_${transformation}`],
-              [`out.c-${shopName}.${shopName}_${transformation}`],
-              [`out.c-${shopName}.${shopName}_${transformation}`],
-              [`out.c-${shopName}.${shopName}_${transformation}`],
-              [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
-            ]
-
-            const outputTablesKeys = [
-              ['itemId', 'date'],
-              ['itemId', 'date'],
-              ['itemId', 'date'],
-              ['pkey'],
-              ['p_key'],
-              [['slug'], ['slug']]
-            ]
-
-            const outputIncremental = [
-              [true],
-              [true],
-              [true],
-              [false],
-              [false],
-              [false, false]
-            ]
-
             for (const transformation of transformations) {
                 const index = transformations.indexOf(transformation)
+                
+            const inputTablesSource = [
+              [`in.c-black-friday.${shopName}`],
+              [`out.c-${shopName}.${shopName}_01_unification`],
+              [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
+              [`out.c-${shopName}.${shopName}_03_complete`],
+              [`out.c-${shopName}.${shopName}_03_complete`],
+              [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_pricehistory`]
+          ]
+
+          const inputTablesName = [
+            ['shop_raw'],
+            ['shop_01_unification'],
+            ['shop_01_unification', 'shop_02_refprices'],
+            ['shop_03_complete'],
+            ['shop_03_complete'],
+            ['shop_04_extension', 'shop_05_pricehistory']
+          ] 
+
+          const outputTablesName = [
+            [`shop_${transformation}`],
+            [`shop_${transformation}`],
+            [`shop_${transformation}`],
+            [`shop_${transformation}`],
+            [`shop_${transformation}`],
+            [`shop_s3_metadata`, `shop_s3_pricehistory`]
+          ]
+
+          const outputTablesSource = [
+            [`out.c-${shopName}.${shopName}_${transformation}`],
+            [`out.c-${shopName}.${shopName}_${transformation}`],
+            [`out.c-${shopName}.${shopName}_${transformation}`],
+            [`out.c-${shopName}.${shopName}_${transformation}`],
+            [`out.c-${shopName}.${shopName}_${transformation}`],
+            [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
+          ]
+
+          const outputTablesKeys = [
+            ['itemId', 'date'],
+            ['itemId', 'date'],
+            ['itemId', 'date'],
+            ['pkey'],
+            ['p_key'],
+            [['slug'], ['slug']]
+          ]
+
+          const outputIncremental = [
+            [true],
+            [true],
+            [true],
+            [false],
+            [false],
+            [false, false]
+          ]
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
                     transformation
