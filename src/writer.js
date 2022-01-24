@@ -62,7 +62,7 @@ export async function getOrCreateTableRow(shopName, suffix, writerId) {
   });
   // console.log(getBody);
 
-  const writerDataAll = JSON.parse(getBody).find((i) => i.id != null;
+  const writerDataAll = JSON.parse(getBody).find((i) => i.id != null);
   if (writerDataAll) {
       console.log(`Table-row for ${shopName}_${suffix} writer exists, returning its ID.`);
       return writerDataAll.id;
