@@ -23,7 +23,6 @@ export async function getOrCreateWriter(shopName, suffix) {
     if (writerData) {
         console.log(`Writer ${shopName}_${suffix} exists, returning its ID.`);
         return writerData.id;
-
     }
     // Otherwise, create
     console.log(`Writer ${shopName}_${suffix} doesn't exist, I am going to create it.`);
@@ -45,33 +44,27 @@ export async function getOrCreateWriter(shopName, suffix) {
     })
     console.log(`Writer ${shopName}_${suffix} has been created.`);
     const writerId = JSON.parse(postBody).id;
-    return writerId;
-}
 
-export async function getOrCreateTableRow(shopName, suffix, writerId) {
-    
-  const getUrl =  "https://connection.eu-central-1.keboola.com/v2/storage/components?include=configuration"
-    const getMethod = 'GET';
-    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
-    const { body: getBody } = await gotScraping({
+    const getUrlRow = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
+    const getMethodRow = 'GET';
+    const getHeadersRow = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
+    const { body: getBodyRow } = await gotScraping({
         useHeaderGenerator: false,
-        url: getUrl,
-        method: getMethod,
-        headers: getHeaders,
+        url: getUrlRow,
+        method: getMethodRow,
+        headers: getHeadersRow,
     });
     // console.log(getBody);
 
-    const writerDataAll = JSON.parse(getBody).find((i) => i.id === 'keboola.wr-aws-s3').configurations;
-    const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`);
-    if (writerData) {
-        console.log(`Writer ${shopName}_${suffix} exists, checking for its table-row ID.`);
-        const rows = findAnd.returnFound(writerData, {rows: '0'});
-        return rows.id;
-  }
+    const writerDataAllRow = JSON.parse(getBodyRow).find((i) => i.id !== '');
+    if (writerDataAllRow) {
+        console.log(`Table-row for writer ${shopName}_${suffix} exists, returning its ID.`);
+        return writerDataAllRow.id;
+    }
+
   // Otherwise, create
   console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
-  const postUrlRows =
-      'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows'
+  const postUrlRows =`https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
   const postMethodRows = 'POST'
   const formDataRows = ({"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
   const postHeadersRows = {
