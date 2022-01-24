@@ -90,7 +90,7 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
         `I am going to update writer ${shopName}_${suffix} (writer ID: ${writerId}, row ID: ${rowId}).`
     )
 
-    const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}`
+    const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
 
     const method = 'PUT'
     const formData = {
