@@ -22,6 +22,7 @@ export async function getOrCreateWriter(shopName, suffix) {
     if (writerData) {
         console.log(`Writer ${shopName}_${suffix} exists, returning its ID.`);
         return writerData.id;
+
     }
     // Otherwise, create
     console.log(`Writer ${shopName}_${suffix} doesn't exist, I am going to create it.`);
@@ -33,7 +34,16 @@ export async function getOrCreateWriter(shopName, suffix) {
         'content-type': 'application/x-www-form-urlencoded',
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
     }
-
+    
+    const getMethod = 'GET';
+    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
+    const { body: getBody } = await gotScraping({
+        useHeaderGenerator: false,
+        url: getUrl,
+        method: getMethod,
+        headers: getHeaders,
+    });
+   
     const { body: postBody } = await gotScraping({
         useHeaderGenerator: false,
         url: postUrl,
@@ -43,21 +53,20 @@ export async function getOrCreateWriter(shopName, suffix) {
     })
     console.log(`Writer ${shopName}_${suffix} has been created.`);
     const writerId = JSON.parse(postBody).id; 
-    return writerId;
+    const rowId = JSON.parse(postBody).rows.id; 
+    return writerId, rowId;
 }
 
-export async function updateWriter (shopName, suffix, writerId) {
+export async function updateWriter (shopName, suffix, writerId, rowId) {
     const shortSuffix = suffix.substring(3);
     console.log(
-        `I am going to update writer ${shopName}_${suffix} (writer ID: ${writerId}).`
+        `I am going to update writer ${shopName}_${suffix} (writer ID: ${writerId}, row ID: ${rowId}).`
     )
 
     const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}`
 
     const method = 'PUT'
     const formData = {
-        "description": "Writing price history to S3 AWS",
-        "changeDescription": "Configuration edited via API",
         "configuration": JSON.stringify({
             "parameters": {
                 "accessKeyId": "AKIAZX7NKEIMGRBOQF6W",
@@ -65,28 +74,57 @@ export async function updateWriter (shopName, suffix, writerId) {
                 "bucket": "data.hlidacshopu.cz",
                 "prefix": "items/"
             },
-            "storage": {
-                "input": {
-                    "tables": [
-                        {
-                            "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
-                            "destination": `shop_${shortSuffix}.csv`
+            "rowsSortOrder": [],
+            "rows": [
+                {
+                    "id": ${rowId},
+                    "name": `${shopName}_${suffix}`,
+                    "description": "Writing price history to S3 AWS",
+                    "isDisabled": false,
+                  },
+                    "changeDescription": "Configuration edited via API",
+                    "state": {
+                        "component": [],
+                        "storage": {
+                            "input": {
+                                "tables": [
+                                    {
+                                        "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
+                                      }
+                                ],
+                                "files": []
+                            }
                         }
-                    ]
-                }
-            },
-            "processors": {
-                "before": [
-                    {
-                        "definition": {
-                            "component": "kds-team.processor-json-generator-hlidac-shopu"
-                        },
+                    },
+                    "configuration": {
                         "parameters": {
-                            "format": shortSuffix
+                            "prefix": "items/"
+                        },
+                        "storage": {
+                            "input": {
+                                "tables": [
+                                    {
+                                        "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
+                                        "destination": `shop_${suffix}.csv`
+                                    }
+                                ]
+                            }
+                        },
+                        "processors": {
+                            "before": [
+                                {
+                                    "definition": {
+                                        "component": "kds-team.processor-json-generator-hlidac-shopu"
+                                    },
+                                    "parameters": {
+                                        "format": shortSuffix
+                                    }
+                                }
+                            ]
                         }
                     }
-                ]
-            }
+                }
+            ],
         }),
     }
 
@@ -103,5 +141,5 @@ export async function updateWriter (shopName, suffix, writerId) {
         form: formData
     })
 
-    console.log(`I have updated the writer ${shopName}_${suffix} with writer ID: ${writerId}`)
+    console.log(`I have updated the writer ${shopName}_${suffix} (writer ID: ${writerId}).`)
 }
