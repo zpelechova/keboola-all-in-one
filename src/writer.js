@@ -44,6 +44,26 @@ export async function getOrCreateWriter(shopName, suffix) {
     })
     console.log(`Writer ${shopName}_${suffix} has been created.`);
     const writerId = JSON.parse(postBody).id; 
+
+    console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
+    const postUrl =
+        'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows'
+    const postMethod = 'POST'
+    const formData = ({"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
+    const postHeaders = {
+        'content-type': 'application/x-www-form-urlencoded',
+        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+    }
+    
+    const { body: postBody } = await gotScraping({
+        useHeaderGenerator: false,
+        url: postUrl,
+        method: postMethod,
+        headers: postHeaders,
+        form: formData
+    })
+    console.log(`Table-row for ${shopName}_${suffix} writer has been created.`);
+    
     const rowId = JSON.parse(postBody).rows[0].id; 
     return writerId, rowId;
 }
