@@ -21,7 +21,7 @@ export async function getOrCreateWriter(shopName, suffix) {
     const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`); 
     if (writerData) {
         console.log(`Writer ${shopName}_${suffix} exists, returning its ID.`);
-        return writerData.id;
+        return writerData.id, writerData.rows[0].id;
 
     }
     // Otherwise, create
