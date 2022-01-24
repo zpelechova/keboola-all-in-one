@@ -1,4 +1,5 @@
 import { gotScraping } from 'got-scraping';
+const findAnd = require('find-and');
 
 // wip
 
@@ -49,23 +50,23 @@ export async function getOrCreateWriter(shopName, suffix) {
 
 export async function getOrCreateTableRow(shopName, suffix, writerId) {
     
-  console.log(`Checking if writer ${shopName}_${suffix} ID ${writerID} contains table-row`);
-  const getUrl =  "https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows"
-  const getMethod = 'GET';
-  const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
-  const { body: getBody } = await gotScraping({
-      useHeaderGenerator: false,
-      url: getUrl,
-      method: getMethod,
-      headers: getHeaders,
-  });
-  // console.log(getBody);
+  const getUrl =  "https://connection.eu-central-1.keboola.com/v2/storage/components?include=configuration"
+    const getMethod = 'GET';
+    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
+    const { body: getBody } = await gotScraping({
+        useHeaderGenerator: false,
+        url: getUrl,
+        method: getMethod,
+        headers: getHeaders,
+    });
+    // console.log(getBody);
 
-  const writerDataAll = JSON.parse(getBody).find((i) => i.id != null);
-  if (writerDataAll) {
-      console.log(`Table-row for ${shopName}_${suffix} writer exists, returning its ID.`);
-      return writerDataAll.id;
-
+    const writerDataAll = JSON.parse(getBody).find((i) => i.id === 'keboola.wr-aws-s3').configurations;
+    const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`);
+    if (writerData) {
+        console.log(`Writer ${shopName}_${suffix} exists, checking for its table-row ID.`);
+        const rows = findAnd.returnFound(writerData, {rows: '0'});
+        return rows.id;
   }
   // Otherwise, create
   console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
