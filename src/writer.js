@@ -35,14 +35,14 @@ export async function getOrCreateWriter(shopName, suffix) {
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
     }
     
-    const getMethod = 'GET';
-    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
-    const { body: getBody } = await gotScraping({
-        useHeaderGenerator: false,
-        url: getUrl,
-        method: getMethod,
-        headers: getHeaders,
-    });
+//    const getMethod = 'GET';
+//    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
+//    const { body: getBody } = await gotScraping({
+//        useHeaderGenerator: false,
+//        url: getUrl,
+//        method: getMethod,
+//        headers: getHeaders,
+//    });
    
     const { body: postBody } = await gotScraping({
         useHeaderGenerator: false,
