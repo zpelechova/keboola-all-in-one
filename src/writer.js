@@ -53,7 +53,7 @@ export async function getOrCreateWriter(shopName, suffix) {
     })
     console.log(`Writer ${shopName}_${suffix} has been created.`);
     const writerId = JSON.parse(postBody).id; 
-    const rowId = JSON.parse(postBody).rows.id; 
+    const rowId = JSON.parse(postBody).rows[0].id; 
     return writerId, rowId;
 }
 
