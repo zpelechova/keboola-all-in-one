@@ -48,23 +48,23 @@ export async function getOrCreateWriter(shopName, suffix) {
     console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
     const postUrlRows =
         'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows'
-    const postMethod = 'POST'
-    const formData = ({"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
-    const postHeaders = {
+    const postMethodRows = 'POST'
+    const formDataRows = ({"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
+    const postHeadersRows = {
         'content-type': 'application/x-www-form-urlencoded',
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
     }
     
-    const { body: postBody } = await gotScraping({
+    const { body: postBodyRows } = await gotScraping({
         useHeaderGenerator: false,
         url: postUrlRows,
-        method: postMethod,
-        headers: postHeaders,
-        form: formData
+        method: postMethodRows,
+        headers: postHeadersRows,
+        form: formDataRows
     })
     console.log(`Table-row for ${shopName}_${suffix} writer has been created.`);
     
-    const rowId = JSON.parse(postBody).rows[0].id; 
+    const rowId = JSON.parse(postBodyRows).id; 
     return writerId, rowId;
 }
 
