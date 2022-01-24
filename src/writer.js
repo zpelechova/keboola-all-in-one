@@ -77,7 +77,7 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
             "rowsSortOrder": [],
             "rows": [
                 {
-                    "id": ${rowId},
+                    "id": `${rowId}`,
                     "name": `${shopName}_${suffix}`,
                     "description": "Writing price history to S3 AWS",
                     "isDisabled": false,
