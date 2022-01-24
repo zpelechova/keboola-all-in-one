@@ -18,7 +18,8 @@ export async function getOrCreateWriter(shopName, suffix) {
     // console.log(getBody);
 
     const writerDataAll = JSON.parse(getBody).find((i) => i.id === 'keboola.wr-aws-s3').configurations;
-    const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`); 
+    const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`);
+    const writerDataRow = writerData.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`);
     if (writerData) {
         console.log(`Writer ${shopName}_${suffix} exists, returning its ID.`);
         return writerData.id;
@@ -43,29 +44,52 @@ export async function getOrCreateWriter(shopName, suffix) {
         form: formData
     })
     console.log(`Writer ${shopName}_${suffix} has been created.`);
-    const writerId = JSON.parse(postBody).id; 
+    const writerId = JSON.parse(postBody).id;
+    return writerId;
+}
 
-    console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
-    const postUrlRows =
-        'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows'
-    const postMethodRows = 'POST'
-    const formDataRows = ({"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
-    const postHeadersRows = {
-        'content-type': 'application/x-www-form-urlencoded',
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN
-    }
+export async function getOrCreateTableRow(shopName, suffix, writerId) {
     
-    const { body: postBodyRows } = await gotScraping({
-        useHeaderGenerator: false,
-        url: postUrlRows,
-        method: postMethodRows,
-        headers: postHeadersRows,
-        form: formDataRows
-    })
-    console.log(`Table-row for ${shopName}_${suffix} writer has been created.`);
-    
-    const rowId = JSON.parse(postBodyRows).id; 
-    return writerId, rowId;
+  console.log(`Checking if writer ${shopName}_${suffix} ID ${writerID} contains table-row`);
+  const getUrl =  "https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows"
+  const getMethod = 'GET';
+  const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
+  const { body: getBody } = await gotScraping({
+      useHeaderGenerator: false,
+      url: getUrl,
+      method: getMethod,
+      headers: getHeaders,
+  });
+  // console.log(getBody);
+
+  const writerDataAll = JSON.parse(getBody).find((i) => i.id != null;
+  if (writerDataAll) {
+      console.log(`Table-row for ${shopName}_${suffix} writer exists, returning its ID.`);
+      return writerDataAll.id;
+
+  }
+  // Otherwise, create
+  console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
+  const postUrlRows =
+      'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows'
+  const postMethodRows = 'POST'
+  const formDataRows = ({"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
+  const postHeadersRows = {
+      'content-type': 'application/x-www-form-urlencoded',
+      'x-storageapi-token': process.env.KEBOOLA_TOKEN
+  }
+  
+  const { body: postBodyRows } = await gotScraping({
+      useHeaderGenerator: false,
+      url: postUrlRows,
+      method: postMethodRows,
+      headers: postHeadersRows,
+      form: formDataRows
+  })
+  console.log(`Table-row for ${shopName}_${suffix} writer has been created.`);
+  
+  const rowId = JSON.parse(postBodyRows).id; 
+  return rowId;
 }
 
 export async function updateWriter (shopName, suffix, writerId, rowId) {
