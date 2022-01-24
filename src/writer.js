@@ -81,7 +81,6 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
                     "name": `${shopName}_${suffix}`,
                     "description": "Writing price history to S3 AWS",
                     "isDisabled": false,
-                  },
                     "changeDescription": "Configuration edited via API",
                     "state": {
                         "component": [],
