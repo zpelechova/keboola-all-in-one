@@ -19,7 +19,6 @@ export async function getOrCreateWriter(shopName, suffix) {
 
     const writerDataAll = JSON.parse(getBody).find((i) => i.id === 'keboola.wr-aws-s3').configurations;
     const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`);
-    const writerDataRow = writerData.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`);
     if (writerData) {
         console.log(`Writer ${shopName}_${suffix} exists, returning its ID.`);
         return writerData.id;
