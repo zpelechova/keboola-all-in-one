@@ -36,6 +36,7 @@ Apify.main(async () => {
     for (const shopName of shopNames) {
         const transformationIds = []
         const writerIds = []
+        const rowIds = []
 
         if (migrateTables) {
             //TODO adding clean table?
