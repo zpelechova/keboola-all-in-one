@@ -43,6 +43,26 @@ export async function getOrCreateWriter(shopName, suffix) {
     })
     console.log(`Writer ${shopName}_${suffix} has been created.`);
     const writerId = JSON.parse(postBody).id;
+    return writerId;
+  }
+
+export async function getOrCreateTableRow(shopName, suffix) {
+    console.log(`Checking if table-row ${shopName}_${suffix} exists`);
+    const getUrl =  "https://connection.eu-central-1.keboola.com/v2/storage/components?include=configuration"
+  
+    const getMethod = 'GET';
+    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN };
+    const { body: getBody } = await gotScraping({
+        useHeaderGenerator: false,
+        url: getUrl,
+        method: getMethod,
+        headers: getHeaders,
+    });
+  // console.log(getBody);
+
+    const writerDataAll = JSON.parse(getBody).find((i) => i.id === 'keboola.wr-aws-s3').configurations;
+    const writerData = writerDataAll.find((i) => i.name.toLowerCase() === `${shopName}_${suffix}`);
+    const writerId = writerData.id;
 
     const getUrlRow = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
     const getMethodRow = 'GET';
