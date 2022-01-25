@@ -184,7 +184,7 @@ create or replace table "temp_final" as
                     "p_key", "d"
 ;
 --next_querry
-CREATE TABLE "final" AS
+CREATE TABLE "shop_05_pricehistory" AS
 /*
  - tohle už je jen očištění a filtrace
  - asi by to mohlo být všechno dohromady v jedné query, ale líp se mi to v DataGripu čte

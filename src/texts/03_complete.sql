@@ -1,4 +1,4 @@
-CREATE TABLE "shop_complete" AS
+CREATE TABLE "shop_03_complete" AS
 SELECT "uni"."shop"
 	,"uni"."p_key"
 	,"uni"."itemId"
