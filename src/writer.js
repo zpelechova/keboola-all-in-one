@@ -67,13 +67,14 @@ export async function getOrCreateWriter(shopName, suffix) {
     const formDataRows =  {
       "configuration": JSON.stringify(
         {"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
+      }
     const postHeadersRows = {
       'content-type': 'application/x-www-form-urlencoded',
       'x-storageapi-token': process.env.KEBOOLA_TOKEN
     }
   
     const { body: postBodyRows } = await gotScraping({
-       useHeaderGenerator: false,
+        useHeaderGenerator: false,
         url: postUrlRows,
         method: postMethodRows,
         headers: postHeadersRows,
