@@ -27,7 +27,7 @@ select distinct("p_key" )
       end as "shop_id"
     , last_value("slug") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
 from "shop_03_complete"
-where "parsedUrl" != ''
+where "slug" != ''
 ;
 --next_querry
 create or replace table "shop_s3_pricehistory" as
