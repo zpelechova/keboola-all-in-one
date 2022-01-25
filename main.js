@@ -101,6 +101,7 @@ Apify.main(async () => {
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [
+                        `out.c-${shopName}.${shopName}_03_complete`,
                         `out.c-${shopName}.${shopName}_04_extension`,
                         `out.c-${shopName}.${shopName}_05_pricehistory`
                     ]
@@ -112,7 +113,7 @@ Apify.main(async () => {
                     ['shop_01_unification', 'shop_02_refprices'],
                     ['shop_03_complete'],
                     ['shop_03_complete'],
-                    ['shop_04_extension', 'shop_05_pricehistory']
+                    ['shop_03_complete', 'shop_04_extension', 'shop_05_pricehistory']
                 ]
 
                 const outputTablesName = [
@@ -165,7 +166,7 @@ Apify.main(async () => {
                 const sqls = fs
                     .readFileSync(`./src/texts/${transformation}.sql`,'utf-8')
                     .toString()
-                    .split('--;')
+                    .split('--next_querry')
                 for (let sql of sqls) {
                     if (sql != '') {
                         sql = sql.trim()

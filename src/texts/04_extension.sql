@@ -1,4 +1,3 @@
-[`
 --MAIN TABLE  
 --it uses the last record for given item (and only goes back to history for the same period of time as inc at the very beginning does. 
 CREATE TABLE "shop_04_extension" AS
@@ -43,4 +42,3 @@ FROM
 		--AND "date" >= dateadd(day, -7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 		)
 WHERE "row_number" = 1;
-`]

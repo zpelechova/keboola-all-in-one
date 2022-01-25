@@ -1,4 +1,3 @@
-[`
 /*
  musím si vyrobit vazbu datum + itemId a to mít pro všechny požadovaný dny,
  pokud nebudu mít tenhle pár informací, tak nebudu schopnej dělat gapfilling,
@@ -11,7 +10,7 @@ SELECT DISTINCT
 FROM "shop_01_unification"
 WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
-`,`
+--next_querry
 /*
     tohle mi vytvoří řadu čísel - je pak použiju v kartézáku s posledním (max) dnem v shop datech, abych
     získal "kalendář", na kterej joinu seznamy itemIds - ((a nedělám to jen na 90 dní, ale 150 => změněno na 60 dní sledování, takže 90 generuji)),
@@ -21,7 +20,7 @@ CREATE OR REPLACE TABLE "sekvence" AS
 select row_number() over (order by seq2()) as "seq"
 from table(generator(rowcount => 91))
 ;
-`,`
+--next_querry
 CREATE OR REPLACE TABLE "gendate" AS
 SELECT DATEADD(DAY, -("seq"."seq"-1), "DAY") :: DATE AS "GENDATE"
 FROM (SELECT MAX("date" :: DATE) AS "DAY"
@@ -29,7 +28,7 @@ FROM (SELECT MAX("date" :: DATE) AS "DAY"
          LEFT JOIN "sekvence" "seq"
 ORDER BY 1
 ;
-`,`
+--next_querry
 /*
     teď dělám tabulku, na kterou pak najoinuju děravý data v alze
  */
@@ -38,7 +37,7 @@ SELECT *
 FROM "gendate"
          LEFT JOIN "allItemIds"
 ;
-`,`
+--next_querry
 /*
     s těmahle datama z alzy budu dělat megajoin :)
  */
@@ -51,7 +50,7 @@ FROM "shop_unified"
 --90 proto, že někde na začátku -60 dní mohou být díry, tak jdu dozadu
 WHERE to_date("date") >= dateadd('day', -90, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
-`,`
+--next_querry
 CREATE TABLE "shop_data_filled_labelled" AS
 SELECT "b"."date"                AS "date",
        "b"."itemId"              AS "itemId",
@@ -90,7 +89,7 @@ FROM (
 WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) AND
       "currentPrice" IS NOT NULL --tímhle oseknu empty rows u věcí, co jsou nové v tom sledovaném 60d okně
 ;
-`,`
+--next_querry
 CREATE TABLE "shop_common_price" AS
 SELECT DISTINCT "itemId",
          first_value("currentPrice")
@@ -103,7 +102,7 @@ FROM (SELECT "itemId",
       FROM   "shop_data_filled_labelled"
       GROUP BY 1,2)
 ;
-`,`
+--next_querry
 CREATE TABLE "shop_last_price_change" AS
 SELECT "t0"."date",
        "t0"."itemId",
@@ -119,7 +118,7 @@ FROM (SELECT "date",
       ORDER BY "itemId", "date") "t0"
 WHERE "row_number" = 1
 ;
-`,`
+--next_querry
 CREATE TABLE "shop_last_sale_vs_prev_30d_min_price" AS
 SELECT "t0"."date",
        "t0"."itemId",
@@ -135,7 +134,7 @@ FROM "shop_last_price_change" "t0"
 WHERE "t0"."price_trend" = 'down'
 GROUP BY 1, 2, 3, 4
 ;
-`,`
+--next_querry
 CREATE TABLE "shop_02_refprices" AS
 SELECT "c"."itemId",
        "commonPrice",
@@ -144,4 +143,3 @@ SELECT "c"."itemId",
 FROM "shop_common_price" "c"
 	LEFT JOIN "shop_last_sale_vs_prev_30d_min_price" "eu" ON "c"."itemId" = "eu"."itemId"
 ;
-`]

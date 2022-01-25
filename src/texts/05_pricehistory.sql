@@ -1,4 +1,3 @@
-[`
 /*
     - shopy a produkty mohou mít duplicitní informace o denních cenách
     - v takovém případě mám vzít tu nejnižší
@@ -34,7 +33,7 @@ SELECT
     WHERE
         "t0"."row_number" = 1
 ;
-`,`
+--next_querry
 /*
     - tohle vyrobí tabulku kde je důležitý sloupec "type"
     - slouží pro "emulaci" stavového stroje
@@ -94,7 +93,7 @@ SELECT
                 GROUP BY
                     "p_key") "dd" ON "dd"."p_key" = "a"."p_key"
 ;
-`,`
+--next_querry
 /*
     - tohle mi generuje sekvenci datumů
     - základní účel je gap filling prázdných datumů
@@ -117,35 +116,13 @@ SELECT
                                 MAX("d")
                                 FROM "produkty"))
 ;
-`,`
+--next_querry
 /*
     tady mám tabulku všech datumů a všech p_key a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
 */
-CREATE TABLE "final" AS
-/*
- - tohle už je jen očištění a filtrace
- - asi by to mohlo být všechno dohromady v jedné query, ale líp se mi to v DataGripu čte
- - poslední co tady vyrobím, je json pro DynamoDB
-   - sestavím objekty pro každý den a zagreguju je do pole
-   - je důležité, aby to předtím bylo seřazené - viz ORDER BY dole
- */
-SELECT
-    "tof"."p_key"                                      AS "p_key",
-    /*
-     - objekt obsahuje date,originalPrice,currentPrice - seknuté na první písmenka, aby byl json menší
-     - array to groupne pro p_key a WITHIN GROUP je tady jen pro pořadí datumů
-     - na char to převádím proto, že v Storage API není podpora VARIANTu
-     */
-    to_char(array_agg(
-            object_construct(
-                    'd', "tof"."d",
-                    'o', "tof"."o",
-                    'c', "tof"."c"
-                )
-        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
-    FROM
-        (
+
+create or replace table "temp_final" as
             /*
              - tady si přidám 2 pomocné sloupce, kde:
              - type_lag je pomocný k detekci jestli je řádek opakující se v sekvenci cen nebo první
@@ -204,10 +181,51 @@ SELECT
                                               ON "t1"."p_key" = "t2"."p_key" AND "t2"."d" = "t1"."DateSeq"
                     ) "tf"
                 ORDER BY
-                    "p_key", "d") "tof"
+                    "p_key", "d"
+;
+--next_querry
+CREATE TABLE "final" AS
+/*
+ - tohle už je jen očištění a filtrace
+ - asi by to mohlo být všechno dohromady v jedné query, ale líp se mi to v DataGripu čte
+ - poslední co tady vyrobím, je json pro DynamoDB
+   - sestavím objekty pro každý den a zagreguju je do pole
+   - je důležité, aby to předtím bylo seřazené - viz ORDER BY dole
+ */
+SELECT
+    "tof"."p_key"                                      AS "p_key",
+    /*
+     - objekt obsahuje date,originalPrice,currentPrice - seknuté na první písmenka, aby byl json menší
+     - array to groupne pro p_key a WITHIN GROUP je tady jen pro pořadí datumů
+     - na char to převádím proto, že v Storage API není podpora VARIANTu
+     */
+    to_char(array_agg(
+            object_construct(
+                    'd', "tof"."d",
+                    'o', "tof"."o",
+                    'c', "tof"."c"
+                )
+        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
+    FROM "temp_final" "tof"
     WHERE
-        "type2" = 'nechat' --AND "p_key" = '000014d8fb043ff8282f1993ac1ddc54'
+        "type2" = 'nechat'
     GROUP BY
         "p_key"
 ;
-`]
+--next_querry
+CREATE or replace TABLE "final_s3" AS
+SELECT
+    "tof"."p_key"                                      AS "p_key",
+    to_char(array_agg(
+            object_construct_KEEP_NULL(
+                    'd', "tof"."d",
+                    'o', try_to_number("tof"."o",12,2),
+                    'c', try_to_number("tof"."c",12,2)
+                )
+        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
+    FROM "temp_final" "tof"
+    WHERE
+        "type2" = 'nechat'
+    GROUP BY
+        "p_key"
+;

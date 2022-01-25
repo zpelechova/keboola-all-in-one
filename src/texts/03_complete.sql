@@ -1,4 +1,3 @@
-[`
 CREATE TABLE "shop_complete" AS
 SELECT "uni"."shop"
 	,"uni"."p_key"
@@ -25,4 +24,3 @@ LEFT JOIN
     FROM "shop_02_refprices") "ref"
 ON "uni"."itemId" = "ref"."itemId" AND "uni"."date" = "ref"."date"
 ;
-`]

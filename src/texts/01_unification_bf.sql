@@ -1,4 +1,3 @@
-[`
 --takes only records from last 7 days from both input tables - the number of days can be easily modified or omitted altogether
 CREATE VIEW "shop_bf"
 AS
@@ -6,14 +5,14 @@ SELECT *
 FROM "shop_bf_all"
 WHERE left("date", 10) >= to_char(DATEADD("d", - 3,CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE), 'yyyy-mm-dd')
 ;
-`,`
+--next_querry
 CREATE VIEW "shop"
 AS
 SELECT *
 FROM "shop_all"
 WHERE left("date", 10) >= to_char(DATEADD("d", - 3, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE), 'yyyy-mm-dd')
 ;
-`,`
+--next_querry
 --takes bf table, sets minimum number for current price and maximum for original price, converts date to date format, leaves out rows with no itemId or price or date 
 CREATE or replace VIEW "tmp.shop_bf"
 AS
@@ -35,7 +34,7 @@ WHERE "currentPrice" <> ''
 	AND "date" <> ''
 	AND "itemId" <> ''
 ;
-`,`
+--next_querry
 --takes main table, sets minimum number for current price and maximum for original price, converts date to date format, leaves out rows with no itemId or price or date
 
 CREATE or replace VIEW "tmp.shop_clean"
@@ -58,7 +57,7 @@ WHERE "currentPrice" <> ''
 	AND "date" <> ''
 	AND "itemId" <> ''
 ;
-`,`
+--next_querry
 --takes main table, sets minimum number for current price and maximum for original price, converts date to date format, leaves out rows with no itemId or price or date, leaves out extra information
 --creates two md5 hashes - p_key is unique for item and consists of shop and itemId, pk is unique for item a date and is made from p_key, - , date
 
@@ -86,4 +85,3 @@ SELECT DISTINCT "shop" AS "shop"
 FROM "tmp.shop_clean" "s"
 FULL JOIN "tmp.shop_bf" "bf" ON to_date("s"."date") = to_date("bf"."date")
 	AND "bf"."itemId" = "s"."itemId";
-`]

@@ -1,4 +1,3 @@
-[`
 create or replace table "shop_s3_metadata" as
 select case
         when "shop" like '%_cz' then replace("shop",'_cz','.cz')
@@ -13,10 +12,10 @@ select case
 	, "itemImage"
     , "commonPrice"
 	, "minPrice"
-from "url_shop"
+from "shop_04_extension"
 where "slug" != 'null' and "commonPrice" != 'null'
 ;
-`,`
+--next_querry
 create or replace table "slug" as
 select distinct("p_key" )
     , case
@@ -27,17 +26,16 @@ select distinct("p_key" )
         else "shop"||'.cz'
       end as "shop_id"
     , last_value("parsedUrl") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
-from "shop_clean"
+from "shop_03_complete"
 where "parsedUrl" != ''
 ;
-`,`
+--next_querry
 create or replace table "shop_s3_pricehistory" as
 select "s"."shop_id"
     , "s"."slug"
-    , replace("f"."json",'""','null') as "json"
-from "shop_final" "f"
+    , "ph"."json"
+from "shop_05_pricehistory" "ph"
 left join "slug" "s"
-on "f"."p_key" = "s"."p_key"
+on "ph"."p_key" = "s"."p_key"
 where "slug" is not null
 ;
-`]
