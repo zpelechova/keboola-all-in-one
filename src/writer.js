@@ -43,6 +43,25 @@ export async function getOrCreateWriter(shopName, suffix) {
     })
     console.log(`Writer ${shopName}_${suffix} has been created.`);
     const writerId = JSON.parse(postBody).id;
+    const postUrlNew =
+    `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}`
+    const postMethodNew = 'PUT'
+    const formDataNew = {
+      "configuration": JSON.stringify(
+        {"parameters":{"accessKeyId":"AKIAZX7NKEIMGRBOQF6W","#secretAccessKey":"KBC::ProjectSecure::eJxLtDKyqs60MrAutjI0MLZSuveViWGecMEluV0nL2xbuj7npJJ8BuM/oWkHBJgby5w/+hfc2vXHYdLnW/6vS+T81jMYuK1vjtxzhFfn2pESHX/VySELV78W6WayXF3/4nZkYWNYD3PpU42JH/gkMm+ZX9BKcSsum+JaH3v2upJ1ppUhyE4LEyslRiZmhgp1rrT1nO9lTuyTv33j5gExE5fLl/ikKl9LGhZvnVS1SP4cY+a+nkV3xQ7NVOus3+gfvECJgYGhzqCGjVOrzaPtOy8jO9uCfINcJkYGgwyEGKOBHBtnQpsHYyozC6OegSALj0+bCWPWb/VV1WmLPjMxCjRYs5dbH3Ts4l0qc0b04pJ2nQ2+UVqRUbtmqfxcHNo200ax69gpU5vZpcWH5ucXnyg3NBK87/VKRWX9NanuhldK1rUAw7195A==","bucket":"data.hlidacshopu.cz"}})
+      }
+    const postHeadersNew = {
+        'content-type': 'application/x-www-form-urlencoded',
+        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+    }
+    
+    const { body: postBodyNew } = await gotScraping({
+        useHeaderGenerator: false,
+        url: postUrlNew,
+        method: postMethodNew,
+        headers: postHeadersNew,
+        form: formDataNew
+    })
     return writerId;
   }
 
