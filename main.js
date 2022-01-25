@@ -68,11 +68,11 @@ Apify.main(async () => {
             await trans.migrate()
         }
 
-        if (runStorage) {
-            //It checks if the in table already exists and if not, creates it. it also returns the data about the table, but we dont need it for anything at the moment I think
-            console.log(`Starting Storage management program`)
-            await stor.getOrCreateTable(shopName)
-        }
+//        if (runStorage) {
+//            //It checks if the in table already exists and if not, creates it. it also returns the data about the table, but we dont need it for anything at the moment I think
+//            console.log(`Starting Storage management program`)
+//            await stor.getOrCreateTable(shopName)
+//        }
 
         if (runTransformation) {
             console.log(`Starting Transformation management program`)
