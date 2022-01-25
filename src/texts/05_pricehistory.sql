@@ -213,7 +213,7 @@ SELECT
         "p_key"
 ;
 --next_querry
-CREATE or replace TABLE "final_s3" AS
+CREATE or replace TABLE "shop_05_final_s3" AS
 SELECT
     "tof"."p_key"                                      AS "p_key",
     to_char(array_agg(
