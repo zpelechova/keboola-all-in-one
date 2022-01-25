@@ -106,7 +106,7 @@ export async function getOrCreateTableRow(shopName, suffix) {
     const formDataRows =  {
       "name": `${shopName}_${suffix}`,
       "configuration": JSON.stringify(
-        {"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":`out.c-0-${shopName}.${shopName}_${suffix}`,"destination":`shop_${suffix}.csv`}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
+        {"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":`out.c-${shopName}.${shopName}_${suffix}`,"destination":`shop_${suffix}.csv`}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
       }
     const postHeadersRows = {
       'content-type': 'application/x-www-form-urlencoded',
@@ -143,7 +143,7 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
             "input": {
               "tables": [
                 {
-                  "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
+                  "source": `out.c-${shopName}.${shopName}_${suffix}`,
                   "destination": `${shopName}_${suffix}.csv`
                 }
               ]
