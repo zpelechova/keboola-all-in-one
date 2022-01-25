@@ -6,11 +6,11 @@ select case
         when "shop" like '%.sk' then "shop"
         else "shop"||'.cz'
       end as "shop_id"
-	, "parsedUrl" as "slug"
-    , "itemId"
+	, "itemUrl" as "slug"
+  , "itemId"
 	, "itemName"
 	, "itemImage"
-    , "commonPrice"
+  , "commonPrice"
 	, "minPrice"
 from "shop_04_extension"
 where "slug" != 'null' and "commonPrice" != 'null'
