@@ -25,7 +25,7 @@ select distinct("p_key" )
         when "shop" like '%.sk' then "shop"
         else "shop"||'.cz'
       end as "shop_id"
-    , last_value("parsedUrl") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
+    , last_value("slug") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
 from "shop_03_complete"
 where "parsedUrl" != ''
 ;
