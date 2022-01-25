@@ -132,66 +132,34 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
     )
 
     const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
-
     const method = 'PUT'
     const formData = {
         "configuration": JSON.stringify({
-            "parameters": {
-                "accessKeyId": "AKIAZX7NKEIMGRBOQF6W",
-                "#secretAccessKey": process.env.AWS_TOKEN,
-                "bucket": "data.hlidacshopu.cz",
-                "prefix": "items/"
-            },
-            "rowsSortOrder": [],
-            "rows": [
+          "parameters": {
+            "prefix": "items/"
+          },
+          "storage": {
+            "input": {
+              "tables": [
                 {
-                    "id": rowId,
-                    "name": `${shopName}_${suffix}`,
-                    "description": "Writing price history to S3 AWS",
-                    "isDisabled": false,
-                    "changeDescription": "Configuration edited via API",
-                    "state": {
-                        "component": [],
-                        "storage": {
-                            "input": {
-                                "tables": [
-                                    {
-                                        "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
-                                      }
-                                ],
-                                "files": []
-                            }
-                        }
-                    },
-                    "configuration": {
-                        "parameters": {
-                            "prefix": "items/"
-                        },
-                        "storage": {
-                            "input": {
-                                "tables": [
-                                    {
-                                        "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
-                                        "destination": `shop_${suffix}.csv`
-                                    }
-                                ]
-                            }
-                        },
-                        "processors": {
-                            "before": [
-                                {
-                                    "definition": {
-                                        "component": "kds-team.processor-json-generator-hlidac-shopu"
-                                    },
-                                    "parameters": {
-                                        "format": shortSuffix
-                                    }
-                                }
-                            ]
-                        }
-                    }
+                  "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
+                  "destination": `shop_${suffix}.csv`
                 }
-            ],
+              ]
+            }
+          },
+          "processors": {
+            "before": [
+              {
+                "definition": {
+                  "component": "kds-team.processor-json-generator-hlidac-shopu"
+                },
+                "parameters": {
+                  "format": "metadata"
+                }
+              }
+            ]
+          }
         }),
     }
 
