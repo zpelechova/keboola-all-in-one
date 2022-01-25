@@ -21,7 +21,7 @@ Apify.main(async () => {
 
     const shopNames = input.shopNames.map(name => name.toLowerCase())
     const email = input.email
-    const runStorage = input.runStorage
+//    const runStorage = input.runStorage
     const runTransformation = input.runTransformation
     const runWriter = input.runWriter
     const runOrchestration = input.runOrchestration
@@ -103,7 +103,7 @@ Apify.main(async () => {
                     [
                         `out.c-${shopName}.${shopName}_03_complete`,
                         `out.c-${shopName}.${shopName}_04_extension`,
-                        `out.c-${shopName}.${shopName}_05_pricehistory`
+                        `out.c-${shopName}.${shopName}_05_final_s3`
                     ]
                 ]
 
@@ -113,7 +113,7 @@ Apify.main(async () => {
                     ['shop_01_unification', 'shop_02_refprices'],
                     ['shop_03_complete'],
                     ['shop_03_complete'],
-                    ['shop_03_complete', 'shop_04_extension', 'shop_05_pricehistory']
+                    ['shop_03_complete', 'shop_04_extension', 'shop_05_final_s3']
                 ]
 
                 const outputTablesName = [
@@ -121,7 +121,7 @@ Apify.main(async () => {
                     [`shop_${transformation}`],
                     [`shop_${transformation}`],
                     [`shop_${transformation}`],
-                    [`shop_${transformation}`],
+                    [`shop_${transformation}`, `shop_05_final_s3`],
                     [`shop_s3_metadata`, `shop_s3_pricehistory`]
                 ]
 
@@ -130,7 +130,10 @@ Apify.main(async () => {
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [
+                      `out.c-${shopName}.${shopName}_${transformation}`,
+                      `out.c-${shopName}.${shopName}_05_final_s3`
+                    ],
                     [
                         `out.c-${shopName}.${shopName}_s3_metadata`,
                         `out.c-${shopName}.${shopName}_s3_pricehistory`
