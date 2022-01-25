@@ -60,24 +60,25 @@ export async function getOrCreateWriter(shopName, suffix) {
         console.log(`Table-row for writer ${shopName}_${suffix} exists, returning its ID.`);
         return writerDataAllRow.id;
     }
-
-  // Otherwise, create
-  console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
-  const postUrlRows =`https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
-  const postMethodRows = 'POST'
-  const formDataRows = ({"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
-  const postHeadersRows = {
+    // Otherwise, create
+    console.log(`Setting up table-row for ${shopName}_${suffix} writer.`);
+    const postUrlRows =`https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
+    const postMethodRows = 'POST'
+    const formDataRows =  {
+      "configuration": JSON.stringify(
+        {"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
+    const postHeadersRows = {
       'content-type': 'application/x-www-form-urlencoded',
       'x-storageapi-token': process.env.KEBOOLA_TOKEN
-  }
+    }
   
-  const { body: postBodyRows } = await gotScraping({
-      useHeaderGenerator: false,
-      url: postUrlRows,
-      method: postMethodRows,
-      headers: postHeadersRows,
-      form: formDataRows
-  })
+    const { body: postBodyRows } = await gotScraping({
+       useHeaderGenerator: false,
+        url: postUrlRows,
+        method: postMethodRows,
+        headers: postHeadersRows,
+        form: formDataRows
+    })
   console.log(`Table-row for ${shopName}_${suffix} writer has been created.`);
   
   const rowId = JSON.parse(postBodyRows).id; 
