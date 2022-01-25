@@ -34,7 +34,7 @@ create or replace table "shop_s3_pricehistory" as
 select "s"."shop_id"
     , "s"."slug"
     , "ph"."json"
-from "shop_05_pricehistory" "ph"
+from "shop_05_final_s3" "ph"
 left join "slug" "s"
 on "ph"."p_key" = "s"."p_key"
 where "slug" is not null
