@@ -126,7 +126,7 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
             "rowsSortOrder": [],
             "rows": [
                 {
-                    "id": `${rowId}`,
+                    "id": rowId,
                     "name": `${shopName}_${suffix}`,
                     "description": "Writing price history to S3 AWS",
                     "isDisabled": false,
@@ -189,5 +189,5 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
         form: formData
     })
 
-    console.log(`I have updated the writer ${shopName}_${suffix} (writer ID: ${writerId}).`)
+    console.log(`I have updated the writer ${shopName}_${suffix} (writer ID: ${writerId}, row ID: ${rowId}).`)
 }

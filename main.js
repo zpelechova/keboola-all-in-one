@@ -202,7 +202,7 @@ Apify.main(async () => {
                 writerIds.push(writerId)
                 const rowId = await wr.getOrCreateTableRow(shopName, writer)
                 rowIds.push(rowId)
-                console.log('Writer ID is ' + writerId + 'row ID is' + rowId)
+                console.log('Writer ID is ' + writerId + ', row ID is' + rowId)
                 await wr.updateWriter(shopName, writer, writerId, rowId)
             }
         }
