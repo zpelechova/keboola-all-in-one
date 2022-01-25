@@ -137,14 +137,14 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
     const formData = {
         "configuration": JSON.stringify({
           "parameters": {
-            "prefix": "zkouska/items/"
+            "prefix": "items/"
           },
           "storage": {
             "input": {
               "tables": [
                 {
-                  "source": `out.c-0-${shopName}.${shopName}_${suffix}_zkouska`,
-                  "destination": `${shopName}_${suffix}_zkouska.csv`
+                  "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
+                  "destination": `${shopName}_${suffix}.csv`
                 }
               ]
             }
