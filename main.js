@@ -21,7 +21,7 @@ Apify.main(async () => {
 
     const shopNames = input.shopNames.map(name => name.toLowerCase())
     const email = input.email
-//    const runStorage = input.runStorage
+    const runStorage = input.runStorage
     const runTransformation = input.runTransformation
     const runWriter = input.runWriter
     const runOrchestration = input.runOrchestration
@@ -38,7 +38,7 @@ Apify.main(async () => {
         const writerIds = []
         const rowIds = []
 
-        if (migrateTables) {
+      if (migrateTables) {
             //TODO adding clean table?
             const code = [
                 `alter table "shop_w" drop column "_timestamp";`,
@@ -68,13 +68,13 @@ Apify.main(async () => {
             await trans.migrate()
         }
 
-//        if (runStorage) {
-//            //It checks if the in table already exists and if not, creates it. it also returns the data about the table, but we dont need it for anything at the moment I think
-//            console.log(`Starting Storage management program`)
-//            await stor.getOrCreateTable(shopName)
-//        }
+      if (runStorage) {
+            //It checks if the in table already exists and if not, creates it. it also returns the data about the table, but we dont need it for anything at the moment I think
+            console.log(`Starting Storage management program`)
+            await stor.getOrCreateTable(shopName)
+        }
 
-        if (runTransformation) {
+      if (runTransformation) {
             console.log(`Starting Transformation management program`)
 
             const transformations = [
@@ -196,7 +196,7 @@ Apify.main(async () => {
             }
         }
 
-        if (runWriter) {
+      if (runWriter) {
             console.log(`Starting Writer management program`)
 
             const writers = ['s3_metadata', 's3_pricehistory']
@@ -240,7 +240,7 @@ Apify.main(async () => {
             )
         }
 
-        if (testOrchestration) {
+      if (testOrchestration) {
             console.log(`Starting Orchestration test program`)
             const orchestrationInfo = await orch.getOrCreateOrchestration(
                 shopName

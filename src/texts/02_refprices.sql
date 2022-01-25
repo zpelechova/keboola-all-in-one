@@ -24,7 +24,7 @@ from table(generator(rowcount => 91))
 CREATE OR REPLACE TABLE "gendate" AS
 SELECT DATEADD(DAY, -("seq"."seq"-1), "DAY") :: DATE AS "GENDATE"
 FROM (SELECT MAX("date" :: DATE) AS "DAY"
-      FROM "shop_w") "t1"
+      FROM "shop_01_unification") "t1"
          LEFT JOIN "sekvence" "seq"
 ORDER BY 1
 ;
