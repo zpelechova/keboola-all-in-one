@@ -105,7 +105,7 @@ export async function getOrCreateTableRow(shopName, suffix) {
     const postMethodRows = 'POST'
     const formDataRows =  {
       "configuration": JSON.stringify(
-        {"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":"out.c-test.test","destination":"test.csv"}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
+        {"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":`out.c-0-${shopName}.${shopName}_${suffix}`,"destination":`shop_${suffix}.csv`}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
       }
     const postHeadersRows = {
       'content-type': 'application/x-www-form-urlencoded',
