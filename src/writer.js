@@ -104,6 +104,7 @@ export async function getOrCreateTableRow(shopName, suffix) {
     const postUrlRows =`https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
     const postMethodRows = 'POST'
     const formDataRows =  {
+      "name": `${shopName}_${suffix}`,
       "configuration": JSON.stringify(
         {"parameters":{"prefix":""},"storage":{"input":{"tables":[{"source":`out.c-0-${shopName}.${shopName}_${suffix}`,"destination":`shop_${suffix}.csv`}]}},"processors":{"before":[{"definition":{"component":"keboola.processor-move-files"},"parameters":{"direction":"files"}}]}})
       }
@@ -136,14 +137,14 @@ export async function updateWriter (shopName, suffix, writerId, rowId) {
     const formData = {
         "configuration": JSON.stringify({
           "parameters": {
-            "prefix": "items/"
+            "prefix": "zkouska/items/"
           },
           "storage": {
             "input": {
               "tables": [
                 {
-                  "source": `out.c-0-${shopName}.${shopName}_${suffix}`,
-                  "destination": `${shopName}_${suffix}.csv`
+                  "source": `out.c-0-${shopName}.${shopName}_${suffix}_zkouska`,
+                  "destination": `${shopName}_${suffix}_zkouska.csv`
                 }
               ]
             }
