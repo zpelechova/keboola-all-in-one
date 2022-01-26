@@ -1,9 +1,9 @@
 alter table "shop_w" rename column "parsedUrl" to "slug"
 ;
-
+--next_querry
 alter table "shop_clean" rename column "parsedUrl" to "slug"
 ;
-
+--next_querry
 create or replace table "shop_01_unification" as
 select "shop"
     , "p_key"
@@ -19,7 +19,7 @@ select "shop"
     , "inStock"
 from "shop_w"
 ;
-
+--next_querry
 create or replace table "shop_02_refprices" as
 select "itemId"
     , "commonPrice"
@@ -27,7 +27,7 @@ select "itemId"
     , "date"
 from "shop_new"
 ;
-
+--next_querry
 create or replace table "shop_03_complete" as
 select "shop"
     , "p_key"
