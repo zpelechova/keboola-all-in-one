@@ -62,7 +62,7 @@ export async function updateOrchestrationTasks (
     transformationIds,
     writerIds
 ) {
-    console.log(`I am going to update tasks in ${orchestrationName} orchestration.`)
+    console.log(`I am going to update tasks in ${shopName} orchestration.`)
 
     const url = `https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations/${orchestrationId}/tasks`
     const method = 'PUT'
@@ -129,17 +129,17 @@ export async function updateOrchestrationTasks (
         body: requestBody
     })
 
-    console.log(`I have updated the tasks in ${orchestrationName} orchestration: `)
+    console.log(`I have updated the tasks in ${shopName} orchestration: `)
     console.dir(body)
 }
 
 export async function updateOrchestrationNotifications (
-    orchestrationName,
+    shopName,
     orchestrationId,
     email
 ) {
     console.log(
-        `I am going to update notifications in ${orchestrationName} orchestration.`
+        `I am going to update notifications in ${shopName} orchestration.`
     )
 
     const url = `https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations/${orchestrationId}/notifications`
@@ -177,17 +177,17 @@ export async function updateOrchestrationNotifications (
     })
 
     console.log(
-        `I have updated the notifications in ${orchestrationName} orchestration: `
+        `I have updated the notifications in ${shopName} orchestration: `
     )
     console.dir(body)
 }
 
 export async function updateOrchestrationTriggers (
-    orchestrationName,
+    shopName,
     orchestrationId,
     orchestrationTokenId
 ) {
-    console.log(`I am going to update triggers in ${orchestrationName} orchestration.`)
+    console.log(`I am going to update triggers in ${shopName} orchestration.`)
 
     const url = `https://connection.eu-central-1.keboola.com/v2/storage/triggers/`
 
@@ -212,6 +212,6 @@ export async function updateOrchestrationTriggers (
         form
     })
 
-    console.log(`I have updated the triggers in ${orchestrationName} orchestration: `)
+    console.log(`I have updated the triggers in ${shopName} orchestration: `)
     console.dir(body)
 }
