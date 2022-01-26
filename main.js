@@ -37,8 +37,6 @@ Apify.main(async () => {
         const transformationIds = []
         const writerIds = []
         const rowIds = []
-        const orchestrationName = `${shopName}_NEW`
-
 
       if (migrateTables) {
             //TODO adding clean table?
@@ -224,27 +222,27 @@ Apify.main(async () => {
 
       if (runOrchestration) {
             console.log(`Starting Orchestration management program`)
-            const orchestrationInfo = await orch.getOrCreateOrchestration(orchestrationName)
+            const orchestrationInfo = await orch.getOrCreateOrchestration(shopName)
 
             const orchestrationId = orchestrationInfo.id
             const orchestrationTokenId = orchestrationInfo.token.id
             
 
             await orch.updateOrchestrationTasks(
-                orchestrationName,
+                shopName,
                 orchestrationId,
                 transformationIds,
                 writerIds
             )
 
             await orch.updateOrchestrationNotifications(
-                orchestrationName,
+                shopName,
                 orchestrationId,
                 email
             )
 
             await orch.updateOrchestrationTriggers(
-                orchestrationName,
+                shopName,
                 orchestrationId,
                 orchestrationTokenId
             )
@@ -253,7 +251,7 @@ Apify.main(async () => {
       if (testOrchestration) {
             console.log(`Starting Orchestration test program`)
             const orchestrationInfo = await orch.getOrCreateOrchestration(
-                shopName, orchestrationName
+                shopName
             )
             //TODO The folloowing line errors when an incorrect name is provided - also case sensitive still
             const orchestrationLastTimeStart =

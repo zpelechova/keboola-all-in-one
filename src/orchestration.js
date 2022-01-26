@@ -1,8 +1,8 @@
 import { gotScraping } from 'got-scraping'
 
-export async function getOrCreateOrchestration (orchestrationName) {
+export async function getOrCreateOrchestration (shopName) {
     // Check if exists, if so, return id
-    console.log(`Checking if orchestration ${orchestrationName} already exists.`)
+    console.log(`Checking if orchestration ${shopName} already exists.`)
 
     const url =
         'https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations'
@@ -19,11 +19,11 @@ export async function getOrCreateOrchestration (orchestrationName) {
     })
 
     const orchestrationGetData = JSON.parse(getBody).find(
-        i => i.name.toLowerCase() === `${orchestrationName}`
+        i => i.name.toLowerCase() === `${shopName}`
     )
     if (orchestrationGetData) {
         console.log(
-            `The orchestration ${orchestrationName} already exists, returning its information.`
+            `The orchestration ${shopName} already exists, returning its information.`
         )
         return orchestrationGetData
     }
@@ -31,7 +31,7 @@ export async function getOrCreateOrchestration (orchestrationName) {
     // Otherwise, create
 
     console.log(
-        `The orchestration ${orchestrationName} doesn't exists, I am going to create it now.`
+        `The orchestration ${shopName} doesn't exists, I am going to create it now.`
     )
 
     const postMethod = 'POST'
@@ -39,7 +39,7 @@ export async function getOrCreateOrchestration (orchestrationName) {
         'content-type': 'application/json',
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
     }
-    const requestBody = JSON.stringify({ name: orchestrationName })
+    const requestBody = JSON.stringify({ name: shopName })
 
     const { body: orchestrationPostBody } = await gotScraping({
         useHeaderGenerator: false,
@@ -50,14 +50,14 @@ export async function getOrCreateOrchestration (orchestrationName) {
     })
 
     console.log(
-        `The orchestration ${orchestrationName} has been created, returning its information.`
+        `The orchestration ${shopName} has been created, returning its information.`
     )
 
     return JSON.parse(orchestrationPostBody)
 }
 
 export async function updateOrchestrationTasks (
-    orchestrationName,
+    shopName,
     orchestrationId,
     transformationIds,
     writerIds
