@@ -53,7 +53,7 @@ export async function getOrCreateOrchestration (orchestrationName) {
         `The orchestration ${orchestrationName} has been created, returning its information.`
     )
 
-    return JSON.parse(orchestrationPostBody), orchestrationName
+    return JSON.parse(orchestrationPostBody)
 }
 
 export async function updateOrchestrationTasks (
