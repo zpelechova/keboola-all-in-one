@@ -1,9 +1,8 @@
 import { gotScraping } from 'got-scraping'
 
-export async function getOrCreateOrchestration (shopName) {
+export async function getOrCreateOrchestration (orchestrationName) {
     // Check if exists, if so, return id
-
-    console.log(`Checking if orchestration ${shopName} already exists.`)
+    console.log(`Checking if orchestration ${orchestrationName} already exists.`)
 
     const url =
         'https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations'
@@ -20,11 +19,11 @@ export async function getOrCreateOrchestration (shopName) {
     })
 
     const orchestrationGetData = JSON.parse(getBody).find(
-        i => i.name.toLowerCase() === shopName
+        i => i.name.toLowerCase() === `${orchestrationName}`
     )
     if (orchestrationGetData) {
         console.log(
-            `The orchestration ${shopName} already exists, returning its information.`
+            `The orchestration ${orchestrationName} already exists, returning its information.`
         )
         return orchestrationGetData
     }
@@ -32,7 +31,7 @@ export async function getOrCreateOrchestration (shopName) {
     // Otherwise, create
 
     console.log(
-        `The orchestration ${shopName} doesn't exists, I am going to create it now.`
+        `The orchestration ${orchestrationName} doesn't exists, I am going to create it now.`
     )
 
     const postMethod = 'POST'
@@ -40,7 +39,7 @@ export async function getOrCreateOrchestration (shopName) {
         'content-type': 'application/json',
         'x-storageapi-token': process.env.KEBOOLA_TOKEN
     }
-    const requestBody = JSON.stringify({ name: shopName })
+    const requestBody = JSON.stringify({ name: orchestrationName })
 
     const { body: orchestrationPostBody } = await gotScraping({
         useHeaderGenerator: false,
@@ -51,19 +50,19 @@ export async function getOrCreateOrchestration (shopName) {
     })
 
     console.log(
-        `The orchestration ${shopName} has been created, returning its information.`
+        `The orchestration ${orchestrationName} has been created, returning its information.`
     )
 
-    return JSON.parse(orchestrationPostBody)
+    return JSON.parse(orchestrationPostBody), orchestrationName
 }
 
 export async function updateOrchestrationTasks (
-    shopName,
+    orchestrationName,
     orchestrationId,
     transformationIds,
     writerIds
 ) {
-    console.log(`I am going to update tasks in ${shopName} orchestration.`)
+    console.log(`I am going to update tasks in ${orchestrationName} orchestration.`)
 
     const url = `https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations/${orchestrationId}/tasks`
     const method = 'PUT'
@@ -130,17 +129,17 @@ export async function updateOrchestrationTasks (
         body: requestBody
     })
 
-    console.log(`I have updated the tasks in ${shopName} orchestration: `)
+    console.log(`I have updated the tasks in ${orchestrationName} orchestration: `)
     console.dir(body)
 }
 
 export async function updateOrchestrationNotifications (
-    shopName,
+    orchestrationName,
     orchestrationId,
     email
 ) {
     console.log(
-        `I am going to update notifications in ${shopName} orchestration.`
+        `I am going to update notifications in ${orchestrationName} orchestration.`
     )
 
     const url = `https://syrup.eu-central-1.keboola.com/orchestrator/orchestrations/${orchestrationId}/notifications`
@@ -178,17 +177,17 @@ export async function updateOrchestrationNotifications (
     })
 
     console.log(
-        `I have updated the notifications in ${shopName} orchestration: `
+        `I have updated the notifications in ${orchestrationName} orchestration: `
     )
     console.dir(body)
 }
 
 export async function updateOrchestrationTriggers (
-    shopName,
+    orchestrationName,
     orchestrationId,
     orchestrationTokenId
 ) {
-    console.log(`I am going to update triggers in ${shopName} orchestration.`)
+    console.log(`I am going to update triggers in ${orchestrationName} orchestration.`)
 
     const url = `https://connection.eu-central-1.keboola.com/v2/storage/triggers/`
 
@@ -213,6 +212,6 @@ export async function updateOrchestrationTriggers (
         form
     })
 
-    console.log(`I have updated the triggers in ${shopName} orchestration: `)
+    console.log(`I have updated the triggers in ${orchestrationName} orchestration: `)
     console.dir(body)
 }
