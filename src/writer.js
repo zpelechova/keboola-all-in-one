@@ -48,7 +48,10 @@ export async function getOrCreateWriter(shopName, suffix) {
     const postMethodNew = 'PUT'
     const formDataNew = {
       "configuration": JSON.stringify(
-        {"parameters":{"accessKeyId":"AKIAZX7NKEIMGRBOQF6W","#secretAccessKey":"KBC::ProjectSecure::eJwBVAGr/mE6Mjp7aTowO3M6MTI0OiLe9QIAYdZrdGLsjdrVvUxGq4zXuyjq6vbNajbUE0oNFE5vpafW82fm1dop3B3HS6XqfQyPNJtkQT9WJKlDSBSOsGn/J8RiEu32RVe/pzHiobDIohQ7TnPT4nLIoqcrKuFZQ+GBg0VD3kHJB7+ArNVH1qlpfhI2fd1j1eBLIjtpOjE7czoxODQ6IgECAwB4JwpmrwnvHMi+H9vY2cAWNETT0g4aeesZMXO1knqiH84BxYIcTJgjoGMYRiU24a4FcwAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO3ty94FiQF+/orFBgIBEIA7nvmFJzMsQzMJLWiPmXUH5VUhL6bd7U0rL+ZQnaGNXoLoubDL29c3+osVCnCy3OuzRSYRtWXTie3UhfciO324y4//","bucket":"data.hlidacshopu.cz"}})
+        {"parameters":
+          {"accessKeyId":"AKIAZX7NKEIMII6WOZN7",
+          "#secretAccessKey": process.env.AWS_TOKEN,
+          "bucket":"data.hlidacshopu.cz"}})
       }
     const postHeadersNew = {
         'content-type': 'application/x-www-form-urlencoded',
