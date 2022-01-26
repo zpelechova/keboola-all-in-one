@@ -79,7 +79,7 @@ export async function updateOrchestrationTasks (
                 config: 331156399
             },
             timeoutMinutes: null,
-            active: false,
+            active: true,
             continueOnFailure: false,
             phase: 'Sleep'
         }
