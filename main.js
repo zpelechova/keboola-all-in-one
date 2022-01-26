@@ -40,27 +40,36 @@ Apify.main(async () => {
 
       if (migrateTables) {
             //TODO adding clean table?
-            const code = [
-                `alter table "shop_w" drop column "_timestamp";`,
-                `create table "shop_unified" as select * from "shop_w" limit 100;`,
-                `create table "shop_refprices" as select * from "shop_new";`
-            ]
+            const code = [];
+            const migrateCode = fs
+                    .readFileSync(`./src/texts/migrateTables.sql`,'utf-8')
+                    .toString()
+                    .split('--next_querry')
+                for (let sql of migrateCode) {
+                    if (sql != '') {
+                        sql = sql.trim()
+                        code.push(sql);
+                    }
+                }
 
             await trans.updateTransformation(
                 367214386,
                 'This transformation migrates data from old to new Keboola',
                 [
                     `out.c-0-${shopName}.${shopName}_w`,
-                    `out.c-0-${shopName}.${shopName}_new`
+                    `out.c-0-${shopName}.${shopName}_new`,
+                    `out.c-0-${shopName}.${shopName}_clean`
                 ],
-                ['shop_w', 'shop_new'],
-                [`shop_unified`, 'shop_refprices'],
+                ['shop_w', 'shop_new', 'shop_clean'],
+                [`shop_01_unification`, 'shop_02_refprices', 'shop_03_complete'],
                 [
-                    `out.c-${shopName}.${shopName}_unified`,
-                    `out.c-${shopName}.${shopName}_refprices`
+                    `out.c-${shopName}.${shopName}_01_unification`,
+                    `out.c-${shopName}.${shopName}_02_refprices`,
+                    `out.c-${shopName}.${shopName}_03_complete`
                 ],
-                [['itemId', 'date']],
-                [true, true]`Codeblock - MIGRATION`,
+                [['itemId', 'date'], ['itemId', 'date'], ['itemId', 'date']],
+                [true, true, true],
+                `Codeblock - MIGRATION`,
                 `MIGRATION`,
                 code
             )

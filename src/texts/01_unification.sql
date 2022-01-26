@@ -11,7 +11,6 @@ CREATE TABLE "shop_01_unification"
 AS
 SELECT DISTINCT "shop" AS "shop"
 	,md5("shop" || "itemId") AS "p_key"
-  , "shop" || '_' ||"itemId" AS "shop_itemId"
 	,"itemId" AS "itemId"
 	,"itemName" AS "itemName"
 	,"itemUrl" AS "itemUrl"
