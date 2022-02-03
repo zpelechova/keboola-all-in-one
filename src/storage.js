@@ -1,14 +1,14 @@
 import { Apify } from 'apify'
 import { gotScraping } from 'got-scraping'
 
-export async function getOrCreateTable (shopName) {
+export async function getOrCreateTable (shopName, KEBOOLA_TOKEN) {
     console.log(`Checking if table ${shopName} already exists.`)
 
     const getUrl =
         'https://connection.eu-central-1.keboola.com/v2/storage/tables?include=buckets,columns,metadata,columnMetadata'
     const getMethod = 'GET'
     const getHeaders = {
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+        'x-storageapi-token': KEBOOLA_TOKEN
     }
 
     const { body: getBody } = await gotScraping({
@@ -31,7 +31,7 @@ export async function getOrCreateTable (shopName) {
     // Otherwise, create
 
     console.log(
-        `The table ${shopName} doesn't exist, I am going to create it now.`
+        `The table ${shopName} doesn't exist, going to create it now.`
     )
 
     // Not sure if dataFileId will last forever, hope so, otherwise either get new Id by manually uploading the csv file, or contact Keboola how to do it
@@ -41,7 +41,7 @@ export async function getOrCreateTable (shopName) {
     const postMethod = 'POST'
     const postHeaders = {
         'content-type': 'application/x-www-form-urlencoded',
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+        'x-storageapi-token': KEBOOLA_TOKEN
     }
     const postFormData = {
         name: shopName,
@@ -65,14 +65,14 @@ export async function getOrCreateTable (shopName) {
     }
 }
 
-export async function getTables () {
+export async function getTables (KEBOOLA_TOKEN) {
     console.log(`Getting information about all tables`)
 
     const getUrl =
         'https://connection.eu-central-1.keboola.com/v2/storage/tables?include=buckets,columns,metadata,columnMetadata'
     const getMethod = 'GET'
     const getHeaders = {
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+        'x-storageapi-token': KEBOOLA_TOKEN
     }
 
     const { body: getBody } = await gotScraping({

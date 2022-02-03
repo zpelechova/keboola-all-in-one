@@ -1,6 +1,6 @@
 import { gotScraping } from 'got-scraping'
 
-export async function getOrCreateTransformation (shopName, suffix) {
+export async function getOrCreateTransformation (shopName, suffix, KEBOOLA_TOKEN) {
     const transformationName = `${shopName}_${suffix}`
 
     console.log(
@@ -17,7 +17,7 @@ export async function getOrCreateTransformation (shopName, suffix) {
 
     const getMethod = 'GET'
 
-    const getHeaders = { 'x-storageapi-token': process.env.KEBOOLA_TOKEN }
+    const getHeaders = { 'x-storageapi-token': KEBOOLA_TOKEN }
 
     const { body: getBody } = await gotScraping({
         useHeaderGenerator: false,
@@ -26,15 +26,15 @@ export async function getOrCreateTransformation (shopName, suffix) {
         headers: getHeaders
     })
 
-    const transformationAllData = JSON.parse(getBody);
+    const transformationAllData = JSON.parse(getBody)
 
-    let transformationData = {};
-    
+    let transformationData = {}
+
     for (const t of transformationAllData) {
-        if (t.id = "keboola.snowflake-transformation") {
+        if ((t.id = 'keboola.snowflake-transformation')) {
             transformationData = t.configurations.find(
                 i => i.name === transformationName
-            );
+            )
         }
     }
 
@@ -48,7 +48,7 @@ export async function getOrCreateTransformation (shopName, suffix) {
     // Otherwise, create
 
     console.log(
-        `The transformation ${transformationName} doesn't exists, I am going to create it now.`
+        `The transformation ${transformationName} doesn't exists, going to create it now.`
     )
     const description = 'This is description'
 
@@ -61,7 +61,7 @@ export async function getOrCreateTransformation (shopName, suffix) {
     }
     const postHeaders = {
         'content-type': 'application/x-www-form-urlencoded',
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+        'x-storageapi-token': KEBOOLA_TOKEN
     }
 
     const { body: postBody } = await gotScraping({
@@ -90,10 +90,11 @@ export async function updateTransformation (
     incremental,
     blockName,
     codeName,
-    code
+    code,
+    KEBOOLA_TOKEN
 ) {
     console.log(
-        `I am going to update tasks in ${transformationId} transformation.`
+        `Going to update tasks in ${transformationId} transformation.`
     )
 
     const url =
@@ -107,7 +108,7 @@ export async function updateTransformation (
     const inTables = []
     if (inputSources.length === inputNames.length) {
         for (const inputSource of inputSources) {
-            const index = inputSources.indexOf(inputSource);
+            const index = inputSources.indexOf(inputSource)
             const inTable = {
                 source: inputSource,
                 destination: inputNames[index]
@@ -115,25 +116,29 @@ export async function updateTransformation (
             inTables.push(inTable)
         }
     } else {
-        console.log('The input tables are not defined properly - there is different number of sources and names in their respective arrays.')
+        console.log(
+            'The input tables are not defined properly - there is different number of sources and names in their respective arrays.'
+        )
         return 'READ THE ERROR MESSAGE'
     }
 
-    const outTables = [];
+    const outTables = []
     if (outputDestinations.length === outputNames.length) {
         for (const outputDestination of outputDestinations) {
-            const index = outputDestinations.indexOf(outputDestination);
+            const index = outputDestinations.indexOf(outputDestination)
             const outTable = {
                 destination: outputDestination,
                 source: outputNames[index],
                 primary_key: primaryKeys[index],
-                incremental: incremental[index],
-            };
-            outTables.push(outTable);
+                incremental: incremental[index]
+            }
+            outTables.push(outTable)
         }
     } else {
-        console.log("The output tables are not defined properly - there is different number of destinations and names/primary keys in their respective arrays.")
-        return "READ THE ERROR MESSAGE"
+        console.log(
+            'The output tables are not defined properly - there is different number of destinations and names/primary keys in their respective arrays.'
+        )
+        return 'READ THE ERROR MESSAGE'
     }
 
     const method = 'PUT'
@@ -166,7 +171,7 @@ export async function updateTransformation (
     }
     const headers = {
         'content-type': 'application/x-www-form-urlencoded',
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+        'x-storageapi-token': KEBOOLA_TOKEN
     }
 
     const { body } = await gotScraping({
@@ -177,22 +182,19 @@ export async function updateTransformation (
         form: formData
     })
 
-    console.log(`I have updated the ${transformationId} transformation. `)
-    console.dir(JSON.parse(body))
-    console.dir(body)
+    console.log(`The ${transformationId} transformation has been updated. `)
 }
 
-export async function migrate () {
-    console.log(
-        `I am going to run migration transformation.`
-    )
+export async function migrate (KEBOOLA_TOKEN) {
+    console.log(`Going to run migration transformation.`)
 
-    const url = "https://syrup.eu-central-1.keboola.com/docker/keboola.snowflake-transformation/run"
+    const url =
+        'https://syrup.eu-central-1.keboola.com/docker/keboola.snowflake-transformation/run'
     const method = 'POST'
-    const requestBody = JSON.stringify({"config":"367214386"});
+    const requestBody = JSON.stringify({ config: '367214386' })
     const headers = {
         'content-type': 'application/json',
-        'x-storageapi-token': process.env.KEBOOLA_TOKEN
+        'x-storageapi-token': KEBOOLA_TOKEN
     }
 
     const { body } = await gotScraping({
@@ -203,8 +205,5 @@ export async function migrate () {
         body: requestBody
     })
 
-    console.log(`I have started running the transformation. `)
-    console.dir(JSON.parse(body))
-    
-    console.dir(JSON.parse(body))
+    console.log(`The transformation has started running. `)
 }

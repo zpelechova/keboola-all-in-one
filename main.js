@@ -10,45 +10,47 @@ config()
 const LATEST = 'LATEST'
 
 Apify.main(async () => {
-    console.log(process.env.KEBOOLA_TOKEN)
-    console.log(process.env.SLACK_TOKEN)
-    console.log(process.env.AWS_TOKEN)
     const input = await Apify.getInput()
-    console.log(input)
 
     const date = new Date()
     const todaysDate = date.toISOString().substring(0, 10)
 
     const shopNames = input.shopNames.map(name => name.toLowerCase())
-    const email = input.email
-    const runStorage = input.runStorage
-    const runTransformation = input.runTransformation
-    const runWriter = input.runWriter
-    const runOrchestration = input.runOrchestration
-    const testOrchestration = input.testOrchestration
-    const testStorage = input.testStorage
-    const getStorage = input.getStorage
-    const notifyByMail = input.notifyByMail
-    const notifyBySlack = input.notifyBySlack
-    const migrateTables = input.migrateTables
-    const slackChannel = input.slackChannel
+    const {
+        KEBOOLA_TOKEN,
+        runStorage,
+        runTransformation,
+        runWriter,
+        runOrchestration,
+        migrateTables,
+        testOrchestration,
+        testStorage,
+        getStorage,
+        notifyByMail,
+        email,
+        notifyBySlack,
+        slackChannel,
+        SLACK_TOKEN,
+        AWS_TOKEN,
+        awsAccessKeyId
+    } = input
 
     for (const shopName of shopNames) {
-        const transformationIds = [];
-        const writerIds = [];
+        const transformationIds = []
+        const writerIds = []
 
-      if (migrateTables) {
-            const code = [];
+        if (migrateTables) {
+            const code = []
             const migrateCode = fs
-                    .readFileSync(`./src/texts/migrateTables.sql`,'utf-8')
-                    .toString()
-                    .split('--next_querry')
-                for (let sql of migrateCode) {
-                    if (sql != '') {
-                        sql = sql.trim()
-                        code.push(sql);
-                    }
+                .readFileSync(`./src/texts/migrateTables.sql`, 'utf-8')
+                .toString()
+                .split('--next_querry')
+            for (let sql of migrateCode) {
+                if (sql != '') {
+                    sql = sql.trim()
+                    code.push(sql)
                 }
+            }
 
             await trans.updateTransformation(
                 367214386,
@@ -59,29 +61,38 @@ Apify.main(async () => {
                     `out.c-0-${shopName}.${shopName}_clean`
                 ],
                 ['shop_w', 'shop_new', 'shop_clean'],
-                [`shop_01_unification`, 'shop_02_refprices', 'shop_03_complete'],
+                [
+                    `shop_01_unification`,
+                    'shop_02_refprices',
+                    'shop_03_complete'
+                ],
                 [
                     `out.c-${shopName}.${shopName}_01_unification`,
                     `out.c-${shopName}.${shopName}_02_refprices`,
                     `out.c-${shopName}.${shopName}_03_complete`
                 ],
-                [['itemId', 'date'], ['itemId', 'date'], ['itemId', 'date']],
+                [
+                    ['itemId', 'date'],
+                    ['itemId', 'date'],
+                    ['itemId', 'date']
+                ],
                 [true, true, true],
                 `Codeblock - MIGRATION`,
                 `MIGRATION`,
-                code
+                code,
+                KEBOOLA_TOKEN
             )
 
-            await trans.migrate()
+            await trans.migrate(KEBOOLA_TOKEN)
         }
 
-      if (runStorage) {
+        if (runStorage) {
             //It checks if the in table already exists and if not, creates it. it also returns the data about the table, but we dont need it for anything at the moment I think
             console.log(`Starting Storage management program`)
-            await stor.getOrCreateTable(shopName)
+            await stor.getOrCreateTable(shopName, KEBOOLA_TOKEN)
         }
 
-      if (runTransformation) {
+        if (runTransformation) {
             console.log(`Starting Transformation management program`)
 
             const transformations = [
@@ -120,7 +131,11 @@ Apify.main(async () => {
                     ['shop_01_unification', 'shop_02_refprices'],
                     ['shop_03_complete'],
                     ['shop_03_complete'],
-                    ['shop_03_complete', 'shop_04_extension', 'shop_05_final_s3']
+                    [
+                        'shop_03_complete',
+                        'shop_04_extension',
+                        'shop_05_final_s3'
+                    ]
                 ]
 
                 const outputTablesName = [
@@ -138,8 +153,8 @@ Apify.main(async () => {
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [
-                      `out.c-${shopName}.${shopName}_${transformation}`,
-                      `out.c-${shopName}.${shopName}_05_final_s3`
+                        `out.c-${shopName}.${shopName}_${transformation}`,
+                        `out.c-${shopName}.${shopName}_05_final_s3`
                     ],
                     [
                         `out.c-${shopName}.${shopName}_s3_metadata`,
@@ -166,21 +181,22 @@ Apify.main(async () => {
                 ]
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
-                    transformation
+                    transformation,
+                    KEBOOLA_TOKEN
                 )
-                //I am creating an array of transformation Ids to be used in orchestrations later on
+                //Creating an array of transformation Ids to be used in orchestrations later on
                 transformationIds.push(transformationId)
 
-                //I am transforming sql code to array
-                const sqlCode = [];
+                //Transforming sql code to array
+                const sqlCode = []
                 const sqls = fs
-                    .readFileSync(`./src/texts/${transformation}.sql`,'utf-8')
+                    .readFileSync(`./src/texts/${transformation}.sql`, 'utf-8')
                     .toString()
                     .split('--next_querry')
                 for (let sql of sqls) {
                     if (sql != '') {
                         sql = sql.trim()
-                        sqlCode.push(sql);
+                        sqlCode.push(sql)
                     }
                 }
 
@@ -198,58 +214,69 @@ Apify.main(async () => {
                     outputIncremental[index], //out-table incremental?
                     `Codeblock - ${transformation}`,
                     `Shop ${transformation}`,
-                    sqlCode
+                    sqlCode,
+                    KEBOOLA_TOKEN
                 )
             }
         }
 
-      if (runWriter) {
+        if (runWriter) {
             console.log(`Starting Writer management program`)
 
             const writers = ['s3_metadata', 's3_pricehistory']
 
             for (const writer of writers) {
-                const writerId = await wr.getOrCreateWriter(shopName, writer);
-                writerIds.push(writerId);
-                await wr.updateWriter(shopName, writer, writerId);
-                const rowId = await wr.getOrCreateTableRow(shopName, writer, writerId);
-                console.log(`Writer ID is ${writerId}, row ID is ${rowId}.`);
-                await wr.updateTableRow(shopName, writer, writerId, rowId);
+                const writerId = await wr.getOrCreateWriter(shopName, writer, KEBOOLA_TOKEN)
+                writerIds.push(writerId)
+                await wr.updateWriter(shopName, writer, writerId, KEBOOLA_TOKEN, AWS_TOKEN, awsAccessKeyId)
+                const rowId = await wr.getOrCreateTableRow(
+                    shopName,
+                    writer,
+                    writerId,
+                    KEBOOLA_TOKEN
+                )
+                console.log(`Writer ID is ${writerId}, row ID is ${rowId}.`)
+                await wr.updateTableRow(shopName, writer, writerId, rowId, KEBOOLA_TOKEN);
             }
         }
 
-      if (runOrchestration) {
+        if (runOrchestration) {
             console.log(`Starting Orchestration management program`)
-            const orchestrationInfo = await orch.getOrCreateOrchestration(shopName)
+            const orchestrationInfo = await orch.getOrCreateOrchestration(
+                shopName,
+                KEBOOLA_TOKEN
+            )
 
             const orchestrationId = orchestrationInfo.id
             const orchestrationTokenId = orchestrationInfo.token.id
-            
 
             await orch.updateOrchestrationTasks(
                 shopName,
                 orchestrationId,
                 transformationIds,
-                writerIds
+                writerIds,
+                KEBOOLA_TOKEN
             )
 
             await orch.updateOrchestrationNotifications(
                 shopName,
                 orchestrationId,
-                email
+                email,
+                KEBOOLA_TOKEN
             )
 
             await orch.updateOrchestrationTriggers(
                 shopName,
                 orchestrationId,
-                orchestrationTokenId
+                orchestrationTokenId,
+                KEBOOLA_TOKEN
             )
         }
 
-      if (testOrchestration) {
+        if (testOrchestration) {
             console.log(`Starting Orchestration test program`)
             const orchestrationInfo = await orch.getOrCreateOrchestration(
-                shopName
+                shopName, KEBOOLA_TOKEN
             )
             //TODO The folloowing line errors when an incorrect name is provided - also case sensitive still
             const orchestrationLastTimeStart =
@@ -264,7 +291,7 @@ Apify.main(async () => {
                     await Apify.call('katerinahronik/slack-message', {
                         text: `The orchestration for ${shopName} has not run yet, check what is wrong!`,
                         channel: slackChannel,
-                        token: process.env.SLACK_TOKEN
+                        token: SLACK_TOKEN
                     })
                     console.log('Email sent. Good luck!')
                 }
@@ -283,7 +310,7 @@ Apify.main(async () => {
 
     if (testStorage) {
         console.log(`Starting Storage checking program`)
-        const tablesRawData = await stor.getTables()
+        const tablesRawData = await stor.getTables(KEBOOLA_TOKEN)
 
         const kvStore = await Apify.openKeyValueStore('outputTables')
 
@@ -374,7 +401,7 @@ Apify.main(async () => {
 
     if (getStorage) {
         console.log(`Starting Storage downloading program`)
-        const tablesData = await stor.getTables()
+        const tablesData = await stor.getTables(KEBOOLA_TOKEN)
 
         //makes dataset from all shops
         for (const table of tablesData) {

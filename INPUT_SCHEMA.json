@@ -9,20 +9,11 @@
             "description": "With country suffixes.",
             "editor": "stringList"
         },
-        "testOrchestration": {
-            "title": "testOrchestration",
-            "type": "boolean",
-            "default": false,
-            "editor": "checkbox",
-            "description": "Do you want to test Orchestration?",
-            "sectionCaption": "Run tests"
-        },
-        "testStorage": {
-            "title": "testStorage",
-            "type": "boolean",
-            "default": false,
-            "editor": "checkbox",
-            "description": "Do you want to test Storage?"
+        "KEBOOLA_TOKEN": {
+            "title": "KEBOOLA_TOKEN",
+            "type": "string",
+            "description": "You need to provide your Keboola token to run this actor.",
+            "editor": "textfield"
         },
         "runStorage": {
             "title": "runStorage",
@@ -39,13 +30,6 @@
             "editor": "checkbox",
             "description": "Do you want to run Transformation?"
         },
-        "migrateTables": {
-            "title": "migrateTables",
-            "type": "boolean",
-            "default": false,
-            "editor": "checkbox",
-            "description": "Do you want to run migrate Tables?"
-        },
         "runWriter": {
             "title": "runWriter",
             "type": "boolean",
@@ -59,6 +43,28 @@
             "default": false,
             "editor": "checkbox",
             "description": "Do you want to run Orchestration?"
+        },
+        "migrateTables": {
+            "title": "migrateTables",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run migrate Tables?"
+        },
+        "testOrchestration": {
+            "title": "testOrchestration",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to test Orchestration?",
+            "sectionCaption": "Run tests"
+        },
+        "testStorage": {
+            "title": "testStorage",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to test Storage?"
         },
         "getStorage": {
             "title": "getStorage",
@@ -94,7 +100,26 @@
             "type": "string",
             "description": "What channel you want to send notifications",
             "editor": "textfield"
+        },
+        "SLACK_TOKEN": {
+            "title": "SLACK_TOKEN",
+            "type": "string",
+            "description": "Provide Slack token if you want to send notifications",
+            "editor": "textfield"
+        },
+        "AWS_TOKEN": {
+            "title": "AWS_TOKEN",
+            "type": "string",
+            "description": "Provide AWS token if you want to write to S3.",
+            "editor": "textfield",
+            "sectionCaption": "Tokens"
+        },
+        "awsAccessKeyId": {
+            "title": "AWS accessKeyId",
+            "type": "string",
+            "description": "Provide AWS accessKyeId if you want to write to S3.",
+            "editor": "textfield"
         }
     },
-    "required": ["shopNames"]
+    "required": ["shopNames", "KEBOOLA_TOKEN"]
 }
