@@ -34,12 +34,10 @@ Apify.main(async () => {
     const slackChannel = input.slackChannel
 
     for (const shopName of shopNames) {
-        const transformationIds = []
-        const writerIds = []
-        const rowIds = []
+        const transformationIds = [];
+        const writerIds = [];
 
       if (migrateTables) {
-            //TODO adding clean table?
             const code = [];
             const migrateCode = fs
                     .readFileSync(`./src/texts/migrateTables.sql`,'utf-8')
@@ -211,12 +209,12 @@ Apify.main(async () => {
             const writers = ['s3_metadata', 's3_pricehistory']
 
             for (const writer of writers) {
-                const writerId = await wr.getOrCreateWriter(shopName, writer)
-                writerIds.push(writerId)
-                const rowId = await wr.getOrCreateTableRow(shopName, writer)
-                rowIds.push(rowId)
-                console.log('Writer ID is ' + writerId + ', row ID is' + rowId)
-                await wr.updateWriter(shopName, writer, writerId, rowId)
+                const writerId = await wr.getOrCreateWriter(shopName, writer);
+                writerIds.push(writerId);
+                await wr.updateWriter(shopName, writer, writerId);
+                const rowId = await wr.getOrCreateTableRow(shopName, writer, writerId);
+                console.log(`Writer ID is ${writerId}, row ID is ${rowId}.`);
+                await wr.updateTableRow(shopName, writer, writerId, rowId);
             }
         }
 
