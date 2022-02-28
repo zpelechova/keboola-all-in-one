@@ -2,6 +2,7 @@
 node_modules
 apify_storage
 .env
+desktop.ini
 
 apify_storage
 apify_storage

@@ -96,10 +96,10 @@ Apify.main(async () => {
             console.log(`Starting Transformation management program`)
 
             const transformations = [
-                '01_unification',
-                '02_refprices',
-                '03_complete',
-                '04_extension',
+                // '01_unification',
+                // '02_refprices',
+                // '03_complete',
+                // '04_extension',
                 '05_pricehistory',
                 '06_s3format'
                 //doplnit 07_dashboard
@@ -110,13 +110,13 @@ Apify.main(async () => {
                 const index = transformations.indexOf(transformation)
 
                 const inputTablesSource = [
-                    [`in.c-black-friday.${shopName}`],
-                    [`out.c-${shopName}.${shopName}_01_unification`],
-                    [
-                        `out.c-${shopName}.${shopName}_01_unification`,
-                        `out.c-${shopName}.${shopName}_02_refprices`
-                    ],
-                    [`out.c-${shopName}.${shopName}_03_complete`],
+                    // [`in.c-black-friday.${shopName}`],
+                    // [`out.c-${shopName}.${shopName}_01_unification`],
+                    // [
+                    //     `out.c-${shopName}.${shopName}_01_unification`,
+                    //     `out.c-${shopName}.${shopName}_02_refprices`
+                    // ],
+                    // [`out.c-${shopName}.${shopName}_03_complete`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [
                         `out.c-${shopName}.${shopName}_03_complete`,
@@ -126,10 +126,10 @@ Apify.main(async () => {
                 ]
 
                 const inputTablesName = [
-                    ['shop_raw'],
-                    ['shop_01_unification'],
-                    ['shop_01_unification', 'shop_02_refprices'],
-                    ['shop_03_complete'],
+                    // ['shop_raw'],
+                    // ['shop_01_unification'],
+                    // ['shop_01_unification', 'shop_02_refprices'],
+                    // ['shop_03_complete'],
                     ['shop_03_complete'],
                     [
                         'shop_03_complete',
@@ -139,19 +139,19 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesName = [
-                    [`shop_${transformation}`],
-                    [`shop_${transformation}`],
-                    [`shop_${transformation}`],
-                    [`shop_${transformation}`],
+                    // [`shop_${transformation}`],
+                    // [`shop_${transformation}`],
+                    // [`shop_${transformation}`],
+                    // [`shop_${transformation}`],
                     [`shop_${transformation}`, `shop_05_final_s3`],
                     [`shop_s3_metadata`, `shop_s3_pricehistory`]
                 ]
 
                 const outputTablesSource = [
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    // [`out.c-${shopName}.${shopName}_${transformation}`],
+                    // [`out.c-${shopName}.${shopName}_${transformation}`],
+                    // [`out.c-${shopName}.${shopName}_${transformation}`],
+                    // [`out.c-${shopName}.${shopName}_${transformation}`],
                     [
                         `out.c-${shopName}.${shopName}_${transformation}`,
                         `out.c-${shopName}.${shopName}_05_final_s3`
@@ -163,19 +163,19 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesKeys = [
-                    [['itemId', 'date']],
-                    [['itemId', 'date']],
-                    [['itemId', 'date']],
-                    [['pkey']],
-                    [['p_key']],
+                    // [['itemId', 'date']],
+                    // [['itemId', 'date']],
+                    // [['itemId', 'date']],
+                    // [['pkey']],
+                    [['itemId']],
                     [['slug'], ['slug']]
                 ]
 
                 const outputIncremental = [
-                    [true],
-                    [true],
-                    [true],
-                    [false],
+                    // [true],
+                    // [true],
+                    // [true],
+                    // [false],
                     [false],
                     [false, false]
                 ]
