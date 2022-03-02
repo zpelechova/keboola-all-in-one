@@ -167,7 +167,7 @@ Apify.main(async () => {
                     // [['itemId', 'date']],
                     // [['itemId', 'date']],
                     // [['pkey']],
-                    [['itemId']],
+                    [['p_key']],
                     [['slug'], ['slug']]
                 ]
 
