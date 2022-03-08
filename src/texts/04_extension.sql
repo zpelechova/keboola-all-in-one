@@ -42,6 +42,6 @@ FROM
 		WHERE "itemId" <> ''
 			OR "slug" <> ''
 		-- here I set a time period for which it checks backwards so that I dont run all of it again. Could 		easily be only for one day.
-		AND "date" >= $ref_date
+		AND "_timestamp" >= $ref_date
 		)
 WHERE "row_number" = 1;
