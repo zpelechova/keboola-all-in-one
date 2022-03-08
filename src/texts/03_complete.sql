@@ -1,4 +1,4 @@
-set ref_date = DATEADD("d", - 7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 
 CREATE TABLE "shop_03_complete" AS
@@ -32,7 +32,7 @@ FROM (select
 	,"itemImage"
   ,"inStock"
 	FROM "shop_01_unification"
-  where "date" >= $ref_date) "uni"
+  where left("_timestamp",10) >= $ref_date) "uni"
 LEFT JOIN
     (SELECT "itemId"
         , "commonPrice"
