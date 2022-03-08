@@ -1,42 +1,44 @@
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
-set ref_date = DATEADD("d", - 7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
+
 --next_querry
 /*
     - shopy a produkty mohou mít duplicitní informace o denních cenách
     - v takovém případě mám vzít tu nejnižší
     - řeším to pomocí row_number()
  */
-CREATE TABLE "all_shops_dedupe_days" AS
+CREATE or replace TABLE "all_shops_dedupe_days" AS
 /*
  tahle query si jen vezme result svojí sub-query a vyfiltroje čísla řádků = 1
  - k tomu chceme, aby 1240,00 bylo 1240 a aby null byly '' (protože by mi dělaly bordel
    u windows fcí lead/lag, který maj null na detekci prvního a posledního kousku
  */
 SELECT
-    "t0"."p_key"                                                                    AS "p_key",
+    "t0"."itemId"                                                                    AS "itemId",
     "t0"."date"                                                                     AS "date",
     REPLACE(IFF("t0"."currentPrice" IS NULL, '', "t0"."currentPrice"), '.00', '')   AS "currentPrice",
     REPLACE(IFF("t0"."originalPrice" IS NULL, '', "t0"."originalPrice"), '.00', '') AS "originalPrice"
     FROM
         (
             /*
-            - tohle pro každé p_key+date očísluje řádky podle currentPrice
+            - tohle pro každé itemId+date očísluje řádky podle currentPrice
             - je to pro situaci, kdy je v jeden den víc cen - pak nejnižší cena má číslo "1"
             */
             SELECT
-                "p_key"                                                                                     AS "p_key",
+                "itemId"                                                                                     AS "itemId",
                 "date"                                                                                      AS "date",
                 to_char(try_to_number("currentPrice", 20, 2))                                               AS "currentPrice",
                 to_char(try_to_number("originalPrice", 20, 2))                                              AS "originalPrice",
                 row_number()
-                OVER (PARTITION BY "p_key", "date"::DATE ORDER BY try_to_number("currentPrice", 20, 2) ASC) AS "row_number"
+                OVER (PARTITION BY "itemId", "date"::DATE ORDER BY try_to_number("currentPrice", 20, 2) ASC) AS "row_number"
                 FROM
                     "shop_03_complete"
         ) "t0"
     WHERE
         "t0"."row_number" = 1
 ;
+
 --next_querry
 /*
     - tohle vyrobí tabulku kde je důležitý sloupec "type"
@@ -45,7 +47,7 @@ SELECT
  */
 CREATE or replace TABLE "produkty" AS
 SELECT
-    "a"."p_key"          AS "p_key",
+    "a"."itemId"          AS "itemId",
     "dd"."min_d"         AS "min_d", --pro budoucí omezení kartézáku
     "dd"."max_d"         AS "max_d", --pro budoucí omezení kartézáku
     "a"."d"              AS "d",
@@ -73,25 +75,25 @@ SELECT
              - výsledek pak budu porovnávat
              */
             SELECT DISTINCT
-                "p_key"                                                                                        AS "p_key",
+                "itemId"                                                                                        AS "itemId",
                 "date"::DATE                                                                                   AS "d",
                 "originalPrice"                                                                                AS "o",
                 "currentPrice"                                                                                 AS "c"
                 --"originalPrice" || '-' || "currentPrice"                                                       AS "bothPrice"
-                --LEAD("bothPrice") OVER (PARTITION BY "p_key" ORDER BY "date"::DATE ASC)                        AS "lead",
+                --LEAD("bothPrice") OVER (PARTITION BY "itemId" ORDER BY "date"::DATE ASC)                        AS "lead",
                 --LAG("bothPrice")
-                --OVER (PARTITION BY "p_key" ORDER BY "date"::DATE ASC,try_to_number("currentPrice", 20, 2) ASC) AS "lag"
+                --OVER (PARTITION BY "itemId" ORDER BY "date"::DATE ASC,try_to_number("currentPrice", 20, 2) ASC) AS "lag"
 --                object_construct('d', "date", 'o', "originalPrice", 'c', "currentPrice") AS "json"
                 FROM "all_shops_dedupe_days"
         ) "a"
             LEFT JOIN (
             /*
-             - tady si vyrobím p_key a minimální a maximální datum
+             - tady si vyrobím itemId a minimální a maximální datum
              - pokud je max day < current date, přidám 1 den, abych poslala cenu platnou dál "null"
              - pomocí tohohle rozsahu pak vyrobím efektivněji kartézský součin pro gap filling
              */
             SELECT
-                "p_key",
+                "itemId",
                 MIN("date") AS "min_d",
                 case
                     when to_date(max("date")) < CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE then DATEADD("d", +1, max("date"))::date
@@ -99,14 +101,15 @@ SELECT
                 end AS "max_d"  
             FROM "all_shops_dedupe_days"
                 GROUP BY
-                    "p_key") "dd" ON "dd"."p_key" = "a"."p_key"
+                    "itemId") "dd" ON "dd"."itemId" = "a"."itemId"
 ;
+
 --next_querry
 /*
     - tohle mi generuje sekvenci datumů
     - základní účel je gap filling prázdných datumů
 */
-CREATE TABLE "sekvence" AS
+CREATE or replace TABLE "sekvence" AS
 SELECT
     "t1"."DateSeq"
     FROM
@@ -124,9 +127,10 @@ SELECT
                                 MAX("d")
                                 FROM "produkty"))
 ;
+
 --next_querry
 /*
-    tady mám tabulku všech datumů a všech p_key a na ně joinuju reálné produkty
+    tady mám tabulku všech datumů a všech itemId a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
 */
 
@@ -135,25 +139,25 @@ create or replace table "temp_final" as
              - tady si přidám 2 pomocné sloupce, kde:
              - type_lag je pomocný k detekci jestli je řádek opakující se v sekvenci cen nebo první
              - podle "type2" pak řádky odstraníme nebo pustíme do dynamoDB
-             - known issue je že pokud první 2 dny je stejná cena, tak se druhý den p_key vždycky nechá
+             - known issue je že pokud první 2 dny je stejná cena, tak se druhý den itemId vždycky nechá
              */
             SELECT *
-                   --LAG("type") OVER (PARTITION BY "p_key" ORDER BY "d"::DATE ASC) AS "type_lag",
+                   --LAG("type") OVER (PARTITION BY "itemId" ORDER BY "d"::DATE ASC) AS "type_lag",
                    --iff("type" = "type_lag", 'smazat', 'nechat')                   AS "type2_padak"
                    , case
-                    when lag("bothPrice") over (partition by "p_key" order by "d" asc) = "bothPrice" then 'smazat'
+                    when lag("bothPrice") over (partition by "itemId" order by "d" asc) = "bothPrice" then 'smazat'
                     else 'nechat'
                     end as "type2"
                 FROM
                     (
                         /*
-                         - tabulka t1 je sekvenční list datumů pro p_key
+                         - tabulka t1 je sekvenční list datumů pro itemId
                          - tabulka t2 je list denních cen produktů
                          - t2 obsahuje díry, které se tímhle joinem projeví
                          - sloupeček "type" označuje moment, kdy v apify datech není pro daný den cena
                          */
                         SELECT
-                            "t1"."p_key"                                         AS "p_key",
+                            "t1"."itemId"                                         AS "itemId",
                             "t1"."DateSeq"                                       AS "d",
                             /*
                              - dohoda z whatsapp je, že <null> bude prázdný string
@@ -171,31 +175,49 @@ create or replace table "temp_final" as
                             FROM
                                 (
                                     /*
-                                     - k sekvenci datumů KARTÉZÁKEM najoinujeme list p_key
-                                     - omezený na hranici datumů ve kterých máme pro p_key ceny
+                                     - k sekvenci datumů KARTÉZÁKEM najoinujeme list itemId
+                                     - omezený na hranici datumů ve kterých máme pro itemId ceny
                                      */
                                     SELECT
                                         "s"."DateSeq",
-                                        "p"."p_key"
+                                        "p"."itemId"
                                         FROM
                                             "sekvence" "s"
                                                 FULL JOIN (
                                                 /*
-                                                 - list p_key a hraničních datumů ve kterých máme ceny
+                                                 - list itemId a hraničních datumů ve kterých máme ceny
                                                  */
                                                 SELECT DISTINCT
-                                                    "p_key",
+                                                    "itemId",
                                                     "min_d",
                                                     "max_d"
                                                     FROM "produkty") "p"
                                                           ON "s"."DateSeq" >= "p"."min_d" AND "s"."DateSeq" <= "p"."max_d"
                                 ) "t1"
                                     LEFT JOIN "produkty" "t2"
-                                              ON "t1"."p_key" = "t2"."p_key" AND "t2"."d" = "t1"."DateSeq"
+                                              ON "t1"."itemId" = "t2"."itemId" AND "t2"."d" = "t1"."DateSeq"
                     ) "tf"
                 ORDER BY
-                    "p_key", "d"
+                    "itemId", "d"
 ;
+
+--next_querry
+-- Pro doplnění do výstupních tabulek zjišťuji last_valu of slug a last_valu of p_key, rovnou přeformátovávám "shop"
+create or replace table "slug" as
+select distinct("itemId" )
+    , case
+        when "shop" like '%_cz' then replace("shop",'_cz','.cz')
+        when "shop" like '%.cz' then "shop"
+        when "shop" like '%_sk' then replace("shop",'_sk','.sk')
+        when "shop" like '%.sk' then "shop"
+        else "shop"||'.cz'
+      end as "shop_id"
+    , last_value("slug") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
+    , last_value("p_key") ignore nulls over (partition by "itemId" order by "date" desc) as "p_key"
+from "shop_03_complete"
+where "slug" != ''
+;
+
 --next_querry
 CREATE or replace TABLE "shop_05_pricehistory" AS
 /*
@@ -206,10 +228,10 @@ CREATE or replace TABLE "shop_05_pricehistory" AS
    - je důležité, aby to předtím bylo seřazené - viz ORDER BY dole
  */
 SELECT
-    "tof"."p_key"                                      AS "p_key",
+    "s"."p_key"                                      AS "p_key",
     /*
      - objekt obsahuje date,originalPrice,currentPrice - seknuté na první písmenka, aby byl json menší
-     - array to groupne pro p_key a WITHIN GROUP je tady jen pro pořadí datumů
+     - array to groupne pro itemId a WITHIN GROUP je tady jen pro pořadí datumů
      - na char to převádím proto, že v Storage API není podpora VARIANTu
      */
     to_char(array_agg(
@@ -220,16 +242,21 @@ SELECT
                 )
         ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
     FROM "temp_final" "tof"
+    left join "slug" "s"
+    on "s"."itemId" = "tof"."itemId"
     WHERE
         "type2" = 'nechat'
     GROUP BY
         "p_key"
 ;
+
 --next_querry
 CREATE or replace TABLE "shop_05_final_s3" AS
 SELECT
-    "tof"."p_key"                                      AS "p_key",
-    to_char(array_agg(
+    "tof"."itemId"                                      AS "itemId"
+    , "slug"
+    , "shop_id"
+    ,to_char(array_agg(
             object_construct_KEEP_NULL(
                     'd', "tof"."d",
                     'o', try_to_number("tof"."origP",12,2),
@@ -237,10 +264,12 @@ SELECT
                 )
         ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
     FROM "temp_final" "tof"
+    left join "slug" "s"
+    on "s"."itemId" = "tof"."itemId"
     WHERE
-        "type2" = 'nechat' and "p_key" in (select distinct("p_key")
+        "type2" = 'nechat' and "tof"."itemId" in (select distinct("itemId")
                     from "temp_final"
                     where "type2" = 'nechat' and "d" > $ref_date)
     GROUP BY
-        "p_key"
+        "tof"."itemId", "slug", "shop_id"
 ;

@@ -1,3 +1,6 @@
+set ref_date = DATEADD("d", - 7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+;
+
 CREATE TABLE "shop_03_complete" AS
 SELECT "uni"."shop"
 	,"uni"."p_key"
@@ -15,7 +18,21 @@ SELECT "uni"."shop"
   ,"ref"."minPrice"
   ,case when "ref"."minPrice" != '' then "ref"."minPrice" else "ref"."commonPrice" end as "originalPriceHS"
   ,round(("uni"."currentPrice" / nullifzero("originalPriceHS") - 1) * -100, 2)  as "newSale"
-FROM "shop_01_unification" "uni"
+FROM (select
+  "shop"
+	,"p_key"
+	,"itemId"
+	,"itemName"
+	,"itemUrl"
+  ,"slug"
+	,"currentPrice"
+	,"originalPrice"
+	,"officialSale"
+  ,"date"
+	,"itemImage"
+  ,"inStock"
+	FROM "shop_01_unification"
+  where "date" >= $ref_date) "uni"
 LEFT JOIN
     (SELECT "itemId"
         , "commonPrice"

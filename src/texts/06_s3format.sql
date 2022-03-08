@@ -23,31 +23,10 @@ where "slug" != 'null' and "commonPrice" != 'null' and "pkey" in
     )
 ;
 --next_querry
-create or replace table "slug" as
-select distinct("p_key" )
-    , case
-        when "shop" like '%_cz' then replace("shop",'_cz','.cz')
-        when "shop" like '%.cz' then "shop"
-        when "shop" like '%_sk' then replace("shop",'_sk','.sk')
-        when "shop" like '%.sk' then "shop"
-        else "shop"||'.cz'
-      end as "shop_id"
-    , last_value("slug") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
-    , last_value("p_key") ignore nulls over (partition by "itemId" order by "date" desc) as "p_key"
-from "shop_03_complete"
-where "slug" != ''
-;
---next_querry
 create or replace table "shop_s3_pricehistory" as
-select "all".*
-from (select "s"."shop_id"
-    , "s"."slug"
-    , "ph"."json"
-from (select *
-      from "shop_05_final_s3"
-      where left("_timestamp",10) > $ref_date
-     ) "ph"
-left join "slug" "s"
-on "ph"."p_key" = "s"."p_key"
-where "slug" is not null) "all"
+select "shop_id"
+    , "slug"
+    , "json"
+from "shop_05_final_s3"
+where left("_timestamp",10) > $ref_date and "slug" is not null
 ;
