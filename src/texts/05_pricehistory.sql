@@ -1,6 +1,7 @@
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
 set ref_date = DATEADD("d", - 2000, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
+--next_querry
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
 
 /*
@@ -38,7 +39,7 @@ SELECT
     WHERE
         "t0"."row_number" = 1
 ;
-
+--next_querry
 /*
     - tohle vyrobí tabulku kde je důležitý sloupec "type"
     - slouží pro "emulaci" stavového stroje
@@ -102,7 +103,7 @@ SELECT
                 GROUP BY
                     "itemId") "dd" ON "dd"."itemId" = "a"."itemId"
 ;
-
+--next_querry
 /*
     - tohle mi generuje sekvenci datumů
     - základní účel je gap filling prázdných datumů
@@ -125,7 +126,7 @@ SELECT
                                 MAX("d")
                                 FROM "produkty"))
 ;
-
+--next_querry
 /*
     tady mám tabulku všech datumů a všech itemId a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
@@ -197,7 +198,7 @@ create or replace table "temp_final" as
                 ORDER BY
                     "itemId", "d"
 ;
-
+--next_querry
 -- Pro doplnění do výstupních tabulek zjišťuji last_valu of slug a last_valu of p_key, rovnou přeformátovávám "shop"
 create or replace table "slug" as
 select distinct("itemId" )
@@ -213,7 +214,7 @@ select distinct("itemId" )
 from "shop_03_complete"
 --where "slug" != ''
 ;
-
+--next_querry
 CREATE or replace TABLE "shop_05_pricehistory" AS
 /*
  - tohle už je jen očištění a filtrace
@@ -244,7 +245,7 @@ SELECT
     GROUP BY
         "p_key"
 ;
-
+--next_querry
 CREATE or replace TABLE "shop_05_final_s3" AS
 SELECT
     "tof"."itemId"                                      AS "itemId"
