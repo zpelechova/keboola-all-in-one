@@ -1,4 +1,7 @@
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
+set ref_date = DATEADD("d", - 7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+;
+--next_querry
 /*
     - shopy a produkty mohou mít duplicitní informace o denních cenách
     - v takovém případě mám vzít tu nejnižší
@@ -235,7 +238,9 @@ SELECT
         ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
     FROM "temp_final" "tof"
     WHERE
-        "type2" = 'nechat'
+        "type2" = 'nechat' and "p_key" in (select distinct("p_key")
+                    from "temp_final"
+                    where "type2" = 'nechat' and "d" > $ref_date)
     GROUP BY
         "p_key"
 ;

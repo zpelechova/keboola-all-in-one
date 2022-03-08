@@ -1,3 +1,6 @@
+set ref_date = DATEADD("d", - 7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+;
+--next_querry
 create or replace table "shop_s3_metadata" as
 select case
         when "shop" like '%_cz' then replace("shop",'_cz','.cz')
@@ -13,7 +16,11 @@ select case
   , "commonPrice"
 	, "minPrice"
 from "shop_04_extension"
-where "slug" != 'null' and "commonPrice" != 'null'
+where "slug" != 'null' and "commonPrice" != 'null' and "pkey" in
+    (   select distinct("pkey")
+        from "shop_04_extension"
+        where left("_timestamp",10) > $ref_date
+    )
 ;
 --next_querry
 create or replace table "slug" as

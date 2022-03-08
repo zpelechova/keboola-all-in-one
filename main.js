@@ -167,7 +167,7 @@ Apify.main(async () => {
                     // [['itemId', 'date']],
                     // [['itemId', 'date']],
                     // [['pkey']],
-                    [['p_key']],
+                    [['p_key'], ['p_key']],
                     [['slug'], ['slug']]
                 ]
 
@@ -175,8 +175,8 @@ Apify.main(async () => {
                     // [true],
                     // [true],
                     // [true],
-                    // [false],
-                    [false],
+                    // [true],
+                    [true, true],
                     [false, false]
                 ]
                 const transformationId = await trans.getOrCreateTransformation(
