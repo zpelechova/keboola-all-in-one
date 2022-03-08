@@ -1,3 +1,6 @@
+set ref_date = DATEADD("d", - 7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+;
+--next_querry
 --MAIN TABLE  
 --it uses the last record for given item (and only goes back to history for the same period of time as inc at the very beginning does. 
 CREATE TABLE "shop_04_extension" AS
@@ -39,6 +42,6 @@ FROM
 		WHERE "itemId" <> ''
 			OR "slug" <> ''
 		-- here I set a time period for which it checks backwards so that I dont run all of it again. Could 		easily be only for one day.
-		--AND "date" >= dateadd(day, -7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+		AND "date" >= $ref_date
 		)
 WHERE "row_number" = 1;
