@@ -1,8 +1,8 @@
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
 set ref_date = DATEADD("d", - 2000, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
+-- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
 
---next_querry
 /*
     - shopy a produkty mohou mít duplicitní informace o denních cenách
     - v takovém případě mám vzít tu nejnižší
@@ -39,7 +39,6 @@ SELECT
         "t0"."row_number" = 1
 ;
 
---next_querry
 /*
     - tohle vyrobí tabulku kde je důležitý sloupec "type"
     - slouží pro "emulaci" stavového stroje
@@ -104,7 +103,6 @@ SELECT
                     "itemId") "dd" ON "dd"."itemId" = "a"."itemId"
 ;
 
---next_querry
 /*
     - tohle mi generuje sekvenci datumů
     - základní účel je gap filling prázdných datumů
@@ -128,7 +126,6 @@ SELECT
                                 FROM "produkty"))
 ;
 
---next_querry
 /*
     tady mám tabulku všech datumů a všech itemId a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
@@ -201,7 +198,6 @@ create or replace table "temp_final" as
                     "itemId", "d"
 ;
 
---next_querry
 -- Pro doplnění do výstupních tabulek zjišťuji last_valu of slug a last_valu of p_key, rovnou přeformátovávám "shop"
 create or replace table "slug" as
 select distinct("itemId" )
@@ -215,10 +211,9 @@ select distinct("itemId" )
     , last_value("slug") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
     , last_value("p_key") ignore nulls over (partition by "itemId" order by "date" desc) as "p_key"
 from "shop_03_complete"
-where "slug" != ''
+--where "slug" != ''
 ;
 
---next_querry
 CREATE or replace TABLE "shop_05_pricehistory" AS
 /*
  - tohle už je jen očištění a filtrace
@@ -250,7 +245,6 @@ SELECT
         "p_key"
 ;
 
---next_querry
 CREATE or replace TABLE "shop_05_final_s3" AS
 SELECT
     "tof"."itemId"                                      AS "itemId"
@@ -264,7 +258,10 @@ SELECT
                 )
         ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
     FROM "temp_final" "tof"
-    left join "slug" "s"
+    left join 
+        (select *
+        from "slug"
+        where "slug" != '') "s"
     on "s"."itemId" = "tof"."itemId"
     WHERE
         "type2" = 'nechat' and "tof"."itemId" in (select distinct("itemId")
