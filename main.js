@@ -99,7 +99,7 @@ Apify.main(async () => {
                 // '01_unification',
                 // '02_refprices',
                 // '03_complete',
-                // '04_extension',
+                '04_extension',
                 '05_pricehistory',
                 '06_s3format'
                 //doplnit 07_dashboard
@@ -116,7 +116,7 @@ Apify.main(async () => {
                     //     `out.c-${shopName}.${shopName}_01_unification`,
                     //     `out.c-${shopName}.${shopName}_02_refprices`
                     // ],
-                    // [`out.c-${shopName}.${shopName}_03_complete`],
+                    [`out.c-${shopName}.${shopName}_03_complete`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [
                         `out.c-${shopName}.${shopName}_03_complete`,
@@ -129,7 +129,7 @@ Apify.main(async () => {
                     // ['shop_raw'],
                     // ['shop_01_unification'],
                     // ['shop_01_unification', 'shop_02_refprices'],
-                    // ['shop_03_complete'],
+                    ['shop_03_complete'],
                     ['shop_03_complete'],
                     [
                         'shop_03_complete',
@@ -142,7 +142,7 @@ Apify.main(async () => {
                     // [`shop_${transformation}`],
                     // [`shop_${transformation}`],
                     // [`shop_${transformation}`],
-                    // [`shop_${transformation}`],
+                    [`shop_${transformation}`],
                     [`shop_${transformation}`, `shop_05_final_s3`],
                     [`shop_s3_metadata`, `shop_s3_pricehistory`]
                 ]
@@ -151,7 +151,7 @@ Apify.main(async () => {
                     // [`out.c-${shopName}.${shopName}_${transformation}`],
                     // [`out.c-${shopName}.${shopName}_${transformation}`],
                     // [`out.c-${shopName}.${shopName}_${transformation}`],
-                    // [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
                     [
                         `out.c-${shopName}.${shopName}_${transformation}`,
                         `out.c-${shopName}.${shopName}_05_final_s3`
@@ -166,7 +166,7 @@ Apify.main(async () => {
                     // [['itemId', 'date']],
                     // [['itemId', 'date']],
                     // [['itemId', 'date']],
-                    // [['pkey']],
+                    [['pkey']],
                     [['p_key'], ['p_key']],
                     [['slug'], ['slug']]
                 ]
@@ -175,7 +175,7 @@ Apify.main(async () => {
                     // [true],
                     // [true],
                     // [true],
-                    // [true],
+                    [true],
                     [true, true],
                     [false, false]
                 ]
