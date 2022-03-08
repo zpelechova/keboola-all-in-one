@@ -42,10 +42,11 @@ select "all".*
 from (select "s"."shop_id"
     , "s"."slug"
     , "ph"."json"
-from "shop_05_final_s3" "ph"
+from (select *
+      from "shop_05_final_s3"
+      where left("_timestamp",10) > $ref_date
+     ) "ph"
 left join "slug" "s"
 on "ph"."p_key" = "s"."p_key"
 where "slug" is not null) "all"
-inner join "shop_s3_metadata" "m"
-on "m"."slug"="all"."slug"
 ;
