@@ -259,13 +259,11 @@ SELECT
                 )
         ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
     FROM "temp_final" "tof"
-    left join 
-        (select *
-        from "slug"
-        where "slug" != '') "s"
+    left join "slug" "s"
     on "s"."itemId" = "tof"."itemId"
     WHERE
-        "type2" = 'nechat' and "tof"."itemId" in (select distinct("itemId")
+        "type2" = 'nechat'  and "slug" != ''
+        and "tof"."itemId" in (select distinct("itemId")
                     from "temp_final"
                     where "type2" = 'nechat' and "d" > $ref_date)
     GROUP BY

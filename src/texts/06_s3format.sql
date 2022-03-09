@@ -28,5 +28,5 @@ select "shop_id"
     , "slug"
     , "json"
 from "shop_05_final_s3"
-where left("_timestamp",10) > $ref_date and "slug" is not null
+where left("_timestamp",10) > $ref_date and "slug" is not null and "slug" != ''
 ;

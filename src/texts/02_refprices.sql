@@ -119,7 +119,7 @@ FROM (SELECT "date",
 WHERE "row_number" = 1
 ;
 --next_querry
-CREATE TABLE "shop_last_sale_vs_prev_30d_min_price" AS
+CREATE or replace TABLE "shop_last_sale_vs_prev_30d_min_price" AS
 SELECT "t0"."date",
        "t0"."itemId",
        "t0"."currentPrice",
@@ -131,7 +131,7 @@ FROM "shop_last_price_change" "t0"
                    ON "t0"."itemId" = "t1"."itemId" AND
                       "t1"."date" < "t0"."date" AND -- jen starší záznamy
                       "t1"."date" >= dateadd('day', -30, "t0"."date") -- ne vic jak 30 dní dozadu
-WHERE "t0"."price_trend" = 'down'
+WHERE "t0"."price_trend" = 'down' and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 GROUP BY 1, 2, 3, 4
 ;
 --next_querry
