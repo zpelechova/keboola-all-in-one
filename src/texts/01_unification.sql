@@ -1,8 +1,11 @@
+set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+;
+--next_querry
 --takes only records from last 2 days from both input tables - the number of days can be easily modified or omitted altogether
 CREATE TABLE "shop" as
 SELECT *
 	FROM "shop_raw"
-	WHERE LEFT("date", 10) >= to_char(DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE), 'yyyy-mm-dd')
+	WHERE LEFT("date", 10) >= $ref_date
 ;
 --next_querry
 --takes main table, sets minimum number for current price and maximum for original price, converts date to date format, leaves out rows with no itemId or price or date, leaves out extra information

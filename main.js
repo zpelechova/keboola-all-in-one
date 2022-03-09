@@ -97,7 +97,7 @@ Apify.main(async () => {
 
             const transformations = [
                 // '01_unification',
-                '02_refprices',
+                // '02_refprices',
                 '03_complete',
                 '04_extension',
                 '05_pricehistory',
@@ -111,7 +111,7 @@ Apify.main(async () => {
 
                 const inputTablesSource = [
                     // [`in.c-black-friday.${shopName}`],
-                    [`out.c-${shopName}.${shopName}_01_unification`],
+                    // [`out.c-${shopName}.${shopName}_01_unification`],
                     [
                         `out.c-${shopName}.${shopName}_01_unification`,
                         `out.c-${shopName}.${shopName}_02_refprices`
@@ -127,7 +127,7 @@ Apify.main(async () => {
 
                 const inputTablesName = [
                     // ['shop_raw'],
-                    ['shop_01_unification'],
+                    // ['shop_01_unification'],
                     ['shop_01_unification', 'shop_02_refprices'],
                     ['shop_03_complete'],
                     ['shop_03_complete'],
@@ -140,7 +140,7 @@ Apify.main(async () => {
 
                 const outputTablesName = [
                     // [`shop_${transformation}`],
-                    [`shop_${transformation}`],
+                    // [`shop_${transformation}`],
                     [`shop_${transformation}`],
                     [`shop_${transformation}`],
                     [`shop_${transformation}`, `shop_05_final_s3`],
@@ -149,7 +149,7 @@ Apify.main(async () => {
 
                 const outputTablesSource = [
                     // [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    // [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [
@@ -164,7 +164,7 @@ Apify.main(async () => {
 
                 const outputTablesKeys = [
                     // [['itemId', 'date']],
-                    [['itemId', 'date']],
+                    // [['itemId', 'date']],
                     [['itemId', 'date']],
                     [['pkey']],
                     [['p_key'], ['itemId']],
@@ -173,7 +173,7 @@ Apify.main(async () => {
 
                 const outputIncremental = [
                     // [true],
-                    [true],
+                    // [true],
                     [true],
                     [true],
                     [true, true],

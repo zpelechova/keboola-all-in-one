@@ -1,5 +1,5 @@
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
-set ref_date = DATEADD("d", - 2000, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 --next_querry
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
@@ -241,7 +241,7 @@ SELECT
     left join "slug" "s"
     on "s"."itemId" = "tof"."itemId"
     WHERE
-        "type2" = 'nechat'
+        "type2" = 'nechat' and "p_key" is not null and "p_key" != ''
     GROUP BY
         "p_key"
 ;
