@@ -1,6 +1,6 @@
 set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
-
+--next_querry
 CREATE TABLE "shop_03_complete" AS
 SELECT "uni"."shop"
 	,"uni"."p_key"
