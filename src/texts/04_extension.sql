@@ -1,4 +1,4 @@
-set ref_date = DATEADD("d", - 7, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD("d", - 100, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 --next_querry
 --MAIN TABLE  
