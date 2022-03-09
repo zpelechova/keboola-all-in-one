@@ -262,7 +262,7 @@ SELECT
     left join "slug" "s"
     on "s"."itemId" = "tof"."itemId"
     WHERE
-        "type2" = 'nechat'  and "slug" != ''
+        "type2" = 'nechat'  and "slug" != '' and "slug" is not null
         and "tof"."itemId" in (select distinct("itemId")
                     from "temp_final"
                     where "type2" = 'nechat' and "d" > $ref_date)
