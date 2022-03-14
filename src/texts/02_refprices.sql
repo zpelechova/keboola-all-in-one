@@ -48,7 +48,7 @@ SELECT "itemId",
 FROM "shop_01_unification"
 --beru jen 90 dní dozadu, ať ten kartézák na all_dates_items není moc velkej
 --90 proto, že někde na začátku -60 dní mohou být díry, tak jdu dozadu
-WHERE to_date("date") >= dateadd('day', -90, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+WHERE to_date("date") >= dateadd('day', -90, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) and "currentPrice" != ''
 ;
 --next_querry
 CREATE TABLE "shop_data_filled_labelled" AS

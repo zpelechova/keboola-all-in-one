@@ -209,8 +209,8 @@ select distinct("itemId" )
         when "shop" like '%.sk' then "shop"
         else "shop"||'.cz'
       end as "shop_id"
-    , last_value("slug") ignore nulls over (partition by "itemId" order by "date" desc) as "slug"
-    , last_value("p_key") ignore nulls over (partition by "itemId" order by "date" desc) as "p_key"
+    , last_value("slug") ignore nulls over (partition by "itemId" order by "date" asc) as "slug"
+    , last_value("p_key") ignore nulls over (partition by "itemId" order by "date" asc) as "p_key"
 from "shop_03_complete"
 --where "slug" != ''
 ;

@@ -5,7 +5,7 @@ set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMES
 CREATE TABLE "shop" as
 SELECT *
 	FROM "shop_raw"
-	WHERE LEFT("date", 10) >= $ref_date
+	WHERE LEFT("_timestamp", 10) >= $ref_date
 ;
 --next_querry
 --takes main table, sets minimum number for current price and maximum for original price, converts date to date format, leaves out rows with no itemId or price or date, leaves out extra information
