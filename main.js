@@ -97,7 +97,7 @@ Apify.main(async () => {
 
             const transformations = [
                 // '01_unification',
-                // '02_refprices',
+                '02_refprices',
                 '03_complete',
                 '04_extension',
                 '05_pricehistory',
