@@ -17,7 +17,7 @@ SELECT "uni"."shop"
 	,"ref"."commonPrice"
   ,"ref"."minPrice"
   ,case when "ref"."minPrice" != '' then "ref"."minPrice" else "ref"."commonPrice" end as "originalPriceHS"
-  ,round((try_to_number("currentPrice",12,2) / nullifzero(try_to_number("originalPriceHS",12,2)) - 1) * -100, 2)  as "newSale2"
+  ,round((try_to_number("currentPrice",12,2) / nullifzero(try_to_number("originalPriceHS",12,2)) - 1) * -100, 2)  as "newSale"
 FROM (select
   "shop"
 	,"p_key"
