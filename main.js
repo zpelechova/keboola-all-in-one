@@ -96,7 +96,7 @@ Apify.main(async () => {
             console.log(`Starting Transformation management program`)
 
             const transformations = [
-                '01_unification',
+                //'01_unification',
                 '02_refprices',
                 '03_complete',
                 '04_extension',
