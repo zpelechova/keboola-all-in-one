@@ -96,13 +96,13 @@ Apify.main(async () => {
             console.log(`Starting Transformation management program`)
 
             const transformations = [
-                '01_unification',
-                '02_refprices',
-                '03_complete',
-                '04_extension',
-                '05_pricehistory',
-                '06_s3format'
-                //doplnit 07_dashboard
+                //'01_unification',
+                //'02_refprices',
+                //'03_complete',
+                //'04_extension',
+                //'05_pricehistory',
+                //'06_s3format',
+                '07_audit_dashboard'
                 //'00_preparation' // only for shops with feed and/or unitPrice items
             ]
 
@@ -110,74 +110,90 @@ Apify.main(async () => {
                 const index = transformations.indexOf(transformation)
 
                 const inputTablesSource = [
-                    [`in.c-black-friday.${shopName}`],
-                    [`out.c-${shopName}.${shopName}_01_unification`],
+                  //  [`in.c-black-friday.${shopName}`],
+                  //  [`out.c-${shopName}.${shopName}_01_unification`],
+                  //  [
+                  //      `out.c-${shopName}.${shopName}_01_unification`,
+                  //      `out.c-${shopName}.${shopName}_02_refprices`
+                  //  ],
+                  //  [`out.c-${shopName}.${shopName}_03_complete`],
+                  //  [`out.c-${shopName}.${shopName}_03_complete`],
+                  //  [
+                  //      `out.c-${shopName}.${shopName}_03_complete`,
+                  //      `out.c-${shopName}.${shopName}_04_extension`,
+                  //      `out.c-${shopName}.${shopName}_05_final_s3`
+                  //  ],
                     [
-                        `out.c-${shopName}.${shopName}_01_unification`,
-                        `out.c-${shopName}.${shopName}_02_refprices`
-                    ],
-                    [`out.c-${shopName}.${shopName}_03_complete`],
-                    [`out.c-${shopName}.${shopName}_03_complete`],
-                    [
-                        `out.c-${shopName}.${shopName}_03_complete`,
-                        `out.c-${shopName}.${shopName}_04_extension`,
-                        `out.c-${shopName}.${shopName}_05_final_s3`
+                      `out.c-${shopName}.${shopName}_03_complete`,
+                      `in.c-black-friday.${shopName}`
                     ]
                 ]
 
                 const inputTablesName = [
-                    ['shop_raw'],
-                    ['shop_01_unification'],
-                    ['shop_01_unification', 'shop_02_refprices'],
-                    ['shop_03_complete'],
-                    ['shop_03_complete'],
+                  //  ['shop_raw'],
+                  //  ['shop_01_unification'],
+                  //  ['shop_01_unification', 'shop_02_refprices'],
+                  //  ['shop_03_complete'],
+                  //  ['shop_03_complete'],
+                  //  [
+                  //      'shop_03_complete',
+                  //      'shop_04_extension',
+                  //      'shop_05_final_s3'
+                  //  ],
                     [
-                        'shop_03_complete',
-                        'shop_04_extension',
-                        'shop_05_final_s3'
+                      'shop_03_complete',
+                      'shop_raw'
                     ]
                 ]
 
                 const outputTablesName = [
-                    [`shop_${transformation}`],
-                    [`shop_${transformation}`],
-                    [`shop_${transformation}`],
-                    [`shop_${transformation}`],
-                    [`shop_${transformation}`, `shop_05_final_s3`],
-                    [`shop_s3_metadata`, `shop_s3_pricehistory`]
+                  //  [`shop_${transformation}`],
+                  //  [`shop_${transformation}`],
+                  //  [`shop_${transformation}`],
+                  //  [`shop_${transformation}`],
+                  //  [`shop_${transformation}`, `shop_05_final_s3`],
+                  //  [`shop_s3_metadata`, `shop_s3_pricehistory`],
+                    [`shop_dashboard`, `shop_false_discounts`, `shop_incr_origPrice`]
                 ]
 
                 const outputTablesSource = [
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                  //  [`out.c-${shopName}.${shopName}_${transformation}`],
+                  //  [`out.c-${shopName}.${shopName}_${transformation}`],
+                  //  [`out.c-${shopName}.${shopName}_${transformation}`],
+                  //  [`out.c-${shopName}.${shopName}_${transformation}`],
+                  //  [
+                  //      `out.c-${shopName}.${shopName}_${transformation}`,
+                  //      `out.c-${shopName}.${shopName}_05_final_s3`
+                  //  ],
+                  //  [
+                  //      `out.c-${shopName}.${shopName}_s3_metadata`,
+                  //      `out.c-${shopName}.${shopName}_s3_pricehistory`
+                  // ],
                     [
-                        `out.c-${shopName}.${shopName}_${transformation}`,
-                        `out.c-${shopName}.${shopName}_05_final_s3`
-                    ],
-                    [
-                        `out.c-${shopName}.${shopName}_s3_metadata`,
-                        `out.c-${shopName}.${shopName}_s3_pricehistory`
-                    ]
+                      `out.c-${shopName}.${shopName}_dashboard`,
+                      `out.c-${shopName}.${shopName}_false_discounts`,
+                      `out.c-${shopName}.${shopName}_incr_origPrice`
+                  ]
                 ]
 
                 const outputTablesKeys = [
-                    [['itemId', 'date']],
-                    [['itemId', 'date']],
-                    [['itemId', 'date']],
-                    [['pkey']],
-                    [['p_key'], ['itemId']],
-                    [['slug'], ['slug']]
+                  //  [['itemId', 'date']],
+                  //  [['itemId', 'date']],
+                  //  [['itemId', 'date']],
+                  //  [['pkey']],
+                  //  [['p_key'], ['itemId']],
+                  //  [['slug'], ['slug']],
+                    [[], ['itemId'], ['itemId']]
                 ]
 
                 const outputIncremental = [
-                    [true],
-                    [true],
-                    [true],
-                    [true],
-                    [true, true],
-                    [false, false]
+                  //  [true],
+                  //  [true],
+                  //  [true],
+                  //  [true],
+                  //  [true, true],
+                  //  [false, false],
+                    [false, false, false]
                 ]
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
