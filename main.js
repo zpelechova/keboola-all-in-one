@@ -186,7 +186,7 @@ Apify.main(async () => {
                   //  [['pkey']],
                   //  [['p_key'], ['itemId']],
                   //  [['slug'], ['slug']],
-                    [[], ['Aktualizace'], ['itemId'], ['itemId', 'datum']], ['itemId'], ['itemId', 'datum_zmeny_refCeny']]
+                    [[], ['Aktualizace'], ['itemId'], ['itemId', 'datum'], ['itemId'], ['itemId', 'datum_zmeny_refCeny']]
                 ]
 
                 const outputIncremental = [
