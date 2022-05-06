@@ -1,12 +1,16 @@
 set ref_date = (select max("date") from "shop_03_complete")
 ;
 --next_querry
+
 set sleva_hranice = 3
 ;
 --next_querry
+
 set tolerance = 3
 ;
 --next_querry
+
+
 set aktualizace = (select left(max("date"),16) from "shop_raw")
 ;
 --next_querry
@@ -57,6 +61,7 @@ create or replace table "shop_HS_differences" as
 select *
 from "shop_current"
 where "sleva_dle_shopu" != try_to_number("sleva_dle_Hlidace",2) and abs("sleva_dle_shopu" - try_to_number("sleva_dle_Hlidace",2)) >= $tolerance
+	and "sleva_dle_shopu" != 0
 order by "sleva_dle_shopu" desc
 ;
 --next_querry

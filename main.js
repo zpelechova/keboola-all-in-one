@@ -153,7 +153,7 @@ Apify.main(async () => {
                   //  [`shop_${transformation}`],
                   //  [`shop_${transformation}`, `shop_05_final_s3`],
                   //  [`shop_s3_metadata`, `shop_s3_pricehistory`],
-                    [`shop_dashboard`, `shop_false_discounts`, `shop_incr_origPrice`]
+                    [`shop_dashboard`, `shop_dashboard`, `shop_false_discounts`, `shop_false_discounts`, `shop_incr_origPrice`, `shop_incr_origPrice`]
                 ]
 
                 const outputTablesSource = [
@@ -171,8 +171,11 @@ Apify.main(async () => {
                   // ],
                     [
                       `out.c-${shopName}.${shopName}_dashboard`,
+                      `out.c-${shopName}_07_audit_dashboard.${shopName}_dashboard_history`,
                       `out.c-${shopName}.${shopName}_false_discounts`,
-                      `out.c-${shopName}.${shopName}_incr_origPrice`
+                      `out.c-${shopName}_07_audit_dashboard.${shopName}_false_discounts_history`,
+                      `out.c-${shopName}.${shopName}_incr_origPrice`,
+                      `out.c-${shopName}_07_audit_dashboard.${shopName}_incr_origPrice_history`
                   ]
                 ]
 
@@ -183,7 +186,7 @@ Apify.main(async () => {
                   //  [['pkey']],
                   //  [['p_key'], ['itemId']],
                   //  [['slug'], ['slug']],
-                    [[], ['itemId'], ['itemId']]
+                    [[], ['Aktualizace'], ['itemId'], ['itemId', 'datum']], ['itemId'], ['itemId', 'datum_zmeny_refCeny']]
                 ]
 
                 const outputIncremental = [
@@ -193,7 +196,7 @@ Apify.main(async () => {
                   //  [true],
                   //  [true, true],
                   //  [false, false],
-                    [false, false, false]
+                    [false, true, false, true, false, true]
                 ]
                 const transformationId = await trans.getOrCreateTransformation(
                     shopName,
