@@ -114,7 +114,7 @@ having "sleva_dle_shopu" > $sleva_hranice
 --next_querry
 
 create or replace table "avg_disc_HS" as
-select round(avg("sleva_dle_Hlidace") over (),2) as "Prumerna_realna_sleva"
+select round(avg(try_to_number("sleva_dle_Hlidace",12,2)) over (),2) as "Prumerna_realna_sleva"
 from "shop_current"
 having "sleva_dle_shopu" > $sleva_hranice
 ;
