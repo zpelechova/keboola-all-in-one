@@ -176,11 +176,10 @@ select distinct("shop"."shop") as "Shop"
     , "shop"."Produktu_celkem" as "Produktu_celkem" -- celkový počet produktů shopu k poslednímu dni
     , "disc_shop"."Produktu_ve_sleve_(shop)" as "Produktu_ve_sleve" -- počet produktů ve slevě dle shopu (hranice slevy viz $sleva_hranice)
     , iff("Produktu_ve_sleve" = 0, null, (select * from "count_diff_shop-only")) as "Produktu_s_chybnou_slevou" -- produkty dle shopu ve slevě, kde se s HS neshodne o 3 a více %
-    , "incr_orig"."Produktu_s_navysenou_refCenou" as "Produktu_s_navysenou_refCenou" -- produkty s navýšenou originalPrice během posledních 30 dní
-    , iff("Produktu_ve_sleve" = 0, null, (select * from "avg_disc_shop")) as "Prumerna_uvadena_sleva" -- průměrná sleva uváděná shopem
-    , iff("Produktu_ve_sleve" = 0, null, (select * from "avg_disc_HS")) as "Prumerna_realna_sleva" -- průměrná sleva podle Hlídače (na produktech vedených shopem jako zlevněné)
+    , iff("Produktu_ve_sleve" = 0, null, (select * from "count_incr_origPrice")) as "Produktu_s_navysenou_refCenou" -- produkty s navýšenou originalPrice během posledních 30 dní
+    , iff("Produktu_ve_sleve" = 0, null, (select * from "avg_disc_shop")) as "Prumerna_uvadena_sleva"
+    , iff("Produktu_ve_sleve" = 0, null, (select * from "avg_disc_HS")) as "Prumerna_realna_sleva"
     , $aktualizace as "Aktualizace"
 from "count_items" "shop"
 left join "count_disc_shop" "disc_shop"
-left join "count_incr_origPrice" "incr_orig"
 ;
