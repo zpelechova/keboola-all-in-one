@@ -13,8 +13,11 @@ set aktualizace = (select left(max("date"),16) from "shop_raw")
 set days_back = 30
 ;
 --next_querry
+set shop = (select distinct(last_value("shopOrigin") over (order by "date" asc)) from "shop_raw")
+;
+--next_querry
 create or replace table "shop_current" as
-select "shop"
+select $shop as "shop"
     , "itemId"
     , "itemName"
     , "currentPrice" as "prodejni_cena"
@@ -32,7 +35,7 @@ where "date" = $ref_date
 ;
 --next_querry
 create or replace table "shop_30d" as
-select "shop"
+select $shop as "shop"
     , "itemId"
     , "itemName"
     , "currentPrice" as "prodejni_cena"
@@ -54,7 +57,7 @@ select *
 from "shop_current"
 where abs(to_number("sleva_dle_shopu", 12,2) - try_to_number("sleva_dle_Hlidace",12, 2)) >= $tolerance
 	and to_number("sleva_dle_shopu") != 0
-order by to_number("sleva_dle_Hlidace") asc
+order by abs(to_number("sleva_dle_shopu", 12,2) - try_to_number("sleva_dle_Hlidace",12, 2)) desc
 ;
 --next_querry
 create or replace table "count_items" as
@@ -111,7 +114,7 @@ end as "typ_neshody"
     inner join 
         (select * from "shop_HS_differences" where to_number("sleva_dle_shopu") > $sleva_hranice) "shop"
     on "diff"."itemId" = "shop"."itemId"
-order by to_number("diff"."sleva_dle_Hlidace") asc
+order by abs(to_number("sleva_dle_shopu", 12,2) - try_to_number("sleva_dle_Hlidace",12, 2)) desc
 ;
 --next_querry
 // spreadsheet - 2 záložka navýšené originalPrice (za posledních 30 dní)
@@ -141,7 +144,8 @@ from "shop_30d"
 qualify "refCena_puv" != '' and "refCena_dle_shopu" != '' and "incr" != '')
 qualify "row_num" = 1 and "incr" = 'incr' 
     and ("refCena_aktualni"/"refCena_puvodni")*100-100 > 3
-    and abs("sleva_dle_shopu" - try_to_number("sleva_dle_Hlidace",2)) >= $tolerance
+    and abs(to_number("sleva_dle_shopu", 12,2) - try_to_number("sleva_dle_Hlidace",12, 2)) >= $tolerance
+order by (to_number("refCena_aktualni",12,2) - to_number("refCena_puvodni",12,2)) desc
 ;
 --next_querry
 alter table "shop_incr_origPrice" drop column "row_num"
