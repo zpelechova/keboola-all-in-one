@@ -125,10 +125,12 @@ select case
 end as "typ_neshody"
     , "diff".*
     , abs(to_number("diff"."sleva_dle_shopu", 12,2) - try_to_number("diff"."sleva_dle_Hlidace",12, 2)) as "rozdil_slev"
+    , row_number () over (order by "rozdil_slev" desc) as "row_num"
     from "shop_HS_differences" "diff"
     inner join 
         (select * from "shop_HS_differences" where to_number("sleva_dle_shopu") > $sleva_hranice) "shop"
     on "diff"."itemId" = "shop"."itemId"
+qualify "row_num" <= 400000
 order by "rozdil_slev" desc
 ;
 

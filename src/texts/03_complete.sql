@@ -41,3 +41,23 @@ LEFT JOIN
     FROM "shop_02_refprices") "ref"
 ON "uni"."itemId" = "ref"."itemId" AND "uni"."date" = "ref"."date"
 ;
+--next_querry
+
+--vytahuju si produkty, které jsou zdražené o více jak 100% => kontrola chybných cen
+create or replace table "suspicious_prices" as
+select "shop"
+	,"itemId"
+	,"itemName"
+	,"itemUrl"
+  ,"slug"
+	,"currentPrice"
+	,"originalPrice"
+	,"officialSale"
+  ,"date"
+    , lag("currentPrice") ignore nulls over (partition by "itemId" order by "date" asc) as "prev"
+    , "currentPrice"/nullifzero("prev") as "narust"
+from "shop_01_unification"
+qualify ("narust" > 100 or "narust" < 0.01)
+	--and "date" >= $ref_date
+order by "date" desc
+;
