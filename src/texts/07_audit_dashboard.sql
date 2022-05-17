@@ -133,6 +133,10 @@ end as "typ_neshody"
 qualify "row_num" <= 400000
 order by "rozdil_slev" desc
 ;
+--next_querry
+alter table "shop_false_discounts" drop column "row_num"
+;
+
 
 --next_querry
 // spreadsheet - 2 záložka navýšené originalPrice (za posledních 30 dní)
