@@ -139,7 +139,7 @@ order by "rozdil_slev" desc
 // omezeno na: změna o víc jak 3% a pouze tam, kde se neshodneme na slevě
 create or replace table "shop_incr_origPrice" as
 select "shop"
-    , "itemId"
+    , "incr"."itemId"
     , "itemName"
     , "prodejni_cena"
     , "refCena_dle_shopu" as "refCena_aktualni"
@@ -150,7 +150,7 @@ select "shop"
     , "sleva_dle_Hlidace"
     , "itemUrl"
     , (to_number("refCena_dle_shopu",12,2) - to_number("refCena_puv",12,2)) as "rozdil_refCen"
-    , row_number() over (partition by "itemId" order by "datum" desc) as "row_num"
+    , row_number() over (partition by "incr"."itemId" order by "datum" desc) as "row_num"
 from
 (select *
     , (lag("refCena_dle_shopu") over (partition by "itemId" order by "datum" asc)) as "refCena_puv"
@@ -160,13 +160,17 @@ from
         else ''
       end as "incr"
 from "shop_30d"
-qualify "refCena_puv" != '' and "refCena_dle_shopu" != '' and "incr" != '')
+qualify "refCena_puv" != '' and "refCena_dle_shopu" != '' and "incr" != '') "incr"
+inner join 
+    (select "itemId"
+    from "shop_current"
+    where "sleva_dle_shopu" >= $tolerance) "disc"
+on "incr"."itemId" = "disc"."itemId"
 qualify "row_num" = 1 and "incr" = 'incr' 
     and ("refCena_aktualni"/"refCena_puvodni")*100-100 > 3
     and abs(to_number("sleva_dle_shopu", 12,2) - try_to_number("sleva_dle_Hlidace",12, 2)) >= $tolerance
 order by "rozdil_refCen" desc
 ;
-
 --next_querry
 alter table "shop_incr_origPrice" drop column "row_num"
 ;
