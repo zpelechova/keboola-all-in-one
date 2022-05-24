@@ -134,7 +134,7 @@ qualify "row_num" <= 400000
 order by "rozdil_slev" desc
 ;
 --next_querry
-alter table "shop_false_discounts" drop column "row_num"
+alter table "shop_incr_origPrice" drop column "row_num"
 ;
 
 
@@ -186,6 +186,10 @@ select case
         else count(distinct("itemId"))
     end as "Produktu_s_navysenou_refCenou"
 from "shop_incr_origPrice"
+;
+
+--next_querry
+alter session set timezone = 'Europe/Prague'
 ;
 
 --next_querry
