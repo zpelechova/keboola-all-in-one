@@ -134,7 +134,7 @@ qualify "row_num" <= 400000
 order by "rozdil_slev" desc
 ;
 --next_querry
-alter table "shop_incr_origPrice" drop column "row_num"
+alter table "shop_false_discounts" drop column "row_num"
 ;
 
 
