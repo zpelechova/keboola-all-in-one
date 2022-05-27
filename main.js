@@ -146,8 +146,7 @@ Apify.main(async () => {
                   //  [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-${shopName}.${shopName}_05_final_s3`],
                   //  [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`],
-                  //  [`out.c-${shopName}.${shopName}_dashboard`, `out.c-${shopName}_07_audit_dashboard.${shopName}_dashboard_history`, `out.c-${shopName}.${shopName}_false_discounts`, `out.c-${shopName}_07_audit_dashboard.${shopName}_false_discounts_history`, `out.c-${shopName}.${shopName}_incr_origPrice`, `out.c-${shopName}_07_audit_dashboard.${shopName}_incr_origPrice_history`
-                  ]
+                  //  [`out.c-${shopName}.${shopName}_dashboard`, `out.c-${shopName}_07_audit_dashboard.${shopName}_dashboard_history`, `out.c-${shopName}.${shopName}_false_discounts`, `out.c-${shopName}_07_audit_dashboard.${shopName}_false_discounts_history`, `out.c-${shopName}.${shopName}_incr_origPrice`, `out.c-${shopName}_07_audit_dashboard.${shopName}_incr_origPrice_history`]
                 ]
 
                 const outputTablesKeys = [
