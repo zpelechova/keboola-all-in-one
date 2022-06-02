@@ -130,12 +130,12 @@ Apify.main(async () => {
                   //  ['shop_01_unification'],
                     ['shop_01_unification'],
                   //  ['shop_01_unification', 'shop_02_refprices'],
-                    ['shop_01_unification', 'shop_02new_refprices'],
+                    ['shop_01_unification', 'shop_02_refprices'],
                   //  ['shop_03_complete'],
                   //  ['shop_03_complete'],
                   //  ['shop_03_complete', 'shop_04_extension', 'shop_05_final_s3'],
                   //  ['shop_03_complete', 'shop_raw']
-                    ['shop_03new_complete', 'shop_raw']
+                    ['shop_03_complete', 'shop_raw']
                 ]
 
                 const outputTablesName = [
@@ -143,7 +143,7 @@ Apify.main(async () => {
                   //  [`shop_${transformation}`],
                     [`shop_${transformation}`],
                   //  [`shop_${transformation}`, `suspicious_prices`],
-                    [`shop_${transformation}`, `suspicious_prices`],
+                    [`shop_${transformation}`],
                   //  [`shop_${transformation}`],
                   //  [`shop_${transformation}`, `shop_05_final_s3`],
                   //  [`shop_s3_metadata`, `shop_s3_pricehistory`],
