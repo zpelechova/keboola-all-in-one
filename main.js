@@ -156,7 +156,7 @@ Apify.main(async () => {
                   //  [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                   //  [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`],
-                    [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices_a`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
                   //  [`out.c-${shopName}.${shopName}_${transformation}`],
                   //  [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-${shopName}.${shopName}_05_final_s3`],
                   //  [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`],
