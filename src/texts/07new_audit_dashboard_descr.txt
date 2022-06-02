@@ -1,0 +1,1 @@
+Prepares data for daily dashboard avaluating number of discounted items, average discount stated / real, false discounts, increased originalPrice. Details on false discounts and increased originalPrice are stored as well as shared via GoogleSheets.
