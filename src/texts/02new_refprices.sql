@@ -115,13 +115,15 @@ FROM (SELECT "date",
              "price_trend",
              row_number() OVER (PARTITION BY "itemId" ORDER BY "date" DESC) AS "row_number"
       FROM "shop_data_filled_labelled"
-      WHERE "price_trend" NOT IN ('steady', 'price_init') and "date" >= dateadd('day', -31,CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+      WHERE "price_trend" NOT IN ('steady', 'price_init')
       ORDER BY "itemId", "date") "t0"
 --WHERE "row_number" = 1
 ;
 --next_querry
 CREATE OR REPLACE TABLE "shop_last_valid_price_change" AS
-select distinct("all"."itemId")
+select *
+from 
+(select distinct("all"."itemId")
     , "all"."date"
     , "all"."currentPrice"
     , "all"."price_trend"
@@ -136,7 +138,9 @@ left join (
     order by "itemId", "date" desc
 ) "up"
 on "all"."itemId" = "up"."itemId"
-qualify "row_number" = ("min_row_up" -1)
+qualify ("row_number" = ("min_row_up" -1) or "row_number" = '1') 
+    and "all"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE))
+qualify "row_number" = max("row_number") over (partition by "itemId")
 ;
 --next_querry
 CREATE or replace TABLE "shop_last_sale_vs_prev_30d_min_price" AS
@@ -151,7 +155,7 @@ FROM "shop_last_valid_price_change" "t0"
                    ON "t0"."itemId" = "t1"."itemId" AND
                       "t1"."date" < "t0"."date" AND -- jen starší záznamy
                       "t1"."date" >= dateadd('day', -30, "t0"."date") -- ne vic jak 30 dní dozadu
-WHERE "t0"."price_trend" = 'down' and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+WHERE "t0"."price_trend" = 'down'-- and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) -- toto si vyřeším o query dřív
 GROUP BY 1, 2, 3, 4
 ;
 --next_querry
@@ -162,4 +166,5 @@ SELECT "c"."itemId",
        CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE as "date"
 FROM "shop_common_price" "c"
 	LEFT JOIN "shop_last_sale_vs_prev_30d_min_price" "eu" ON "c"."itemId" = "eu"."itemId"
+order by "itemId" desc
 ;
