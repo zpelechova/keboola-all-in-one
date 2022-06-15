@@ -3,7 +3,7 @@ set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMES
 --next_querry
 --MAIN TABLE  
 --it uses the last record for given item (and only goes back to history for the same period of time as inc at the very beginning does. 
-CREATE TABLE "shop_04_extension" AS
+CREATE or replace TABLE "shop_04_extension" AS
 
 SELECT "shop" AS "shop"
 	, "slug" AS "itemUrl"
@@ -39,9 +39,9 @@ FROM
 			, "commonPrice"
 			, "minPrice"
 		FROM "shop_03_complete"
-		WHERE "itemId" <> ''
-			OR "slug" <> ''
+		WHERE ("itemId" <> ''
+			OR "slug" <> '')
 		-- here I set a time period for which it checks backwards so that I dont run all of it again. Could 		easily be only for one day.
-		AND "_timestamp" >= $ref_date
+		AND to_date("_timestamp") >= $ref_date
 		)
 WHERE "row_number" = 1;
