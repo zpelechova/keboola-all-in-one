@@ -93,14 +93,14 @@ from
     inner join 
         (select * 
          from "shop_HS_differences" 
-         where "sleva_dle_shopu" > $sleva_hranice and "typ_neshody" != '4 - shop sleva nižší než sleva Hlídač'
+         where to_number("sleva_dle_shopu") > $sleva_hranice and "typ_neshody" != '4 - shop sleva nižší než sleva Hlídač'
     ) "shop"
     on "diff"."itemId" = "shop"."itemId"
 )
 ;
 --next_querry
 create or replace table "avg_disc_shop" as
-select distinct(round(avg("sleva_dle_shopu") over (),2)) as "Prumerna_uvadena_sleva"
+select distinct(round(avg(to_number("sleva_dle_shopu")) over (),2)) as "Prumerna_uvadena_sleva"
       from "shop_current" where to_number("sleva_dle_shopu",12,2) > $sleva_hranice
 ;
 --next_querry
@@ -155,7 +155,7 @@ qualify "refCena_puv" != '' and "refCena_dle_shopu" != '' and "incr" != '') "inc
 inner join 
     (select "itemId"
     from "shop_current"
-    where "sleva_dle_shopu" >= $tolerance) "disc"
+    where to_number("sleva_dle_shopu") >= $tolerance) "disc"
 on "incr"."itemId" = "disc"."itemId"
 qualify "row_num" = 1 and "incr" = 'incr' 
     and ("refCena_aktualni"/"refCena_puvodni")*100-100 > 3
