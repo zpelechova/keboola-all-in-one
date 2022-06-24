@@ -1,20 +1,26 @@
 set ref_date = (select max("date") from "shop_03_complete")
 ;
+
 --next_querry
 set sleva_hranice = 3
 ;
+
 --next_querry
 set tolerance = 3
 ;
+
 --next_querry
 set aktualizace = (select left(max("date"),16) from "shop_raw")
 ;
+
 --next_querry
 set days_back = 30
 ;
+
 --next_querry
 set shop = (select distinct("shopOrigin") from "shop_raw" where left("date",16) = $aktualizace)
 ;
+
 --next_querry
 create or replace table "shop_current" as
 select $shop as "shop"
@@ -33,6 +39,7 @@ select $shop as "shop"
 from "shop_03_complete"
 where "date" = $ref_date
 ;
+
 --next_querry
 create or replace table "shop_30d" as
 select $shop as "shop"
@@ -51,20 +58,16 @@ select $shop as "shop"
 from "shop_03_complete"
 where "date" >= DATEADD("d", - $days_back, $ref_date)
 ;
+
 --next_querry
 create or replace table "shop_HS_differences" as
-select case
-        when (to_number("sleva_dle_shopu") > to_number("sleva_dle_Hlidace") and to_number("sleva_dle_Hlidace") < 0) then '1 - shop sleva, Hlídač zdražení'
-        when (to_number("sleva_dle_shopu") > to_number("sleva_dle_Hlidace") and to_number("sleva_dle_Hlidace") = 0) then '2 - shop sleva, Hlídač bez slevy'
-        when (to_number("sleva_dle_shopu") > to_number("sleva_dle_Hlidace") and to_number("sleva_dle_Hlidace") > 0) then '3 - shop sleva vyšší než sleva Hlídač'
-        when (to_number("sleva_dle_shopu") < to_number("sleva_dle_Hlidace") and to_number("sleva_dle_Hlidace") > 0) then '4 - shop sleva nižší než sleva Hlídač'
-    end as "typ_neshody"
-    , *
+select *
 from "shop_current"
 where abs(to_number("sleva_dle_shopu", 12,2) - try_to_number("sleva_dle_Hlidace",12, 2)) >= $tolerance
 	and to_number("sleva_dle_shopu") != 0
 order by abs(to_number("sleva_dle_shopu", 12,2) - try_to_number("sleva_dle_Hlidace",12, 2)) desc
 ;
+
 --next_querry
 create or replace table "count_items" as
 select distinct("shop")
@@ -72,6 +75,7 @@ select distinct("shop")
     , "datum" as "aktualizace"
 from "shop_current"
 ;
+
 --next_querry
 create or replace table "count_disc_shop" as
 select 
@@ -81,6 +85,7 @@ select
     end as "Produktu_ve_sleve_(shop)"--"count_bf"
 from (select * from "shop_current" where to_number("sleva_dle_shopu",12,2) > $sleva_hranice)
 ;
+
 --next_querry
 create or replace table "count_diff_shop-only" as
 select case
@@ -91,28 +96,34 @@ from
 (    select "diff".*
     from "shop_HS_differences" "diff"
     inner join 
-        (select * 
-         from "shop_HS_differences" 
-         where to_number("sleva_dle_shopu") > $sleva_hranice and "typ_neshody" != '4 - shop sleva nižší než sleva Hlídač'
-    ) "shop"
+        (select * from "shop_HS_differences" where "sleva_dle_shopu" > $sleva_hranice) "shop"
     on "diff"."itemId" = "shop"."itemId"
 )
 ;
+
 --next_querry
 create or replace table "avg_disc_shop" as
-select distinct(round(avg(to_number("sleva_dle_shopu")) over (),2)) as "Prumerna_uvadena_sleva"
+select distinct(round(avg("sleva_dle_shopu") over (),2)) as "Prumerna_uvadena_sleva"
       from "shop_current" where to_number("sleva_dle_shopu",12,2) > $sleva_hranice
 ;
+
 --next_querry
 create or replace table "avg_disc_HS" as
 select distinct(round(avg(try_to_number("sleva_dle_Hlidace",12,2)) over (),2)) as "Prumerna_realna_sleva"
 from "shop_current"
 having to_number("sleva_dle_shopu") > $sleva_hranice
 ;
+
 --next_querry
 // spreadsheet - 1 záložka všechny neshody + označení typu neshody
 create or replace table "shop_false_discounts" as
-select "diff".*
+select case
+        when (to_number("diff"."sleva_dle_shopu") > to_number("diff"."sleva_dle_Hlidace") and to_number("diff"."sleva_dle_Hlidace") < 0) then '1 - shop sleva, Hlídač zdražení'
+        when (to_number("diff"."sleva_dle_shopu") > to_number("diff"."sleva_dle_Hlidace") and to_number("diff"."sleva_dle_Hlidace") = 0) then '2 - shop sleva, Hlídač bez slevy'
+        when (to_number("diff"."sleva_dle_shopu") > to_number("diff"."sleva_dle_Hlidace") and to_number("diff"."sleva_dle_Hlidace") > 0) then '3 - shop sleva vyšší než sleva Hlídač'
+        when (to_number("diff"."sleva_dle_shopu") < to_number("diff"."sleva_dle_Hlidace") and to_number("diff"."sleva_dle_Hlidace") > 0) then '4 - shop sleva nižší než sleva Hlídač'
+end as "typ_neshody"
+    , "diff".*
     , abs(to_number("diff"."sleva_dle_shopu", 12,2) - try_to_number("diff"."sleva_dle_Hlidace",12, 2)) as "rozdil_slev"
     , row_number () over (order by "rozdil_slev" desc) as "row_num"
     from "shop_HS_differences" "diff"
@@ -125,6 +136,8 @@ order by "rozdil_slev" desc
 --next_querry
 alter table "shop_false_discounts" drop column "row_num"
 ;
+
+
 --next_querry
 // spreadsheet - 2 záložka navýšené originalPrice (za posledních 30 dní)
 // omezeno na: změna o víc jak 3% a pouze tam, kde se neshodneme na slevě
@@ -155,7 +168,7 @@ qualify "refCena_puv" != '' and "refCena_dle_shopu" != '' and "incr" != '') "inc
 inner join 
     (select "itemId"
     from "shop_current"
-    where to_number("sleva_dle_shopu") >= $tolerance) "disc"
+    where "sleva_dle_shopu" >= $tolerance) "disc"
 on "incr"."itemId" = "disc"."itemId"
 qualify "row_num" = 1 and "incr" = 'incr' 
     and ("refCena_aktualni"/"refCena_puvodni")*100-100 > 3
@@ -165,6 +178,7 @@ order by "rozdil_refCen" desc
 --next_querry
 alter table "shop_incr_origPrice" drop column "row_num"
 ;
+
 --next_querry
 create or replace table "count_incr_origPrice" as
 select case
@@ -173,9 +187,11 @@ select case
     end as "Produktu_s_navysenou_refCenou"
 from "shop_incr_origPrice"
 ;
+
 --next_querry
 alter session set timezone = 'Europe/Prague'
 ;
+
 --next_querry
 create or replace table "shop_dashboard" as
 select distinct("shop"."shop") as "Shop"

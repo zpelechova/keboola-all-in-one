@@ -51,7 +51,7 @@ FROM "shop_01_unification"
 WHERE to_date("date") >= dateadd('day', -90, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) and "currentPrice" != ''
 ;
 --next_querry
-CREATE TABLE "shop_data_filled_labelled" AS
+CREATE OR REPLACE TABLE "shop_data_filled_labelled" AS
 SELECT "b"."date"                AS "date",
        "b"."itemId"              AS "itemId",
        "b"."merged_currentPrice" AS "currentPrice",
@@ -90,7 +90,7 @@ WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', C
       "currentPrice" IS NOT NULL --tímhle oseknu empty rows u věcí, co jsou nové v tom sledovaném 60d okně
 ;
 --next_querry
-CREATE TABLE "shop_common_price" AS
+CREATE OR REPLACE TABLE "shop_common_price" AS
 SELECT DISTINCT "itemId",
          first_value("currentPrice")
            over (
@@ -103,11 +103,12 @@ FROM (SELECT "itemId",
       GROUP BY 1,2)
 ;
 --next_querry
-CREATE TABLE "shop_last_price_change" AS
+CREATE OR REPLACE TABLE "shop_price_change" AS
 SELECT "t0"."date",
        "t0"."itemId",
        "t0"."currentPrice",
        "t0"."price_trend"
+       , "t0"."row_number"
 FROM (SELECT "date",
              "itemId",
              "currentPrice",
@@ -116,7 +117,30 @@ FROM (SELECT "date",
       FROM "shop_data_filled_labelled"
       WHERE "price_trend" NOT IN ('steady', 'price_init')
       ORDER BY "itemId", "date") "t0"
-WHERE "row_number" = 1
+--WHERE "row_number" = 1
+;
+--next_querry
+CREATE OR REPLACE TABLE "shop_last_valid_price_change" AS
+select *
+from 
+(select distinct("all"."itemId")
+    , "all"."date"
+    , "all"."currentPrice"
+    , "all"."price_trend"
+    , "all"."row_number"
+    , "up"."min_row_up"
+from "shop_price_change" "all"
+left join (
+    select "itemId"
+        , min("row_number") over (partition by "itemId") as "min_row_up"
+    from "shop_price_change"
+    where "price_trend" = 'up'
+    order by "itemId", "date" desc
+) "up"
+on "all"."itemId" = "up"."itemId"
+qualify ("row_number" = ("min_row_up" -1) or "row_number" = '1') 
+    and "all"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE))
+qualify "row_number" = max("row_number") over (partition by "itemId")
 ;
 --next_querry
 CREATE or replace TABLE "shop_last_sale_vs_prev_30d_min_price" AS
@@ -125,21 +149,22 @@ SELECT "t0"."date",
        "t0"."currentPrice",
        "t0"."price_trend",
        min("t1"."currentPrice") AS "min_currentPrice"
-FROM "shop_last_price_change" "t0"
+FROM "shop_last_valid_price_change" "t0"
          LEFT JOIN (SELECT *
                     FROM "shop_data_filled_labelled") "t1"
                    ON "t0"."itemId" = "t1"."itemId" AND
                       "t1"."date" < "t0"."date" AND -- jen starší záznamy
                       "t1"."date" >= dateadd('day', -30, "t0"."date") -- ne vic jak 30 dní dozadu
-WHERE "t0"."price_trend" = 'down' and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+WHERE "t0"."price_trend" = 'down'-- and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) -- toto si vyřeším o query dřív
 GROUP BY 1, 2, 3, 4
 ;
 --next_querry
-CREATE TABLE "shop_02_refprices" AS
+CREATE OR REPLACE TABLE "shop_02_refprices" AS
 SELECT "c"."itemId",
        "commonPrice",
        "min_currentPrice" as "minPrice",
        CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE as "date"
 FROM "shop_common_price" "c"
 	LEFT JOIN "shop_last_sale_vs_prev_30d_min_price" "eu" ON "c"."itemId" = "eu"."itemId"
+order by "itemId" desc
 ;

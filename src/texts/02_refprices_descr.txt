@@ -1,1 +1,1 @@
-Counts referral prices: **minPrice** as the lowest price for 30 days prior last price change,  **commonPrice** as the most frequest price during last 90 days.
+Counts referral prices: **minPrice** as the lowest price for 30 days prior last price change,  **commonPrice** as the most frequest price during last 60 days. NEW: respects gradual discounts - counting with refPrice based on first price drop 30 days prior today.
