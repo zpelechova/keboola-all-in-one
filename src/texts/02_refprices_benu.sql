@@ -7,6 +7,7 @@
 CREATE OR REPLACE TABLE "allItemIds" AS
 SELECT DISTINCT
        "itemId"
+       , "slug"
 FROM "shop_01_unification"
 WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
@@ -43,6 +44,7 @@ FROM "gendate"
  */
 CREATE OR REPLACE TABLE "shop_data" AS
 SELECT "itemId",
+			"slug",
        "currentPrice"::DECIMAL(12,2) as "currentPrice",
        "date"
 FROM "shop_01_unification"
@@ -54,35 +56,39 @@ WHERE to_date("date") >= dateadd('day', -90, CONVERT_TIMEZONE('Europe/Prague', C
 CREATE OR REPLACE TABLE "shop_data_filled_labelled" AS
 SELECT "b"."date"                AS "date",
        "b"."itemId"              AS "itemId",
+       "b"."slug"              AS "slug",
        "b"."merged_currentPrice" AS "currentPrice",
        "filled_row",
        --lag("merged_currentPrice") OVER (PARTITION BY "itemId" ORDER BY "date") AS "prev_price",
        CASE
-           WHEN "currentPrice" < lag("merged_currentPrice") OVER (PARTITION BY "itemId" ORDER BY "date")
+           WHEN "currentPrice" < lag("merged_currentPrice") OVER (PARTITION BY "itemId", "slug" ORDER BY "date")
                THEN 'down'
-           WHEN "currentPrice" > lag("merged_currentPrice") OVER (PARTITION BY "itemId" ORDER BY "date")
+           WHEN "currentPrice" > lag("merged_currentPrice") OVER (PARTITION BY "itemId", "slug" ORDER BY "date")
                THEN 'up'
-           WHEN "currentPrice" = lag("merged_currentPrice") OVER (PARTITION BY "itemId" ORDER BY "date")
+           WHEN "currentPrice" = lag("merged_currentPrice") OVER (PARTITION BY "itemId", "slug" ORDER BY "date")
                THEN 'steady'
-           WHEN lag("merged_currentPrice") OVER (PARTITION BY "itemId" ORDER BY "date") IS NULL
+           WHEN lag("merged_currentPrice") OVER (PARTITION BY "itemId", "slug" ORDER BY "date") IS NULL
                THEN 'price_init'
            ELSE 'err' END        AS "price_trend"
 FROM (
          SELECT
              "a"."date",
              "a"."itemId",
+  					 "a"."slug",
              "a"."currentPrice"                                                            AS "original_currentPrice",
-             lag("currentPrice") IGNORE NULLS OVER (PARTITION BY "itemId" ORDER BY "date") AS "gapfilled_currentPrice",
+             lag("currentPrice") IGNORE NULLS OVER (PARTITION BY "itemId", "slug" ORDER BY "date") AS "gapfilled_currentPrice",
              IFF("original_currentPrice" IS NULL, "gapfilled_currentPrice",
                  "original_currentPrice")                                                  AS "merged_currentPrice",
              IFF("original_currentPrice" IS NULL, '0', '1')                                AS "filled_row"
          FROM (
                   SELECT "all_dates_items"."itemId"  AS "itemId",
+           							 "all_dates_items"."slug"  AS "slug",
                          "all_dates_items"."GENDATE" AS "date",
                          "shop_data"."currentPrice"
                   FROM "all_dates_items"
                            LEFT JOIN "shop_data" ON "all_dates_items"."GENDATE" = "shop_data"."date" AND
-                                                    "all_dates_items"."itemId" = "shop_data"."itemId"
+                                                    "all_dates_items"."itemId" = "shop_data"."itemId" AND
+           																					"all_dates_items"."slug" = "shop_data"."slug"
                   ORDER BY "all_dates_items"."itemId", "all_dates_items"."GENDATE"
               ) "a"
      ) "b"
@@ -92,28 +98,32 @@ WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', C
 --next_querry
 CREATE OR REPLACE TABLE "shop_common_price" AS
 SELECT DISTINCT "itemId",
+				"slug",
          first_value("currentPrice")
            over (
-             PARTITION BY "itemId"
+             PARTITION BY "itemId", "slug"
              ORDER BY "samplesCount" DESC) AS "commonPrice"
 FROM (SELECT "itemId",
+      				"slug",
           	 "currentPrice",
           	 count("date") AS "samplesCount"
       FROM   "shop_data_filled_labelled"
-      GROUP BY 1,2)
+      GROUP BY 1,2,3)
 ;
 --next_querry
 CREATE OR REPLACE TABLE "shop_price_change" AS
 SELECT "t0"."date",
        "t0"."itemId",
+       "t0"."slug",
        "t0"."currentPrice",
        "t0"."price_trend"
        , "t0"."row_number"
 FROM (SELECT "date",
              "itemId",
+      			 "slug",
              "currentPrice",
              "price_trend",
-             row_number() OVER (PARTITION BY "itemId" ORDER BY "date" DESC) AS "row_number"
+             row_number() OVER (PARTITION BY "itemId", "slug" ORDER BY "date" DESC) AS "row_number"
       FROM "shop_data_filled_labelled"
       WHERE "price_trend" NOT IN ('steady', 'price_init')
       ORDER BY "itemId", "date") "t0"
@@ -124,53 +134,51 @@ CREATE OR REPLACE TABLE "shop_last_valid_price_change" AS
 select *
 from 
 (select distinct("all"."itemId")
+ 		, "all"."slug"
     , "all"."date"
     , "all"."currentPrice"
     , "all"."price_trend"
     , "all"."row_number"
-    , coalesce("up"."min_row_up", "down"."max_row_down_plus1") as "break_row"
+    , "up"."min_row_up"
 from "shop_price_change" "all"
 left join (
     select "itemId"
-        , min("row_number") over (partition by "itemId") as "min_row_up"
+  			, "slug"
+        , min("row_number") over (partition by "itemId", "slug") as "min_row_up"
     from "shop_price_change"
     where "price_trend" = 'up'
+    order by "itemId", "date" desc
 ) "up"
-on "all"."itemId" = "up"."itemId"
-left join (
-    select distinct("itemId")
-        , (max("row_number") over (partition by "itemId")) + 1 as "max_row_down_plus1"
-    from "shop_price_change"
-) "down"
-on "all"."itemId" = "down "."itemId"
-having "all"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
-    and ("row_number" = (to_number("break_row") -1)  or "row_number" = 1)
-    )
-qualify "row_number" = max("row_number") over (partition by "itemId")
+on "all"."itemId" = "up"."itemId" and "all"."slug" = "up"."slug"
+qualify ("row_number" = ("min_row_up" -1) or "row_number" = '1') 
+    and "all"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE))
+qualify "row_number" = max("row_number") over (partition by "itemId", "slug")
 ;
 --next_querry
 CREATE or replace TABLE "shop_last_sale_vs_prev_30d_min_price" AS
 SELECT "t0"."date",
        "t0"."itemId",
+       "t0"."slug",
        "t0"."currentPrice",
        "t0"."price_trend",
        min("t1"."currentPrice") AS "min_currentPrice"
 FROM "shop_last_valid_price_change" "t0"
          LEFT JOIN (SELECT *
                     FROM "shop_data_filled_labelled") "t1"
-                   ON "t0"."itemId" = "t1"."itemId" AND
+                   ON "t0"."itemId" = "t1"."itemId" AND "t0"."slug" = "t1"."slug" AND
                       "t1"."date" < "t0"."date" AND -- jen starší záznamy
                       "t1"."date" >= dateadd('day', -30, "t0"."date") -- ne vic jak 30 dní dozadu
 WHERE "t0"."price_trend" = 'down'-- and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) -- toto si vyřeším o query dřív
-GROUP BY 1, 2, 3, 4
+GROUP BY 1, 2, 3, 4,5
 ;
 --next_querry
 CREATE OR REPLACE TABLE "shop_02_refprices" AS
 SELECT "c"."itemId",
+			"c"."slug",
        "commonPrice",
        "min_currentPrice" as "minPrice",
        CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE as "date"
 FROM "shop_common_price" "c"
-	LEFT JOIN "shop_last_sale_vs_prev_30d_min_price" "eu" ON "c"."itemId" = "eu"."itemId"
+	LEFT JOIN "shop_last_sale_vs_prev_30d_min_price" "eu" ON "c"."itemId" = "eu"."itemId" and "c"."slug" = "eu"."slug"
 order by "itemId" desc
 ;
