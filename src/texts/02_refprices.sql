@@ -131,18 +131,18 @@ from
     , coalesce("up"."min_row_up", "down"."max_row_down_plus1") as "break_row"
 from "shop_price_change" "all"
 left join (
-    select "itemId"
+    select "itemId" as "itemId"
         , min("row_number") over (partition by "itemId") as "min_row_up"
     from "shop_price_change"
     where "price_trend" = 'up'
 ) "up"
 on "all"."itemId" = "up"."itemId"
 left join (
-    select distinct("itemId")
+    select distinct("itemId") as "itemId"
         , (max("row_number") over (partition by "itemId")) + 1 as "max_row_down_plus1"
     from "shop_price_change"
 ) "down"
-on "all"."itemId" = "down "."itemId"
+on "all"."itemId" = "down"."itemId"
 having "all"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
     and ("row_number" = (to_number("break_row") -1)  or "row_number" = 1)
     )
