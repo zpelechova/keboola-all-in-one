@@ -239,6 +239,7 @@ SELECT
         and "tof"."itemId" in (select distinct("itemId")
                     from "temp_final"
                     where "type2" = 'nechat' and "d" > $ref_date)
+        and "commonPrice" != ''
     GROUP BY
         "tof"."itemId", "slug", "shop_id", "commonPrice", "minPrice"
 ;
