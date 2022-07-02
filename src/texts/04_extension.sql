@@ -24,8 +24,9 @@ FROM
 			, "itemName" AS "itemName"
 			, "itemImage" AS "itemImage"
 		FROM "shop_03_complete"
-		WHERE ("itemId" <> ''
-			OR "slug" <> '')
+		WHERE ("itemId" != ''
+			and "slug" != ''
+      and "commonPrice" != '')
 		-- here I set a time period for which it checks backwards so that I dont run all of it again. Could 		easily be only for one day.
 		AND to_date("_timestamp") >= $ref_date
 		)
