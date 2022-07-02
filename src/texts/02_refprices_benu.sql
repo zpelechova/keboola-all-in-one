@@ -11,6 +11,7 @@ SELECT DISTINCT
 FROM "shop_01_unification"
 WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
+
 --next_querry
 /*
     tohle mi vytvoří řadu čísel - je pak použiju v kartézáku s posledním (max) dnem v shop datech, abych
@@ -21,6 +22,7 @@ CREATE OR REPLACE TABLE "sekvence" AS
 select row_number() over (order by seq2()) as "seq"
 from table(generator(rowcount => 91))
 ;
+
 --next_querry
 CREATE OR REPLACE TABLE "gendate" AS
 SELECT DATEADD(DAY, -("seq"."seq"-1), "DAY") :: DATE AS "GENDATE"
@@ -29,6 +31,7 @@ FROM (SELECT MAX("date" :: DATE) AS "DAY"
          LEFT JOIN "sekvence" "seq"
 ORDER BY 1
 ;
+
 --next_querry
 /*
     teď dělám tabulku, na kterou pak najoinuju děravý data v alze
@@ -38,6 +41,7 @@ SELECT *
 FROM "gendate"
          LEFT JOIN "allItemIds"
 ;
+
 --next_querry
 /*
     s těmahle datama z alzy budu dělat megajoin :)
@@ -52,6 +56,7 @@ FROM "shop_01_unification"
 --90 proto, že někde na začátku -60 dní mohou být díry, tak jdu dozadu
 WHERE to_date("date") >= dateadd('day', -90, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) and "currentPrice" != ''
 ;
+
 --next_querry
 CREATE OR REPLACE TABLE "shop_data_filled_labelled" AS
 SELECT "b"."date"                AS "date",
@@ -95,6 +100,7 @@ FROM (
 WHERE to_date("date") >= dateadd('day', -60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) AND
       "currentPrice" IS NOT NULL --tímhle oseknu empty rows u věcí, co jsou nové v tom sledovaném 60d okně
 ;
+
 --next_querry
 CREATE OR REPLACE TABLE "shop_common_price" AS
 SELECT DISTINCT "itemId",
@@ -110,6 +116,7 @@ FROM (SELECT "itemId",
       FROM   "shop_data_filled_labelled"
       GROUP BY 1,2,3)
 ;
+
 --next_querry
 CREATE OR REPLACE TABLE "shop_price_change" AS
 SELECT "t0"."date",
@@ -129,6 +136,7 @@ FROM (SELECT "date",
       ORDER BY "itemId", "date") "t0"
 --WHERE "row_number" = 1
 ;
+
 --next_querry
 CREATE OR REPLACE TABLE "shop_last_valid_price_change" AS
 select *
@@ -139,7 +147,7 @@ from
     , "all"."currentPrice"
     , "all"."price_trend"
     , "all"."row_number"
-    , "up"."min_row_up"
+    , coalesce("up"."min_row_up", "down"."max_row_down_plus1") as "break_row"
 from "shop_price_change" "all"
 left join (
     select "itemId"
@@ -147,13 +155,21 @@ left join (
         , min("row_number") over (partition by "itemId", "slug") as "min_row_up"
     from "shop_price_change"
     where "price_trend" = 'up'
-    order by "itemId", "date" desc
 ) "up"
 on "all"."itemId" = "up"."itemId" and "all"."slug" = "up"."slug"
-qualify ("row_number" = ("min_row_up" -1) or "row_number" = '1') 
-    and "all"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE))
+left join (
+    select distinct("itemId") as "itemId"
+  			, "slug"
+        , (max("row_number") over (partition by "itemId")) + 1 as "max_row_down_plus1"
+    from "shop_price_change"
+) "down"
+on "all"."itemId" = "down"."itemId" and "all"."slug" = "down"."slug"
+having "all"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+    and ("row_number" = (to_number("break_row") -1)  or "row_number" = 1)
+    )
 qualify "row_number" = max("row_number") over (partition by "itemId", "slug")
 ;
+
 --next_querry
 CREATE or replace TABLE "shop_last_sale_vs_prev_30d_min_price" AS
 SELECT "t0"."date",
@@ -171,6 +187,7 @@ FROM "shop_last_valid_price_change" "t0"
 WHERE "t0"."price_trend" = 'down'-- and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) -- toto si vyřeším o query dřív
 GROUP BY 1, 2, 3, 4,5
 ;
+
 --next_querry
 CREATE OR REPLACE TABLE "shop_02_refprices" AS
 SELECT "c"."itemId",

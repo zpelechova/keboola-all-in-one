@@ -1,7 +1,11 @@
+/* ===== BLOCK: Codeblock - 05_pricehistory ===== */
+
+/* ===== CODE: Shop 05_pricehistory ===== */
+
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
 set ref_date = DATEADD("d", - 2000, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
---next_querry
+
 -- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
 
 /*
@@ -17,6 +21,7 @@ CREATE or replace TABLE "all_shops_dedupe_days" AS
  */
 SELECT
     "t0"."itemId"                                                                    AS "itemId",
+    "t0"."slug"                                                                    AS "slug",
     "t0"."date"                                                                     AS "date",
     REPLACE(IFF("t0"."currentPrice" IS NULL, '', "t0"."currentPrice"), '.00', '')   AS "currentPrice",
     REPLACE(IFF("t0"."originalPrice" IS NULL, '', "t0"."originalPrice"), '.00', '') AS "originalPrice"
@@ -28,18 +33,19 @@ SELECT
             */
             SELECT
                 "itemId"                                                                                     AS "itemId",
+          		  "slug"                                                                                     AS "slug",
                 "date"                                                                                      AS "date",
                 to_char(try_to_number("currentPrice", 20, 2))                                               AS "currentPrice",
                 to_char(try_to_number("originalPrice", 20, 2))                                              AS "originalPrice",
                 row_number()
-                OVER (PARTITION BY "itemId", "date"::DATE ORDER BY try_to_number("currentPrice", 20, 2) ASC) AS "row_number"
+                OVER (PARTITION BY "itemId", "slug", "date"::DATE ORDER BY try_to_number("currentPrice", 20, 2) ASC) AS "row_number"
                 FROM
                     "shop_03_complete"
         ) "t0"
     WHERE
         "t0"."row_number" = 1
 ;
---next_querry
+
 /*
     - tohle vyrobí tabulku kde je důležitý sloupec "type"
     - slouží pro "emulaci" stavového stroje
@@ -48,6 +54,7 @@ SELECT
 CREATE or replace TABLE "produkty" AS
 SELECT
     "a"."itemId"          AS "itemId",
+    "a"."slug"          AS "slug",
     "dd"."min_d"         AS "min_d", --pro budoucí omezení kartézáku
     "dd"."max_d"         AS "max_d", --pro budoucí omezení kartézáku
     "a"."d"              AS "d",
@@ -76,6 +83,7 @@ SELECT
              */
             SELECT DISTINCT
                 "itemId"                                                                                        AS "itemId",
+          			"slug"                                                                                        AS "slug",
                 "date"::DATE                                                                                   AS "d",
                 "originalPrice"                                                                                AS "o",
                 "currentPrice"                                                                                 AS "c"
@@ -94,6 +102,7 @@ SELECT
              */
             SELECT
                 "itemId",
+                "slug",
                 MIN("date") AS "min_d",
                 case
                     when to_date(max("date")) < CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE then DATEADD("d", +1, max("date"))::date
@@ -101,9 +110,9 @@ SELECT
                 end AS "max_d"  
             FROM "all_shops_dedupe_days"
                 GROUP BY
-                    "itemId") "dd" ON "dd"."itemId" = "a"."itemId"
+                    "itemId", "slug") "dd" ON "dd"."itemId" = "a"."itemId" and "dd"."slug" = "a"."slug"
 ;
---next_querry
+
 /*
     - tohle mi generuje sekvenci datumů
     - základní účel je gap filling prázdných datumů
@@ -126,7 +135,7 @@ SELECT
                                 MAX("d")
                                 FROM "produkty"))
 ;
---next_querry
+
 /*
     tady mám tabulku všech datumů a všech itemId a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
@@ -143,7 +152,7 @@ create or replace table "temp_final" as
                    --LAG("type") OVER (PARTITION BY "itemId" ORDER BY "d"::DATE ASC) AS "type_lag",
                    --iff("type" = "type_lag", 'smazat', 'nechat')                   AS "type2_padak"
                    , case
-                    when lag("bothPrice") over (partition by "itemId" order by "d" asc) = "bothPrice" then 'smazat'
+                    when lag("bothPrice") over (partition by "itemId", "slug" order by "d" asc) = "bothPrice" then 'smazat'
                     else 'nechat'
                     end as "type2"
                 FROM
@@ -156,6 +165,7 @@ create or replace table "temp_final" as
                          */
                         SELECT
                             "t1"."itemId"                                         AS "itemId",
+                      		  "t1"."slug"                                         AS "slug",
                             "t1"."DateSeq"                                       AS "d",
                             /*
                              - dohoda z whatsapp je, že <null> bude prázdný string
@@ -178,7 +188,8 @@ create or replace table "temp_final" as
                                      */
                                     SELECT
                                         "s"."DateSeq",
-                                        "p"."itemId"
+                                        "p"."itemId",
+                                  			"p"."slug"
                                         FROM
                                             "sekvence" "s"
                                                 FULL JOIN (
@@ -187,21 +198,23 @@ create or replace table "temp_final" as
                                                  */
                                                 SELECT DISTINCT
                                                     "itemId",
+                                                  	"slug",
                                                     "min_d",
                                                     "max_d"
                                                     FROM "produkty") "p"
                                                           ON "s"."DateSeq" >= "p"."min_d" AND "s"."DateSeq" <= "p"."max_d"
                                 ) "t1"
                                     LEFT JOIN "produkty" "t2"
-                                              ON "t1"."itemId" = "t2"."itemId" AND "t2"."d" = "t1"."DateSeq"
+                                              ON "t1"."itemId" = "t2"."itemId" AND "t1"."slug" = "t2"."slug" AND "t2"."d" = "t1"."DateSeq"
                     ) "tf"
                 ORDER BY
                     "itemId", "d"
 ;
---next_querry
+
 -- Pro doplnění do výstupních tabulek zjišťuji last_valu of slug a last_valu of p_key, rovnou přeformátovávám "shop"
 create or replace table "slug" as
 select distinct("itemId" )
+		, "slug" as "slug_temp"
     , case
         when "shop" like '%_cz' then replace("shop",'_cz','.cz')
         when "shop" like '%.cz' then "shop"
@@ -209,34 +222,64 @@ select distinct("itemId" )
         when "shop" like '%.sk' then "shop"
         else "shop"||'.cz'
       end as "shop_id"
-    , last_value("slug") ignore nulls over (partition by "itemId" order by "date" asc) as "slug"
-    , last_value("p_key") ignore nulls over (partition by "itemId" order by "date" asc) as "p_key"
+    , last_value("slug") ignore nulls over (partition by "itemId", "slug" order by "date" asc) as "slug"
+    , last_value("p_key") ignore nulls over (partition by "itemId", "slug" order by "date" asc) as "p_key"
 from "shop_03_complete"
-where "slug" != ''
+--where "slug" != ''
 ;
---next_querry
+
+CREATE or replace TABLE "shop_05_pricehistory" AS
+/*
+ - tohle už je jen očištění a filtrace
+ - asi by to mohlo být všechno dohromady v jedné query, ale líp se mi to v DataGripu čte
+ - poslední co tady vyrobím, je json pro DynamoDB
+   - sestavím objekty pro každý den a zagreguju je do pole
+   - je důležité, aby to předtím bylo seřazené - viz ORDER BY dole
+ */
+SELECT
+    "s"."p_key"                                      AS "p_key",
+    /*
+     - objekt obsahuje date,originalPrice,currentPrice - seknuté na první písmenka, aby byl json menší
+     - array to groupne pro itemId a WITHIN GROUP je tady jen pro pořadí datumů
+     - na char to převádím proto, že v Storage API není podpora VARIANTu
+     */
+    to_char(array_agg(
+            object_construct(
+                    'd', "tof"."d",
+                    'o', "tof"."origP",
+                    'c', "tof"."currP"
+                )
+        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
+    FROM "temp_final" "tof"
+    left join "slug" "s"
+    on "s"."itemId" = "tof"."itemId" and "s"."slug_temp" = "tof"."slug"
+    WHERE
+        "type2" = 'nechat' and "p_key" is not null and "p_key" != ''
+    GROUP BY
+        "p_key"
+;
+
 CREATE or replace TABLE "shop_05_final_s3" AS
 SELECT
-    "tof"."itemId"                AS "itemId"
-    , "slug"                      AS "slug"
-    , "shop_id"                   AS "shop_id"
+    "tof"."itemId"                                      AS "itemId"
+    , "s"."slug"
+    , "shop_id"
     ,to_char(array_agg(
             object_construct_KEEP_NULL(
                     'd', "tof"."d",
                     'o', try_to_number("tof"."origP",12,2),
                     'c', try_to_number("tof"."currP",12,2)
                 )
-        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC))  AS "json"
-    , try_to_number("s"."commonPrice",12,2)             AS "commonPrice"
-    , try_to_number("s"."minPrice",12,2)                AS "minPrice"
+        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
     FROM "temp_final" "tof"
     left join "slug" "s"
-    on "s"."itemId" = "tof"."itemId"
+    on "s"."itemId" = "tof"."itemId" and "s"."slug_temp" = "tof"."slug"
     WHERE
-        "type2" = 'nechat'  and "slug" != '' and "slug" is not null
+        "type2" = 'nechat'  and "s"."slug" != '' and "s"."slug" is not null
         and "tof"."itemId" in (select distinct("itemId")
                     from "temp_final"
                     where "type2" = 'nechat' and "d" > $ref_date)
     GROUP BY
-        "tof"."itemId", "slug", "shop_id", "commonPrice", "minPrice"
+        "tof"."itemId", "s"."slug", "shop_id"
 ;
+

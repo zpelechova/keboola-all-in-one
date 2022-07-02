@@ -212,23 +212,52 @@ select distinct("itemId" )
     , last_value("slug") ignore nulls over (partition by "itemId" order by "date" asc) as "slug"
     , last_value("p_key") ignore nulls over (partition by "itemId" order by "date" asc) as "p_key"
 from "shop_03_complete"
-where "slug" != ''
+--where "slug" != ''
+;
+--next_querry
+CREATE or replace TABLE "shop_05_pricehistory" AS
+/*
+ - tohle už je jen očištění a filtrace
+ - asi by to mohlo být všechno dohromady v jedné query, ale líp se mi to v DataGripu čte
+ - poslední co tady vyrobím, je json pro DynamoDB
+   - sestavím objekty pro každý den a zagreguju je do pole
+   - je důležité, aby to předtím bylo seřazené - viz ORDER BY dole
+ */
+SELECT
+    "s"."p_key"                                      AS "p_key",
+    /*
+     - objekt obsahuje date,originalPrice,currentPrice - seknuté na první písmenka, aby byl json menší
+     - array to groupne pro itemId a WITHIN GROUP je tady jen pro pořadí datumů
+     - na char to převádím proto, že v Storage API není podpora VARIANTu
+     */
+    to_char(array_agg(
+            object_construct(
+                    'd', "tof"."d",
+                    'o', "tof"."origP",
+                    'c', "tof"."currP"
+                )
+        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
+    FROM "temp_final" "tof"
+    left join "slug" "s"
+    on "s"."itemId" = "tof"."itemId"
+    WHERE
+        "type2" = 'nechat' and "p_key" is not null and "p_key" != ''
+    GROUP BY
+        "p_key"
 ;
 --next_querry
 CREATE or replace TABLE "shop_05_final_s3" AS
 SELECT
-    "tof"."itemId"                AS "itemId"
-    , "slug"                      AS "slug"
-    , "shop_id"                   AS "shop_id"
+    "tof"."itemId"                                      AS "itemId"
+    , "slug"
+    , "shop_id"
     ,to_char(array_agg(
             object_construct_KEEP_NULL(
                     'd', "tof"."d",
                     'o', try_to_number("tof"."origP",12,2),
                     'c', try_to_number("tof"."currP",12,2)
                 )
-        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC))  AS "json"
-    , try_to_number("s"."commonPrice",12,2)             AS "commonPrice"
-    , try_to_number("s"."minPrice",12,2)                AS "minPrice"
+        ) WITHIN GROUP (ORDER BY "tof"."d"::DATE ASC)) AS "json"
     FROM "temp_final" "tof"
     left join "slug" "s"
     on "s"."itemId" = "tof"."itemId"
@@ -238,5 +267,5 @@ SELECT
                     from "temp_final"
                     where "type2" = 'nechat' and "d" > $ref_date)
     GROUP BY
-        "tof"."itemId", "slug", "shop_id", "commonPrice", "minPrice"
+        "tof"."itemId", "slug", "shop_id"
 ;

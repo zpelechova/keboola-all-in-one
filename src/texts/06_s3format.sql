@@ -1,4 +1,4 @@
-set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD("d", - 180, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 --next_querry
 create or replace table "shop_s3_metadata" as
@@ -9,15 +9,13 @@ select case
         when "shop" like '%.sk' then "shop"
         else "shop"||'.cz'
       end as "shop_id"
-	, "itemUrl" as "slug"
+	, "slug"
   , "itemId"
 	, "itemName"
 	, "itemImage"
-  , "commonPrice"
-	, "minPrice"
 from "shop_04_extension"
-where "slug" != 'null' and "commonPrice" != 'null' and "pkey" in
-    (   select distinct("pkey")
+where "slug" != 'null' and "slug" in
+    (   select distinct("slug")
         from "shop_04_extension"
         where left("_timestamp",10) > $ref_date
     )
@@ -26,7 +24,16 @@ where "slug" != 'null' and "commonPrice" != 'null' and "pkey" in
 create or replace table "shop_s3_pricehistory" as
 select "shop_id"
     , "slug"
-    , "json"
-from "shop_05_final_s3"
-where left("_timestamp",10) > $ref_date and "slug" is not null and "slug" != ''
+    ,to_char(object_construct_KEEP_NULL(
+                    'entries', parse_json("json"),
+                    'commonPrice', try_to_number("commonPrice",12,2),
+                    'minPrice', try_to_number("minPrice",12,2)
+                ))
+        AS "json"
+from "shop_05_final_s3" "ph"
+where left("_timestamp",10) > $ref_date and
+    "slug" is not null and "slug" != ''
+GROUP BY
+        "itemId", "slug", "shop_id", "json", "commonPrice", "minPrice"
 ;
+
