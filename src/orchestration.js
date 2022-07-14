@@ -202,7 +202,7 @@ export async function updateOrchestrationTriggers (
         runWithTokenId: orchestrationTokenId,
         component: 'orchestrator',
         configurationId: orchestrationId,
-        coolDownPeriodMinutes: 60,
+        coolDownPeriodMinutes: 120,
         'tableIds[0]': `in.c-black-friday.${shopName}`
     }
 

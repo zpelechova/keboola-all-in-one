@@ -17,8 +17,6 @@ select case
   , "itemId"
 	, "itemName"
 	, "itemImage"
-  , "commonPrice"
-	, "minPrice"
 from "shop_04_extension"
 where "slug" != 'null' and "commonPrice" != 'null' and "pkey" in
     (   select distinct("pkey")

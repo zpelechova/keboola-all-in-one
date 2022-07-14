@@ -3,6 +3,6 @@ Further data optimization for dynamo DB.
 For every item it **creates a json object which contains price history**. Price history has three subparts, c = currentPrice, o = originalPrice, d = date.
 It lists last value of **commonPrice** as well as **minPrice**.
 
-Due to price optimization it only saves changes (and first three and last date even if there is no change) in either current or original price.
+Due to price optimization it only saves changes (plus first date) in either current or original price.
 
 It also fills in dates when there is no information (leaving them blank - so that it is not compact in the graph) and takes the minimum current price for an item in a day.

@@ -163,8 +163,8 @@ Apify.main(async () => {
                   //  [true],
                   //  [true],
                   //  [true, true],
-                    [false], //[true] --extension
-                    [false], //[true] --pricehistory
+                    [true],
+                    [true],
                     [false, false]
                   //  [false, true, false, true, false, true]
                 ]

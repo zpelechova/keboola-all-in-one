@@ -1,7 +1,3 @@
-/* ===== BLOCK: Codeblock - 04_extension ===== */
-
-/* ===== CODE: Shop 04_extension ===== */
-
 set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 
