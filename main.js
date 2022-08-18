@@ -101,7 +101,7 @@ Apify.main(async () => {
                 '03_complete',
                 '04_extension',
                 '05_pricehistory',
-                '06_s3format'
+                '06_s3format',
                 '07_audit_dashboard'
                 //'00_preparation' // only for shops with feed and/or unitPrice items
             ]
@@ -115,7 +115,7 @@ Apify.main(async () => {
                     [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
-                    [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_final_s3`]
+                    [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_final_s3`],
                     [`out.c-${shopName}.${shopName}_03_complete`, `in.c-black-friday.${shopName}`]
                 ]
 
@@ -125,7 +125,7 @@ Apify.main(async () => {
                     ['shop_01_unification', 'shop_02_refprices'],
                     ['shop_03_complete'],
                     ['shop_03_complete'],
-                    ['shop_04_extension', 'shop_05_final_s3']
+                    ['shop_04_extension', 'shop_05_final_s3'],
                     ['shop_03_complete', 'shop_raw']
                 ]
 
@@ -135,7 +135,7 @@ Apify.main(async () => {
                     [`shop_${transformation}`, `suspicious_prices`],
                     [`shop_${transformation}`],
                     [`shop_05_final_s3`],
-                    [`shop_s3_metadata`, `shop_s3_pricehistory`]
+                    [`shop_s3_metadata`, `shop_s3_pricehistory`],
                     [`shop_dashboard`, `shop_dashboard`, `shop_false_discounts`, `shop_false_discounts`, `shop_incr_origPrice`, `shop_incr_origPrice`]
                 ]
 
@@ -145,7 +145,7 @@ Apify.main(async () => {
                     [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_05_final_s3`],
-                    [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
+                    [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`],
                     [`out.c-${shopName}.${shopName}_dashboard`, `out.c-${shopName}_07_audit_dashboard.${shopName}_dashboard_history`, `out.c-${shopName}.${shopName}_false_discounts`, `out.c-${shopName}_07_audit_dashboard.${shopName}_false_discounts_history`, `out.c-${shopName}.${shopName}_incr_origPrice`, `out.c-${shopName}_07_audit_dashboard.${shopName}_incr_origPrice_history`]
                 ]
 
@@ -155,7 +155,7 @@ Apify.main(async () => {
                     [['itemId', 'date'], ['itemId', 'date', 'shop']],
                     [['itemId']],
                     [['itemId']],
-                    [['slug'], ['slug']]
+                    [['slug'], ['slug']],
                     [[], ['Aktualizace'], ['itemId'], ['itemId', 'datum'], ['itemId'], ['itemId', 'datum_zmeny_refCeny']]
                 ]
 
@@ -165,7 +165,7 @@ Apify.main(async () => {
                     [true, true],
                     [true],
                     [true],
-                    [false, false]
+                    [false, false],
                     [false, true, false, true, false, true]
                 ]
                 const transformationId = await trans.getOrCreateTransformation(
