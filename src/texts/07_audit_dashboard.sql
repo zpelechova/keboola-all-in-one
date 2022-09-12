@@ -13,7 +13,7 @@ set aktualizace = (select left(max("date"),16) from "shop_raw")
 set days_back = 30
 ;
 --next_querry
-set shop = (select distinct("shopOrigin") from "shop_raw" where left("date",16) = $aktualizace)
+set shop = (select distinct("shopOrigin") from "shop_raw" where left("date",16) = $aktualizace and "shopOrigin" != '')
 ;
 --next_querry
 create or replace table "shop_current" as
