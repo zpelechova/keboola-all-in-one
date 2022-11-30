@@ -2,7 +2,7 @@
 
 /* ===== CODE: Shop 06_s3format ===== */
 
-set ref_date = DATEADD("d", - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD('day', - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 
 create or replace table "shop_s3_metadata" as

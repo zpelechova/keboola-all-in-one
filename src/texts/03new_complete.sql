@@ -1,4 +1,4 @@
-set ref_date = DATEADD("d", - 60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD('day', - 60, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 --next_querry
 CREATE TABLE "shop_03new_complete" AS

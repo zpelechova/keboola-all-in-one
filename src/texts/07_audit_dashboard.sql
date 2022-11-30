@@ -49,7 +49,7 @@ select $shop as "shop"
     , "date" as "datum"
     , "itemUrl"
 from "shop_03_complete"
-where "date" >= DATEADD("d", - $days_back, $ref_date)
+where "date" >= DATEADD('day', - $days_back, $ref_date)
 ;
 --next_querry
 create or replace table "shop_HS_differences" as

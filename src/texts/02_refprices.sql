@@ -3,7 +3,7 @@
  pokud nebudu mít tenhle pár informací, tak nebudu schopnej dělat gapfilling,
  protože budu mít úplně prázdný řádky, kdy je NULL i v itemId
  */
-
+--next_querry
 CREATE OR REPLACE TABLE "allItemIds" AS
 SELECT DISTINCT
        "itemId"
@@ -116,13 +116,14 @@ FROM (SELECT "date",
              row_number() OVER (PARTITION BY "itemId" ORDER BY "date" DESC) AS "row_number"
       FROM "shop_data_filled_labelled"
       WHERE "price_trend" NOT IN ('steady', 'price_init')
+        and "date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
       ORDER BY "itemId", "date") "t0"
 --WHERE "row_number" = 1
 ;
 --next_querry
 CREATE OR REPLACE TABLE "shop_last_valid_price_change" AS
 select *
-from 
+from
 (select distinct("all"."itemId")
     , "all"."date"
     , "all"."currentPrice"
