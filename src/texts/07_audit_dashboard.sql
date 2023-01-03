@@ -10,7 +10,7 @@ set tolerance = 3
 set aktualizace = (select left(max("date"),16) from "shop_raw")
 ;
 --next_querry
-set days_back = 30
+set days_back = 90
 ;
 --next_querry
 set shop = (select distinct("shopOrigin") from "shop_raw" where left("date",16) = $aktualizace and "shopOrigin" != '')

@@ -4,17 +4,11 @@
  protože budu mít úplně prázdný řádky, kdy je NULL i v itemId
  */
 set discount_valid_days = 90;
---next_querry
 set discount_valid_date = dateadd('day', -$discount_valid_days, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE);
---next_querry
 set common_price_days = 90;
---next_querry
 set common_price_date = dateadd('day', -$common_price_days, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE);
---next_querry
 set data_history = $discount_valid_days + 30;
---next_querry
 set data_history_date = dateadd('day', -$data_history, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE);
---next_querry
 
 CREATE OR REPLACE TABLE "allItemIds" AS
 SELECT DISTINCT
@@ -22,7 +16,6 @@ SELECT DISTINCT
 FROM "shop_01_unification"
 WHERE to_date("date") >= $data_history_date
 ;
---next_querry
 
 /*
     tohle mi vytvoří řadu čísel - je pak použiju v kartézáku s posledním (max) dnem v shop datech, abych
@@ -33,7 +26,6 @@ CREATE OR REPLACE TABLE "sekvence" AS
 select row_number() over (order by seq2()) as "seq"
 from table(generator(rowcount => 151))
 ;
---next_querry
 
 CREATE OR REPLACE TABLE "gendate" AS
 SELECT DATEADD(DAY, -("seq"."seq"-1), "DAY") :: DATE AS "GENDATE"
@@ -42,7 +34,6 @@ FROM (SELECT MAX("date" :: DATE) AS "DAY"
          LEFT JOIN "sekvence" "seq"
 ORDER BY 1
 ;
---next_querry
 
 /*
     teď dělám tabulku, na kterou pak najoinuju děravý data v alze
@@ -52,7 +43,6 @@ SELECT *
 FROM "gendate"
          LEFT JOIN "allItemIds"
 ;
---next_querry
 
 /*
     s těmahle datama z alzy budu dělat megajoin :)
@@ -65,7 +55,6 @@ FROM "shop_01_unification"
 WHERE to_date("date") >= $data_history_date
     and "currentPrice" != ''
 ;
---next_querry
 
 CREATE OR REPLACE TABLE "shop_data_filled_labelled" AS
 SELECT "b"."date"                AS "date",
@@ -105,7 +94,6 @@ FROM (
 WHERE to_date("date") >= $data_history_date AND
       "currentPrice" IS NOT NULL --tímhle oseknu empty rows u věcí, co jsou nové v tom sledovaném 60d okně
 ;
---next_querry
 
 CREATE OR REPLACE TABLE "shop_common_price" AS
 SELECT DISTINCT "itemId",
@@ -120,7 +108,6 @@ FROM (SELECT "itemId",
       WHERE "date" >= $common_price_date
       GROUP BY 1,2)
 ;
---next_querry
 
 CREATE OR REPLACE TABLE "shop_price_change" AS
 SELECT "t0"."date",
@@ -139,7 +126,6 @@ FROM (SELECT "date",
       ORDER BY "itemId", "date") "t0"
 --WHERE "row_number" = 1
 ;
---next_querry
 
 CREATE OR REPLACE TABLE "shop_last_valid_price_change" AS
 select *
@@ -169,7 +155,6 @@ having "all"."date" >= $discount_valid_date
     )
 qualify "row_number" = max("row_number") over (partition by "itemId")
 ;
---next_querry
 
 CREATE or replace TABLE "shop_last_sale_vs_prev_30d_min_price" AS
 SELECT "t0"."date",
@@ -186,7 +171,6 @@ FROM "shop_last_valid_price_change" "t0"
 WHERE "t0"."price_trend" = 'down'-- and "t0"."date" >= dateadd('day', -30, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE) -- toto si vyřeším o query dřív
 GROUP BY 1, 2, 3, 4
 ;
---next_querry
 
 CREATE OR REPLACE TABLE "shop_02_refprices" AS
 SELECT "c"."itemId",
