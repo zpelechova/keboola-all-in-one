@@ -88,6 +88,8 @@ export async function updateTransformation (
     outputDestinations,
     primaryKeys,
     incremental,
+    variables_id,
+    variables_values_id,
     blockName,
     codeName,
     code,
@@ -164,7 +166,9 @@ export async function updateTransformation (
                 output: {
                     tables: outTables
                 }
-            }
+            },
+            variables_id,
+            variables_values_id
         }),
         description: transformationDescription,
         changeDescription: 'Changing the transformation via API'

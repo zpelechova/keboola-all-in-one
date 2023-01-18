@@ -220,8 +220,8 @@ select distinct("itemId" )
       end as "shop_id"
     , last_value("slug") ignore nulls over (partition by "itemId", "slug" order by "date" asc) as "slug"
     , last_value("p_key") ignore nulls over (partition by "itemId", "slug" order by "date" asc) as "p_key"
-    , last_value("commonPrice") over (partition by "itemId" order by "date" asc) as "commonPrice"
-    , last_value("minPrice") over (partition by "itemId" order by "date" asc) as "minPrice"
+    , last_value("commonPrice") over (partition by "itemId", "slug" order by "date" asc) as "commonPrice"
+    , last_value("minPrice") over (partition by "itemId", "slug" order by "date" asc) as "minPrice"
 from "shop_03_complete"
 where "slug" != ''
 ;
