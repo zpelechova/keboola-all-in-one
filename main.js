@@ -99,7 +99,7 @@ Apify.main(async () => {
                 //'01_unification',
                 //'02_refprices',
                 //'03_complete',
-                '04_extension',
+                '04_extension'
                 //'05_pricehistory',
                 //'06_s3format',
                 //'07_audit_dashboard'
