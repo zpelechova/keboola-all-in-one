@@ -97,12 +97,12 @@ Apify.main(async () => {
 
             const transformations = [
                 //'01_unification',
-                '02_refprices',
+                //'02_refprices',
                 //'03_complete',
-                //'04_extension',
+                '04_extension',
                 //'05_pricehistory',
                 //'06_s3format',
-                '07_audit_dashboard'
+                //'07_audit_dashboard'
                 //'00_preparation' // only for shops with feed and/or unitPrice items
             ]
 
