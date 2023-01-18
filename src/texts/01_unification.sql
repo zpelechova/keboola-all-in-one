@@ -1,4 +1,4 @@
-set ref_date = DATEADD('day', - 2, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+set ref_date = DATEADD('day', - {{days_back}}, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
 ;
 --next_querry
 --takes only records from last 2 days from both input tables - the number of days can be easily modified or omitted altogether
