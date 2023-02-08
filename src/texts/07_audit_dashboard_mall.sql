@@ -128,6 +128,7 @@ left join (select "ITEM_ID"
            qualify left("CREATED",10) = dateadd("day",-1,"date")) "partner"
 on "diff"."itemId" = "partner"."ITEM_ID" and "diff"."datum" = "partner"."CREATED"
 qualify "row_num" <= 200000
+  and "typ_neshody" != '4 - shop sleva nižší než sleva Hlídač'
 order by "rozdil_slev" desc
 ;
 
