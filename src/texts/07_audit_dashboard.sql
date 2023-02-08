@@ -120,7 +120,7 @@ select "diff".*
         (select * from "shop_HS_differences" where to_number("sleva_dle_shopu") > $sleva_hranice) "shop"
     on "diff"."itemId" = "shop"."itemId"
 qualify "row_num" <= 200000
-  and "typ_neshody" != '4 - shop sleva nižší než sleva Hlídač'
+  and "diff"."typ_neshody" != '4 - shop sleva nižší než sleva Hlídač'
 order by "rozdil_slev" desc
 ;
 --next_querry

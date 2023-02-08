@@ -110,9 +110,9 @@ Apify.main(async () => {
                 const index = transformations.indexOf(transformation)
 
                 const inputTablesSource = [
-                    //[`in.c-black-friday.${shopName}`],
+                    [`in.c-black-friday.${shopName}`],
                     //[`out.c-${shopName}.${shopName}_01_unification`],
-                    //[`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
+                    [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_final_s3`]
@@ -120,9 +120,9 @@ Apify.main(async () => {
                 ]
 
                 const inputTablesName = [
-                    //['shop_raw'],
+                    ['shop_raw'],
                     //['shop_01_unification'],
-                    //['shop_01_unification', 'shop_02_refprices'],
+                    ['shop_01_unification', 'shop_02_refprices'],
                     ['shop_03_complete'],
                     ['shop_03_complete'],
                     ['shop_04_extension', 'shop_05_final_s3']
@@ -130,9 +130,9 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesName = [
+                    [`shop_${transformation}`],
                     //[`shop_${transformation}`],
-                    //[`shop_${transformation}`],
-                    //[`shop_${transformation}`, `suspicious_prices`],
+                    [`shop_${transformation}`, `suspicious_prices`],
                     [`shop_${transformation}`],
                     [`shop_05_final_s3`],
                     [`shop_s3_metadata`, `shop_s3_pricehistory`]
@@ -140,9 +140,9 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesSource = [
+                    [`out.c-${shopName}.${shopName}_${transformation}`],
                     //[`out.c-${shopName}.${shopName}_${transformation}`],
-                    //[`out.c-${shopName}.${shopName}_${transformation}`],
-                    //[`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_05_final_s3`],
                     [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
@@ -150,9 +150,9 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesKeys = [
+                    [['itemId', 'date']],
                     //[['itemId', 'date']],
-                    //[['itemId', 'date']],
-                    //[['itemId', 'date'], ['itemId', 'date', 'shop']],
+                    [['itemId', 'date'], ['itemId', 'date', 'shop']],
                     [['itemId']],
                     [['itemId']],
                     [['slug'], ['slug']]
@@ -160,9 +160,9 @@ Apify.main(async () => {
                 ]
 
                 const outputIncremental = [
+                    [true],
                     //[true],
-                    //[true],
-                    //[true, true],
+                    [true, true],
                     [true],
                     [true],
                     [false, false]
@@ -170,9 +170,9 @@ Apify.main(async () => {
                 ]
 
                 const variables_id = [
-                  //'521325145',
+                  '521325145',
                   //[],
-                  //'521325842',
+                  '521325842',
                   '521293496',
                   '521326281',
                   '521326653'
@@ -180,9 +180,9 @@ Apify.main(async () => {
                 ]
 
                 const variables_values_id = [
-                  //'521325148', 
+                  '521325148', 
                   //[],
-                  //'521325843', 
+                  '521325843', 
                   '521293497',
                   '521326282',
                   '521326655'
