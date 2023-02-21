@@ -19,7 +19,8 @@ Apify.main(async () => {
     const {
         KEBOOLA_TOKEN,
         runStorage,
-        runTransformation,
+        runTransformationAll,
+        runTransformation_01,
         runWriter,
         runOrchestration,
         migrateTables,
