@@ -22,6 +22,7 @@ Apify.main(async () => {
         runTransformationAll,
         runTransformation_01,
         runTransformation_02,
+        runTransformation_03,
         runWriter,
         runOrchestration,
         migrateTables,
