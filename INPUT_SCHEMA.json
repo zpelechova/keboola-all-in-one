@@ -28,56 +28,56 @@
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation?"
+            "description": "Create/update all transformations for shop names"
         },
         "runTransformation_01": {
             "title": "runTransformation_01_unification",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation 01_unification?"
+            "description": "Create/update transformation 01_unification for shop names"
         },
         "runTransformation_02": {
             "title": "runTransformation_02_refPrice",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation 02_refPrice?"
+            "description": "Create/update transformation 02_refPrice for shop names"
         },
         "runTransformation_03": {
             "title": "runTransformation_03_complete",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation 03_complete?"
+            "description": "Create/update transformation 03_complete for shop names"
         },
         "runTransformation_04": {
             "title": "runTransformation_04_extension",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation 04_extension?"
+            "description": "Create/update transformation 04_extension for shop names"
         },
         "runTransformation_05": {
             "title": "runTransformation_05_pricehistory",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation 05_pricehistory?"
+            "description": "Create/update transformation 05_pricehistory for shop names"
         },
         "runTransformation_06": {
             "title": "runTransformation_06_s3format",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation 06_s3format?"
+            "description": "Create/update transformation 06_s3format for shop names"
         },
         "runTransformation_07": {
             "title": "runTransformation_07_audit_dashboard",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
-            "description": "Do you want to run Transformation 07_audit_dashboard?"
+            "description": "Create/update transformation 07_audit_dashboard for shop names"
         },
         "runWriter": {
             "title": "runWriter",
