@@ -51,6 +51,34 @@
             "editor": "checkbox",
             "description": "Do you want to run Transformation 03_complete?"
         },
+        "runTransformation_04": {
+            "title": "runTransformation_04_extension",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation 04_extension?"
+        },
+        "runTransformation_05": {
+            "title": "runTransformation_05_pricehistory",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation 05_pricehistory?"
+        },
+        "runTransformation_06": {
+            "title": "runTransformation_06_s3format",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation 06_s3format?"
+        },
+        "runTransformation_07": {
+            "title": "runTransformation_07_audit_dashboard",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation 07_audit_dashboard?"
+        },
         "runWriter": {
             "title": "runWriter",
             "type": "boolean",
