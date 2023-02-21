@@ -23,12 +23,19 @@
             "description": "Do you want to run Storage?",
             "sectionCaption": "Run updates"
         },
-        "runTransformation": {
-            "title": "runTransformation",
+        "runTransformationAll": {
+            "title": "runTransformationAll",
             "type": "boolean",
             "default": false,
             "editor": "checkbox",
             "description": "Do you want to run Transformation?"
+        },
+        "runTransformation_01": {
+            "title": "runTransformation_01_unification",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation 01_unification?"
         },
         "runWriter": {
             "title": "runWriter",
