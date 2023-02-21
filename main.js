@@ -122,7 +122,7 @@ Apify.main(async () => {
                     [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
                     [`out.c-${shopName}.${shopName}_03_complete`],
-                    [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_final_s3`]
+                    [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_final_s3`],
                     [`out.c-${shopName}.${shopName}_03_complete`, `in.c-black-friday.${shopName}`]
                 ]
 
@@ -132,7 +132,7 @@ Apify.main(async () => {
                     ['shop_01_unification', 'shop_02_refprices'],
                     ['shop_03_complete'],
                     ['shop_03_complete'],
-                    ['shop_04_extension', 'shop_05_final_s3']
+                    ['shop_04_extension', 'shop_05_final_s3'],
                     ['shop_03_complete', 'shop_raw']
                 ]
 
@@ -142,7 +142,7 @@ Apify.main(async () => {
                     [`shop_${transformation}`, `suspicious_prices`],
                     [`shop_${transformation}`],
                     [`shop_05_final_s3`],
-                    [`shop_s3_metadata`, `shop_s3_pricehistory`]
+                    [`shop_s3_metadata`, `shop_s3_pricehistory`],
                     [`shop_dashboard`, `shop_dashboard`, `shop_false_discounts`, `shop_false_discounts`, `shop_incr_origPrice`, `shop_incr_origPrice`]
                 ]
 
@@ -152,7 +152,7 @@ Apify.main(async () => {
                     [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_05_final_s3`],
-                    [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
+                    [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`],
                     [`out.c-${shopName}.${shopName}_dashboard`, `out.c-${shopName}_07_audit_dashboard.${shopName}_dashboard_history`, `out.c-${shopName}.${shopName}_false_discounts`, `out.c-${shopName}_07_audit_dashboard.${shopName}_false_discounts_history`, `out.c-${shopName}.${shopName}_incr_origPrice`, `out.c-${shopName}_07_audit_dashboard.${shopName}_incr_origPrice_history`]
                 ]
 
@@ -162,7 +162,7 @@ Apify.main(async () => {
                     [['itemId', 'date'], ['itemId', 'date', 'shop']],
                     [['itemId']],
                     [['itemId']],
-                    [['slug'], ['slug']]
+                    [['slug'], ['slug']],
                     [[], ['Aktualizace'], ['itemId'], ['itemId', 'datum'], ['itemId'], ['itemId', 'datum_zmeny_refCeny']]
                 ]
 
@@ -172,7 +172,7 @@ Apify.main(async () => {
                     [true, true],
                     [true],
                     [true],
-                    [false, false]
+                    [false, false],
                     [false, true, false, true, false, true]
                 ]
 
@@ -619,6 +619,175 @@ Apify.main(async () => {
 
               const variables_values_id = [
                 '521326282'
+              ]
+
+              const transformationId = await trans.getOrCreateTransformation(
+                  shopName,
+                  transformation,
+                  KEBOOLA_TOKEN
+              )
+              //Creating an array of transformation Ids to be used in orchestrations later on
+              transformationIds.push(transformationId)
+
+              //Transforming sql code to array
+              const sqlCode = []
+              const sqls = fs
+                  .readFileSync(`./src/texts/${transformation}.sql`, 'utf-8')
+                  .toString()
+                  .split('--next_querry')
+              for (let sql of sqls) {
+                  if (sql != '') {
+                      sql = sql.trim()
+                      sqlCode.push(sql)
+                  }
+              }
+
+              await trans.updateTransformation(
+                  transformationId,
+                  fs.readFileSync(
+                      `./src/texts/${transformation}_descr.txt`,
+                      'utf-8'
+                  ),
+                  inputTablesSource[index], //in-table source
+                  inputTablesName[index], //in-table alias
+                  outputTablesName[index], //out-table alias
+                  outputTablesSource[index], //out-table source
+                  outputTablesKeys[index], //out-table primary keys
+                  outputIncremental[index], //out-table incremental?
+                  variables_id[index], //variable setup by ref
+                  variables_values_id[index], //variable value setup by ref
+                  `Codeblock - ${transformation}`,
+                  `Shop ${transformation}`,
+                  sqlCode,
+                  KEBOOLA_TOKEN
+              )
+          }
+      }
+
+        if (runTransformation_06) {
+          console.log(`Starting Transformation management program`)
+
+          const transformations = [
+              '06_s3format'
+          ]
+
+          for (const transformation of transformations) {
+              const index = transformations.indexOf(transformation)
+
+              const inputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_04_extension`, `out.c-${shopName}.${shopName}_05_final_s3`]
+              ]
+
+              const inputTablesName = [
+                  ['shop_04_extension', 'shop_05_final_s3']
+              ]
+
+              const outputTablesName = [
+                  [`shop_s3_metadata`, `shop_s3_pricehistory`]
+              ]
+
+              const outputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_s3_metadata`, `out.c-${shopName}.${shopName}_s3_pricehistory`]
+              ]
+
+              const outputTablesKeys = [
+                  [['slug'], ['slug']]
+              ]
+
+              const outputIncremental = [
+                  [false, false]
+              ]
+
+              const variables_id = [
+                '521326653'
+              ]
+
+              const variables_values_id = [
+                '521326655'
+              ]
+
+              const transformationId = await trans.getOrCreateTransformation(
+                  shopName,
+                  transformation,
+                  KEBOOLA_TOKEN
+              )
+              //Creating an array of transformation Ids to be used in orchestrations later on
+              transformationIds.push(transformationId)
+
+              //Transforming sql code to array
+              const sqlCode = []
+              const sqls = fs
+                  .readFileSync(`./src/texts/${transformation}.sql`, 'utf-8')
+                  .toString()
+                  .split('--next_querry')
+              for (let sql of sqls) {
+                  if (sql != '') {
+                      sql = sql.trim()
+                      sqlCode.push(sql)
+                  }
+              }
+
+              await trans.updateTransformation(
+                  transformationId,
+                  fs.readFileSync(
+                      `./src/texts/${transformation}_descr.txt`,
+                      'utf-8'
+                  ),
+                  inputTablesSource[index], //in-table source
+                  inputTablesName[index], //in-table alias
+                  outputTablesName[index], //out-table alias
+                  outputTablesSource[index], //out-table source
+                  outputTablesKeys[index], //out-table primary keys
+                  outputIncremental[index], //out-table incremental?
+                  variables_id[index], //variable setup by ref
+                  variables_values_id[index], //variable value setup by ref
+                  `Codeblock - ${transformation}`,
+                  `Shop ${transformation}`,
+                  sqlCode,
+                  KEBOOLA_TOKEN
+              )
+          }
+      }
+        if (runTransformation_07) {
+          console.log(`Starting Transformation management program`)
+
+          const transformations = [
+              '07_audit_dashboard'
+          ]
+
+          for (const transformation of transformations) {
+              const index = transformations.indexOf(transformation)
+
+              const inputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_03_complete`, `in.c-black-friday.${shopName}`]
+              ]
+
+              const inputTablesName = [
+                  ['shop_03_complete', 'shop_raw']
+              ]
+
+              const outputTablesName = [
+                  [`shop_dashboard`, `shop_dashboard`, `shop_false_discounts`, `shop_false_discounts`, `shop_incr_origPrice`, `shop_incr_origPrice`]
+              ]
+
+              const outputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_dashboard`, `out.c-${shopName}_07_audit_dashboard.${shopName}_dashboard_history`, `out.c-${shopName}.${shopName}_false_discounts`, `out.c-${shopName}_07_audit_dashboard.${shopName}_false_discounts_history`, `out.c-${shopName}.${shopName}_incr_origPrice`, `out.c-${shopName}_07_audit_dashboard.${shopName}_incr_origPrice_history`]
+              ]
+
+              const outputTablesKeys = [
+                  [[], ['Aktualizace'], ['itemId'], ['itemId', 'datum'], ['itemId'], ['itemId', 'datum_zmeny_refCeny']]
+              ]
+
+              const outputIncremental = [
+                  [false, true, false, true, false, true]
+              ]
+
+              const variables_id = [
+                ''
+              ]
+
+              const variables_values_id = [
+                ''
               ]
 
               const transformationId = await trans.getOrCreateTransformation(
