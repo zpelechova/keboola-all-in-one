@@ -101,7 +101,7 @@ Apify.main(async () => {
                 '03_complete',
                 '04_extension',
                 '05_pricehistory',
-                '06_s3format'
+                '06_s3format',
                 '07_audit_dashboard'
                 //'00_preparation' // only for shops with feed and/or unitPrice items
             ]
