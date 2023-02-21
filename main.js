@@ -21,6 +21,7 @@ Apify.main(async () => {
         runStorage,
         runTransformationAll,
         runTransformation_01,
+        runTransformation_02,
         runWriter,
         runOrchestration,
         migrateTables,
@@ -273,6 +274,176 @@ Apify.main(async () => {
 
               const variables_values_id = [
                 '521325148'
+              ]
+
+              const transformationId = await trans.getOrCreateTransformation(
+                  shopName,
+                  transformation,
+                  KEBOOLA_TOKEN
+              )
+              //Creating an array of transformation Ids to be used in orchestrations later on
+              transformationIds.push(transformationId)
+
+              //Transforming sql code to array
+              const sqlCode = []
+              const sqls = fs
+                  .readFileSync(`./src/texts/${transformation}.sql`, 'utf-8')
+                  .toString()
+                  .split('--next_querry')
+              for (let sql of sqls) {
+                  if (sql != '') {
+                      sql = sql.trim()
+                      sqlCode.push(sql)
+                  }
+              }
+
+              await trans.updateTransformation(
+                  transformationId,
+                  fs.readFileSync(
+                      `./src/texts/${transformation}_descr.txt`,
+                      'utf-8'
+                  ),
+                  inputTablesSource[index], //in-table source
+                  inputTablesName[index], //in-table alias
+                  outputTablesName[index], //out-table alias
+                  outputTablesSource[index], //out-table source
+                  outputTablesKeys[index], //out-table primary keys
+                  outputIncremental[index], //out-table incremental?
+                  variables_id[index], //variable setup by ref
+                  variables_values_id[index], //variable value setup by ref
+                  `Codeblock - ${transformation}`,
+                  `Shop ${transformation}`,
+                  sqlCode,
+                  KEBOOLA_TOKEN
+              )
+          }
+      }
+
+        if (runTransformation_02) {
+          console.log(`Starting Transformation management program`)
+
+          const transformations = [
+              '02_refprices'
+          ]
+
+          for (const transformation of transformations) {
+              const index = transformations.indexOf(transformation)
+
+              const inputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_01_unification`]
+              ]
+
+              const inputTablesName = [
+                  ['shop_01_unification']
+              ]
+
+              const outputTablesName = [
+                  [`shop_${transformation}`]
+              ]
+
+              const outputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_${transformation}`]
+              ]
+
+              const outputTablesKeys = [
+                  [['itemId', 'date']]
+              ]
+
+              const outputIncremental = [
+                  [true]
+              ]
+
+              const variables_id = [
+                '535640168'
+              ]
+
+              const variables_values_id = [ 
+                '535640170'
+              ]
+
+              const transformationId = await trans.getOrCreateTransformation(
+                  shopName,
+                  transformation,
+                  KEBOOLA_TOKEN
+              )
+              //Creating an array of transformation Ids to be used in orchestrations later on
+              transformationIds.push(transformationId)
+
+              //Transforming sql code to array
+              const sqlCode = []
+              const sqls = fs
+                  .readFileSync(`./src/texts/${transformation}.sql`, 'utf-8')
+                  .toString()
+                  .split('--next_querry')
+              for (let sql of sqls) {
+                  if (sql != '') {
+                      sql = sql.trim()
+                      sqlCode.push(sql)
+                  }
+              }
+
+              await trans.updateTransformation(
+                  transformationId,
+                  fs.readFileSync(
+                      `./src/texts/${transformation}_descr.txt`,
+                      'utf-8'
+                  ),
+                  inputTablesSource[index], //in-table source
+                  inputTablesName[index], //in-table alias
+                  outputTablesName[index], //out-table alias
+                  outputTablesSource[index], //out-table source
+                  outputTablesKeys[index], //out-table primary keys
+                  outputIncremental[index], //out-table incremental?
+                  variables_id[index], //variable setup by ref
+                  variables_values_id[index], //variable value setup by ref
+                  `Codeblock - ${transformation}`,
+                  `Shop ${transformation}`,
+                  sqlCode,
+                  KEBOOLA_TOKEN
+              )
+          }
+      }
+
+        if (runTransformation_03) {
+          console.log(`Starting Transformation management program`)
+
+          const transformations = [
+              '03_complete'
+          ]
+
+          for (const transformation of transformations) {
+              const index = transformations.indexOf(transformation)
+
+              const inputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_01_unification`, `out.c-${shopName}.${shopName}_02_refprices`]
+              ]
+
+              const inputTablesName = [
+                  ['shop_01_unification', 'shop_02_refprices']
+              ]
+
+              const outputTablesName = [
+                  [`shop_${transformation}`, `suspicious_prices`]
+              ]
+
+              const outputTablesSource = [
+                  [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`]
+              ]
+
+              const outputTablesKeys = [
+                  [['itemId', 'date'], ['itemId', 'date', 'shop']]
+              ]
+
+              const outputIncremental = [
+                  [true, true]
+              ]
+
+              const variables_id = [
+                '521325842'
+              ]
+
+              const variables_values_id = [
+                '521325843'
               ]
 
               const transformationId = await trans.getOrCreateTransformation(

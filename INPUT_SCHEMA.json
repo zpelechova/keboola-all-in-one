@@ -37,6 +37,20 @@
             "editor": "checkbox",
             "description": "Do you want to run Transformation 01_unification?"
         },
+        "runTransformation_02": {
+            "title": "runTransformation_02_refPrice",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation 02_refPrice?"
+        },
+        "runTransformation_03": {
+            "title": "runTransformation_03_complete",
+            "type": "boolean",
+            "default": false,
+            "editor": "checkbox",
+            "description": "Do you want to run Transformation 03_complete?"
+        },
         "runWriter": {
             "title": "runWriter",
             "type": "boolean",
