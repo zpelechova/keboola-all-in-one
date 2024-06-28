@@ -442,7 +442,7 @@ Apify.main(async () => {
               const outputIncremental = [
                   [true, true]
               ]
-
+              /*
               const variables_id = [
                 '521325842'
               ]
@@ -450,7 +450,7 @@ Apify.main(async () => {
               const variables_values_id = [
                 '521325843'
               ]
-
+              */
               const transformationId = await trans.getOrCreateTransformation(
                   shopName,
                   transformation,
@@ -484,8 +484,8 @@ Apify.main(async () => {
                   outputTablesSource[index], //out-table source
                   outputTablesKeys[index], //out-table primary keys
                   outputIncremental[index], //out-table incremental?
-                  variables_id[index], //variable setup by ref
-                  variables_values_id[index], //variable value setup by ref
+                  //variables_id[index], //variable setup by ref
+                  //variables_values_id[index], //variable value setup by ref
                   `Codeblock - ${transformation}`,
                   `Shop ${transformation}`,
                   sqlCode,
