@@ -609,13 +609,9 @@ Apify.main(async () => {
                   [true]
               ]
 
-              const variables_id = [
-                '521326281'
-              ]
+              const variables_id = []
 
-              const variables_values_id = [
-                '521326282'
-              ]
+              const variables_values_id = []
 
               const transformationId = await trans.getOrCreateTransformation(
                   shopName,
