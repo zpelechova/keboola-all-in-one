@@ -1,9 +1,21 @@
--- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
-set ref_date = DATEADD('day', - 2000, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
+/*
+    - vezmu jenom produkty se změnou v rámci posledních dvou scrapech (rank nad _timestamp >= 2)
+ */
+SET timestamp_limit = (SELECT "_timestamp"
+                       FROM "shop_03_complete"
+                       GROUP BY ALL
+                       QUALIFY DENSE_RANK() OVER (ORDER BY "_timestamp" DESC ) = 2
+                       )
 ;
-
--- NECHÁVÁM V KÓDU TAKÉ ZAKOMENTOVANÉ ŘÁDKY PŮVODNÍ QUERY OD PADÁKA, pro případ, že by bylo potřeba reverzovat úpravy.
-
+--next_querry
+CREATE OR REPLACE TABLE "itemIds_to_include" AS (
+SELECT "itemId"
+FROM "shop_03_complete"
+WHERE "_timestamp" >= $timestamp_limit
+GROUP BY ALL
+)
+;
+--next_querry
 /*
     - shopy a produkty mohou mít duplicitní informace o denních cenách
     - v takovém případě mám vzít tu nejnižší
@@ -17,7 +29,7 @@ CREATE or replace TABLE "all_shops_dedupe_days" AS
  */
 SELECT
     "t0"."itemId"                                                                    AS "itemId",
-    "t0"."slug"                                                                    AS "slug",
+    "t0"."slug"                                                                     AS "slug",
     "t0"."date"                                                                     AS "date",
     REPLACE(IFF("t0"."currentPrice" IS NULL, '', "t0"."currentPrice"), '.00', '')   AS "currentPrice",
     REPLACE(IFF("t0"."originalPrice" IS NULL, '', "t0"."originalPrice"), '.00', '') AS "originalPrice"
@@ -29,7 +41,7 @@ SELECT
             */
             SELECT
                 "itemId"                                                                                     AS "itemId",
-          		  "slug"                                                                                     AS "slug",
+                "slug"                                                                                      AS "slug",
                 "date"                                                                                      AS "date",
                 to_char(try_to_number("currentPrice", 20, 2))                                               AS "currentPrice",
                 to_char(try_to_number("originalPrice", 20, 2))                                              AS "originalPrice",
@@ -37,11 +49,12 @@ SELECT
                 OVER (PARTITION BY "itemId", "slug", "date"::DATE ORDER BY try_to_number("currentPrice", 20, 2) ASC) AS "row_number"
                 FROM
                     "shop_03_complete"
+                WHERE "itemId" IN (SELECT "itemId" FROM "itemIds_to_include")
         ) "t0"
     WHERE
         "t0"."row_number" = 1
 ;
-
+--next_querry
 /*
     - tohle vyrobí tabulku kde je důležitý sloupec "type"
     - slouží pro "emulaci" stavového stroje
@@ -50,26 +63,12 @@ SELECT
 CREATE or replace TABLE "produkty" AS
 SELECT
     "a"."itemId"          AS "itemId",
-    "a"."slug"          AS "slug",
+    "a"."slug"           AS "slug",
     "dd"."min_d"         AS "min_d", --pro budoucí omezení kartézáku
     "dd"."max_d"         AS "max_d", --pro budoucí omezení kartézáku
     "a"."d"              AS "d",
     "a"."o"              AS "o",
     "a"."c"              AS "c"
-    --"a"."bothPrice"      AS "bothPrice",
-    --"a"."lead"           AS "lead",
-    --"a"."lag"            AS "lag",
-    /*
-     - předchozí is null == je to první řádek
-     - následující is null == je to poslední řádek
-     - nezměnilo se to...
-     - vše ostatní se změnilo
-     */
-    --CASE
-    --    WHEN "a"."lag" IS NULL THEN 'první'
-    --    WHEN "a"."lead" IS NULL THEN 'poslední'
-    --    WHEN "a"."bothPrice" = "a"."lag" THEN 'beze zmeny'
-    --    ELSE 'zmena' END AS "type"
     FROM
         (
             /*
@@ -79,15 +78,10 @@ SELECT
              */
             SELECT DISTINCT
                 "itemId"                                                                                        AS "itemId",
-          			"slug"                                                                                        AS "slug",
+                "slug"                                                                                         AS "slug",
                 "date"::DATE                                                                                   AS "d",
                 "originalPrice"                                                                                AS "o",
                 "currentPrice"                                                                                 AS "c"
-                --"originalPrice" || '-' || "currentPrice"                                                       AS "bothPrice"
-                --LEAD("bothPrice") OVER (PARTITION BY "itemId" ORDER BY "date"::DATE ASC)                        AS "lead",
-                --LAG("bothPrice")
-                --OVER (PARTITION BY "itemId" ORDER BY "date"::DATE ASC,try_to_number("currentPrice", 20, 2) ASC) AS "lag"
---                object_construct('d', "date", 'o', "originalPrice", 'c', "currentPrice") AS "json"
                 FROM "all_shops_dedupe_days"
         ) "a"
             LEFT JOIN (
@@ -102,13 +96,15 @@ SELECT
                 MIN("date") AS "min_d",
                 case
                     when to_date(max("date")) < CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE then DATEADD("d", +1, max("date"))::date
-                else max("date")                                                                                              
-                end AS "max_d"  
+                else max("date")
+                end AS "max_d"
             FROM "all_shops_dedupe_days"
                 GROUP BY
-                    "itemId", "slug") "dd" ON "dd"."itemId" = "a"."itemId" and "dd"."slug" = "a"."slug"
+                    "itemId", "slug") "dd"
+              ON "dd"."itemId" = "a"."itemId"
+                AND "dd"."slug" = "a"."slug"
 ;
-
+--next_querry
 /*
     - tohle mi generuje sekvenci datumů
     - základní účel je gap filling prázdných datumů
@@ -120,7 +116,7 @@ SELECT
         (
             /* vyrobím řadu 20000 datumů od 2017-01-01 do 2071-10-31 */
             SELECT
-                DATEADD("DAY", seq2(), '2017-01-01') :: DATE AS "DateSeq"
+                DATEADD('day', seq2(), '2017-01-01') :: DATE AS "DateSeq"
                 FROM table(generator(rowcount => 20000))) "t1"
     WHERE
         /* a tady tu řadu zredukuju na nutné minimum */
@@ -131,7 +127,7 @@ SELECT
                                 MAX("d")
                                 FROM "produkty"))
 ;
-
+--next_querry
 /*
     tady mám tabulku všech datumů a všech itemId a na ně joinuju reálné produkty
     abych tím získal díry a poznal chybějící datumy
@@ -145,8 +141,6 @@ create or replace table "temp_final" as
              - known issue je že pokud první 2 dny je stejná cena, tak se druhý den itemId vždycky nechá
              */
             SELECT *
-                   --LAG("type") OVER (PARTITION BY "itemId" ORDER BY "d"::DATE ASC) AS "type_lag",
-                   --iff("type" = "type_lag", 'smazat', 'nechat')                   AS "type2_padak"
                    , case
                     when lag("bothPrice") over (partition by "itemId", "slug" order by "d" asc) = "bothPrice" then 'smazat'
                     else 'nechat'
@@ -161,7 +155,7 @@ create or replace table "temp_final" as
                          */
                         SELECT
                             "t1"."itemId"                                         AS "itemId",
-                      		  "t1"."slug"                                         AS "slug",
+                            "t1"."slug"                                           AS "slug",
                             "t1"."DateSeq"                                       AS "d",
                             /*
                              - dohoda z whatsapp je, že <null> bude prázdný string
@@ -174,7 +168,6 @@ create or replace table "temp_final" as
                                 WHEN "t2"."c" = '' THEN ''
                                 WHEN "t2"."c" IS NULL THEN ''
                                 ELSE "t2"."c" END::VARCHAR(50)                   AS "currP",
-                            --iff("t2"."type" IS NULL, 'nemame data', "t2"."type") AS "type",
                             "origP" || '-' || "currP"                            AS "bothPrice"
                             FROM
                                 (
@@ -185,8 +178,8 @@ create or replace table "temp_final" as
                                     SELECT
                                         "s"."DateSeq",
                                         "p"."itemId",
-                                  			"p"."slug"
-                                       FROM
+                                        "p"."slug"
+                                        FROM
                                             "sekvence" "s"
                                                 FULL JOIN (
                                                 /*
@@ -201,15 +194,17 @@ create or replace table "temp_final" as
                                                           ON "s"."DateSeq" >= "p"."min_d" AND "s"."DateSeq" <= "p"."max_d"
                                 ) "t1"
                                     LEFT JOIN "produkty" "t2"
-                                              ON "t1"."itemId" = "t2"."itemId" AND "t1"."slug" = "t2"."slug" AND "t2"."d" = "t1"."DateSeq"
+                                              ON "t1"."itemId" = "t2"."itemId"
+                                                AND "t1"."slug" = "t2"."slug"
+                                                AND "t2"."d" = "t1"."DateSeq"
                     ) "tf"
                 ORDER BY
-                    "itemId", "d"
+                    "itemId", "slug", "d"
 ;
-
+--next_querry
 -- Pro doplnění do výstupních tabulek zjišťuji last_valu of slug a last_valu of p_key, rovnou přeformátovávám "shop"
 create or replace table "slug" as
-select distinct("itemId" )
+select distinct("itemId") as "itemId"
     , "slug" as "slug_temp"
     , case
         when "shop" like '%_cz' then replace("shop",'_cz','.cz')
@@ -224,12 +219,14 @@ select distinct("itemId" )
     , last_value("minPrice") over (partition by "itemId", "slug" order by "date" asc) as "minPrice"
 from "shop_03_complete"
 where "slug" != ''
+    and "slug" not ilike '%ii-jakost%'
+    and "_timestamp" >= $timestamp_limit
 ;
-
+--next_querry
 CREATE or replace TABLE "shop_05_final_s3" AS
 SELECT
     "tof"."itemId"                AS "itemId"
-    , "s"."slug"                  AS "slug"
+    , "s"."slug"                      AS "slug"
     , "shop_id"                   AS "shop_id"
     ,to_char(array_agg(
             object_construct_KEEP_NULL(
@@ -242,12 +239,13 @@ SELECT
     , try_to_number("s"."minPrice",12,2)                AS "minPrice"
     FROM "temp_final" "tof"
     left join "slug" "s"
-    on "s"."itemId" = "tof"."itemId"  and "s"."slug_temp" = "tof"."slug"
+    on "s"."itemId" = "tof"."itemId"
+      and "s"."slug" = "tof"."slug"
     WHERE
         "type2" = 'nechat'  and "s"."slug" != '' and "s"."slug" is not null
         and "tof"."itemId" in (select distinct("itemId")
                     from "temp_final"
-                    where "type2" = 'nechat' and "d" > $ref_date)
+                    where "type2" = 'nechat')
         and "commonPrice" != ''
     GROUP BY
         "tof"."itemId", "s"."slug", "shop_id", "commonPrice", "minPrice"
