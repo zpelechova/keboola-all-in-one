@@ -1,25 +1,44 @@
-set ref_date = DATEADD('day', - 2000, CONVERT_TIMEZONE('Europe/Prague', CURRENT_TIMESTAMP)::DATE)
-;
-
 CREATE TABLE "shop_03_complete" AS
-SELECT "uni"."shop"
-	,"uni"."p_key"
-	,"uni"."itemId"
-	,"uni"."itemName"
-	,"uni"."itemUrl"
-  ,"uni"."slug"
-	,"uni"."currentPrice"
-	,"uni"."originalPrice"
-	,"uni"."officialSale"
-  ,"uni"."date"
-	,"uni"."itemImage"
-  ,"uni"."inStock"
-	,"ref"."commonPrice"
-  ,"ref"."minPrice"
-  ,case when "ref"."minPrice" != '' then "ref"."minPrice" else "ref"."commonPrice" end as "originalPriceHS"
-  ,round((try_to_number("currentPrice",12,2) / nullifzero(try_to_number("originalPriceHS",12,2)) - 1) * -100, 2)  as "newSale"
-FROM (select
-  "shop"
+WITH "last_data" AS (
+SELECT "shop"
+	,"p_key"
+	,"itemId"
+	,"itemName"
+	,"itemUrl"
+  ,"slug"
+	,"currentPrice"
+	,"originalPrice"
+	,"officialSale"
+  ,"date"
+	,"itemImage"
+   ,"inStock"
+FROM "shop_01_unification"
+WHERE "_timestamp" = (SELECT max("_timestamp") FROM "shop_01_unification")
+)
+
+, "last_data_with_refprices" AS (
+SELECT "shop"
+	,"p_key"
+	,uni."itemId"
+	,"itemName"
+	,"itemUrl"
+  ,uni."slug"
+	,"currentPrice"
+	,"originalPrice"
+	,"officialSale"
+  ,uni."date"
+	,"itemImage"
+  ,"inStock"
+	,ref."commonPrice"
+  ,ref."minPrice"
+FROM "last_data" uni
+LEFT JOIN "shop_02_refprices" ref
+  ON uni."itemId" = ref."itemId"
+    AND uni."date" = ref."date"
+    AND uni."slug" = ref."slug"
+)
+
+SELECT "shop"
 	,"p_key"
 	,"itemId"
 	,"itemName"
@@ -31,21 +50,18 @@ FROM (select
   ,"date"
 	,"itemImage"
   ,"inStock"
-	FROM "shop_01_unification"
-  where left("_timestamp",10) >= $ref_date) "uni"
-LEFT JOIN
-    (SELECT "itemId"
-     		, "slug"
-        , "commonPrice"
-        , "minPrice"
-        , "date"::varchar as "date"
-    FROM "shop_02_refprices") "ref"
-ON "uni"."itemId" = "ref"."itemId" AND "uni"."date" = "ref"."date" AND "uni"."slug" = "ref"."slug"
+	, "commonPrice"
+  ,"minPrice"
+  , CASE WHEN "minPrice" != '' THEN "minPrice" ELSE "commonPrice" END AS "originalPriceHS"
+  , ROUND((TRY_TO_NUMBER("currentPrice",12,2) / NULLIFZERO(TRY_TO_NUMBER("originalPriceHS",12,2)) - 1) * -100, 2)  AS "newSale"
+FROM "last_data_with_refprices"
 ;
 
 --vytahuju si produkty, které jsou zdražené o více jak 100% => kontrola chybných cen
-create or replace table "suspicious_prices" as
-select "shop"
+SET ref_date = DATEADD('day', - 2, (SELECT max("_timestamp") FROM "shop_01_unification"))
+;
+CREATE OR REPLACE TABLE "suspicious_prices" AS
+SELECT "shop"
 	,"itemId"
 	,"itemName"
 	,"itemUrl"
@@ -54,10 +70,10 @@ select "shop"
 	,"originalPrice"
 	,"officialSale"
   ,"date"
-    , lag("currentPrice") ignore nulls over (partition by "itemId", "slug" order by "date" asc) as "prev"
-    , "currentPrice"/nullifzero("prev") as "narust"
-from "shop_01_unification"
-qualify ("narust" > 100 or "narust" < 0.01)
-	--and "date" >= $ref_date
-order by "date" desc
+  , LAG(TRY_TO_NUMBER("currentPrice")) IGNORE NULLS OVER (PARTITION BY "itemId", "slug" ORDER BY "date" ASC) AS "prev"
+  , TRY_TO_NUMBER("currentPrice")/NULLIFZERO("prev") AS "narust"
+FROM "shop_01_unification"
+WHERE "date" >= $ref_date
+QUALIFY ("narust" > 100 OR "narust" < 0.01)
+ORDER BY "date" DESC
 ;

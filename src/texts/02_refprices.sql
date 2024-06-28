@@ -167,7 +167,7 @@ with "up" as (
 )
 , "down_new_origPrice" as (
     select distinct("itemId") as "itemId"
-        , (max("row_number") over (partition by "itemId")) + 1 as "max_row_down_plus1_origPrice"
+        , (min("row_number") over (partition by "itemId")) + 1 as "max_row_down_plus1_origPrice"
     from "shop_price_change_from_last_up"
     where "first_day_origPrice" = true
 )
