@@ -75,7 +75,7 @@ SELECT "shop"
   , LAG(TRY_TO_NUMBER("currentPrice")) IGNORE NULLS OVER (PARTITION BY "itemId" ORDER BY "date" ASC) AS "prev"
   , TRY_TO_NUMBER("currentPrice")/NULLIFZERO("prev") AS "narust"
 FROM "shop_01_unification"
+WHERE "date" >= $ref_date
 QUALIFY ("narust" > 100 OR "narust" < 0.01)
-	AND "date" >= $ref_date
 ORDER BY "date" DESC
 ;
