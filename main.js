@@ -258,19 +258,19 @@ Apify.main(async () => {
               ]
 
               const outputTablesName = [
-                  [`shop_${transformation}`]
+                  [`shop_${transformation}`, 'item_count_check']
               ]
 
               const outputTablesSource = [
-                  [`out.c-${shopName}.${shopName}_${transformation}`]
+                  [`out.c-${shopName}.${shopName}_${transformation}`, 'out.c-item_count_check.item_count_check']
               ]
 
               const outputTablesKeys = [
-                  [['itemId', 'date']]
+                  [['itemId', 'date'], ['shopOrigin', 'date']]
               ]
 
               const outputIncremental = [
-                  [true]
+                  [true, true]
               ]
 
               const variables_id = [
