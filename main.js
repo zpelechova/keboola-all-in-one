@@ -137,7 +137,7 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesName = [
-                    [`shop_${transformation}`, 'item_count_check'],
+                    [`shop_${transformation}`, `item_count_check`],
                     [`shop_${transformation}`],
                     [`shop_${transformation}`, `suspicious_prices`],
                     [`shop_${transformation}`],
@@ -147,7 +147,7 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesSource = [
-                    [`out.c-${shopName}.${shopName}_${transformation}`, 'out.c-item_count_check.item_count_check'],
+                    [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-item_count_check.item_count_check`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
@@ -258,11 +258,11 @@ Apify.main(async () => {
               ]
 
               const outputTablesName = [
-                  [`shop_${transformation}`, 'item_count_check']
+                  [`shop_${transformation}`, `item_count_check`]
               ]
 
               const outputTablesSource = [
-                  [`out.c-${shopName}.${shopName}_${transformation}`, 'out.c-item_count_check.item_count_check']
+                  [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-item_count_check.item_count_check`]
               ]
 
               const outputTablesKeys = [

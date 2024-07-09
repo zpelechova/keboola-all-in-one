@@ -36,6 +36,7 @@ AND "date" <> ''
 AND "itemId" <> ''
 ;
 --next_querry
+
 CREATE OR REPLACE TABLE "item_count_check" AS
 WITH "shop_origin" AS (
   SELECT "shopOrigin"
