@@ -137,7 +137,7 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesName = [
-                    [`shop_${transformation}`],
+                    [`shop_${transformation}`, 'item_count_check'],
                     [`shop_${transformation}`],
                     [`shop_${transformation}`, `suspicious_prices`],
                     [`shop_${transformation}`],
@@ -147,7 +147,7 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesSource = [
-                    [`out.c-${shopName}.${shopName}_${transformation}`],
+                    [`out.c-${shopName}.${shopName}_${transformation}`, 'out.c-item_count_check.item_count_check'],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
                     [`out.c-${shopName}.${shopName}_${transformation}`, `out.c-test.suspicious_prices`],
                     [`out.c-${shopName}.${shopName}_${transformation}`],
@@ -157,7 +157,7 @@ Apify.main(async () => {
                 ]
 
                 const outputTablesKeys = [
-                    [['itemId', 'date']],
+                    [['itemId', 'date'], ['shopOrigin', 'date']],
                     [['itemId', 'date']],
                     [['itemId', 'date'], ['itemId', 'date', 'shop']],
                     [['itemId']],
@@ -167,7 +167,7 @@ Apify.main(async () => {
                 ]
 
                 const outputIncremental = [
-                    [true],
+                    [true, true],
                     [true],
                     [true, true],
                     [true],

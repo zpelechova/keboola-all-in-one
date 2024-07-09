@@ -35,3 +35,20 @@ WHERE "currentPrice" <> ''
 AND "date" <> ''
 AND "itemId" <> ''
 ;
+--next_querry
+CREATE OR REPLACE TABLE "item_count_check" AS
+WITH "shop_origin" AS (
+  SELECT "shopOrigin"
+  FROM "shop"
+  GROUP BY ALL
+)
+
+SELECT "shop_origin"."shopOrigin"
+    , "date"::DATE  																																													AS "date"
+    , ZEROIFNULL(COUNT(DISTINCT "itemId"))																																		AS "count_itemId_with_curPrice"
+    , ZEROIFNULL(COUNT(DISTINCT(IFF("originalPrice" is not null AND "originalPrice" != '', "itemId", NULL)))) AS "count_itemId_with_origPrice"
+FROM "shop_origin"
+LEFT JOIN "shop_raw" ON 1=1
+--LEFT JOIN "shop" ON 1=1
+WHERE "currentPrice" <> '' AND "currentPrice" IS NOT NULL
+GROUP BY ALL
