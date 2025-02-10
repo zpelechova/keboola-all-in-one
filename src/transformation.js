@@ -9,7 +9,7 @@ export async function getOrCreateTransformation (shopName, suffix, KEBOOLA_TOKEN
 
     // Check if exists, if so, return id
     const getUrl =
-        'https://connection.eu-central-1.keboola.com/v2/' +
+        'https://connection.europe-west3.gcp.keboola.com/v2/' +
         'storage/' +
         'components' +
         '?componentType=transformation' +
@@ -53,7 +53,7 @@ export async function getOrCreateTransformation (shopName, suffix, KEBOOLA_TOKEN
     const description = 'This is description'
 
     const postUrl =
-        'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.snowflake-transformation/configs'
+        'https://connection.europe-west3.gcp.keboola.com/v2/storage/components/keboola.snowflake-transformation/configs'
     const postMethod = 'POST'
     const postFormData = {
         name: `${transformationName}`,
@@ -100,7 +100,7 @@ export async function updateTransformation (
     )
 
     const url =
-        `https://connection.eu-central-1.keboola.com/v2/` +
+        `https://connection.europe-west3.gcp.keboola.com/v2/` +
         `storage/` +
         `components/` +
         `keboola.snowflake-transformation/` +
