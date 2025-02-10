@@ -5,7 +5,7 @@ import { gotScraping } from 'got-scraping'
 export async function getOrCreateWriter (shopName, suffix, KEBOOLA_TOKEN) {
     console.log(`Checking if writer ${shopName}_${suffix} exists`)
     const getUrl =
-        'https://connection.eu-central-1.keboola.com/v2/storage/components?include=configuration'
+        'https://connection.europe-west3.gcp.keboola.com/v2/storage/components?include=configuration'
 
     const getMethod = 'GET'
     const getHeaders = { 'x-storageapi-token': KEBOOLA_TOKEN }
@@ -31,7 +31,7 @@ export async function getOrCreateWriter (shopName, suffix, KEBOOLA_TOKEN) {
         `Writer ${shopName}_${suffix} doesn't exist, going to create it.`
     )
     const postUrl =
-        'https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs'
+        'https://connection.europe-west3.gcp.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs'
     const postMethod = 'POST'
     const formData = { name: `${shopName}_${suffix}` }
     const postHeaders = {
@@ -54,7 +54,7 @@ export async function getOrCreateWriter (shopName, suffix, KEBOOLA_TOKEN) {
 
 export async function updateWriter (shopName, suffix, writerId, KEBOOLA_TOKEN, AWS_TOKEN, awsAccessKeyId) {
     console.log(`Setting up credentials for ${shopName}-${suffix} writer.`)
-    const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}`
+    const url = `https://connection.europe-west3.gcp.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}`
     const method = 'PUT'
     const formData = {
         configuration: JSON.stringify({
@@ -86,7 +86,7 @@ export async function getOrCreateTableRow (shopName, suffix, writerId, KEBOOLA_T
         `Checking if table row ${shopName}_${suffix} exists in the writer.`
     )
 
-    const getUrl = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
+    const getUrl = `https://connection.europe-west3.gcp.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
     const getMethod = 'GET'
     const getHeaders = { 'x-storageapi-token': KEBOOLA_TOKEN }
     const { body: getBody } = await gotScraping({
@@ -108,7 +108,7 @@ export async function getOrCreateTableRow (shopName, suffix, writerId, KEBOOLA_T
     console.log(
         `Table row for writer ${shopName}_${suffix} doesn't exist, setting up now.`
     )
-    const postUrl = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
+    const postUrl = `https://connection.europe-west3.gcp.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows`
     const postMethod = 'POST'
     const formData = {
         name: `${shopName}_${suffix}`
@@ -139,7 +139,7 @@ export async function updateTableRow (shopName, suffix, writerId, rowId, KEBOOLA
         `Updating table rows for writer ${shopName}_${suffix} (writer ID: ${writerId}, row ID: ${rowId}).`
     )
 
-    const url = `https://connection.eu-central-1.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows/${rowId}`
+    const url = `https://connection.europe-west3.gcp.keboola.com/v2/storage/components/keboola.wr-aws-s3/configs/${writerId}/rows/${rowId}`
     const method = 'PUT'
     const formData = {
         configuration: JSON.stringify({
